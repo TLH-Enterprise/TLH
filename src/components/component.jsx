@@ -19,6 +19,7 @@ To read more about using these font, please visit the Next.js documentation:
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
+import Image from "next/image"
 import Link from "next/link"
 
 export function Component() {
@@ -39,12 +40,12 @@ export function Component() {
                 </p>
               </div>
             </div>
-            <img
-              src="/placeholder.svg"
-              width="550"
-              height="400"
+            <Image
+              src="/home.png"
+              width={400}
+              height={400}
               alt="Hero"
-              className="mx-auto aspect-video overflow-hidden rounded-xl object-cover object-center sm:w-full lg:order-last" />
+              className="sm:w-full lg:order-last" />
           </div>
         </div>
       </section>
@@ -69,8 +70,7 @@ export function Component() {
               <div className="p-4">
                 <h3 className="text-lg font-semibold">John Doe</h3>
                 <p className="text-muted-foreground">Lead Designer</p>
-              </div>
-              <div className="flex items-center justify-center gap-2">
+                <div className="flex items-center justify-left gap-2 mt-2">
                     <Link
                       href="#"
                       className="text-muted-foreground hover:underline"
@@ -83,6 +83,7 @@ export function Component() {
                       prefetch={false}>
                       <TwitterIcon className="h-5 w-5" />
                     </Link>
+                </div>
               </div>
             </div>
             <div className="bg-card rounded-lg overflow-hidden">
@@ -96,8 +97,7 @@ export function Component() {
               <div className="p-4">
                 <h3 className="text-lg font-semibold">Jane Smith</h3>
                 <p className="text-muted-foreground">Frontend Developer</p>
-              </div>
-              <div className="flex items-center justify-center gap-3">
+                <div className="flex items-center justify-left gap-3 mt-2">
                     <Link
                       href="#"
                       className="text-muted-foreground hover:underline"
@@ -110,6 +110,7 @@ export function Component() {
                       prefetch={false}>
                       <TwitterIcon className="h-5 w-5" />
                     </Link>
+                </div>
               </div>
             </div>
             <div className="bg-card rounded-lg overflow-hidden">
@@ -123,8 +124,7 @@ export function Component() {
               <div className="p-4">
                 <h3 className="text-lg font-semibold">Michael Johnson</h3>
                 <p className="text-muted-foreground">Backend Developer</p>
-              </div>
-              <div className="flex items-center justify-center gap-3">
+                <div className="flex items-center justify-left gap-3 mt-2">
                     <Link
                       href="#"
                       className="text-muted-foreground hover:underline"
@@ -138,6 +138,7 @@ export function Component() {
                       <TwitterIcon className="h-5 w-5" />
                     </Link>
                 </div>
+              </div>
             </div>
             <div className="bg-card rounded-lg overflow-hidden">
               <img
@@ -150,8 +151,7 @@ export function Component() {
               <div className="p-4">
                 <h3 className="text-lg font-semibold">Emily Davis</h3>
                 <p className="text-muted-foreground">UI/UX Designer</p>
-              </div>
-              <div className="flex items-center justify-center gap-3">
+                <div className="flex items-center justify-left gap-3 mt-2">
                     <Link
                       href="#"
                       className="text-muted-foreground hover:underline"
@@ -165,6 +165,7 @@ export function Component() {
                       <TwitterIcon className="h-5 w-5" />
                     </Link>
                 </div>
+              </div>
             </div>
           </div>
         </div>
@@ -179,29 +180,37 @@ export function Component() {
           </div>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 mt-8">
             <div className="bg-card rounded-lg overflow-hidden">
-              <img
-                src="/placeholder.svg"
-                width="400"
-                height="300"
-                alt="Project 1"
-                className="w-full h-48 object-cover"
-                style={{ aspectRatio: "400/300", objectFit: "cover" }} />
+              <Link
+              target="_blank"
+              href="https://premium-academy-ashy.vercel.app/">
+                <Image
+                  src="/pa.png"
+                  width={400}
+                  height={300}
+                  alt="Premium Academy"
+                  className="w-full h-48 object-cover"
+                  style={{ aspectRatio: "400/300", objectFit: "cover" }} />
+              </Link>
               <div className="p-4">
-                <h3 className="text-lg font-semibold">Project 1</h3>
-                <p className="text-muted-foreground">A modern and responsive website for a leading tech company.</p>
+                <h3 className="text-lg font-semibold">Premium Academy</h3>
+                <p className="text-muted-foreground">Plataforma de aprendizaje y crecimiento personal</p>
               </div>
             </div>
             <div className="bg-card rounded-lg overflow-hidden">
-              <img
-                src="/placeholder.svg"
-                width="400"
-                height="300"
-                alt="Project 2"
+              <Link
+              target="_blank"
+              href="https://arcopedicousa.com">
+                <Image
+                src="/arcopedocousa.png"
+                width={400}
+                height={300}
+                alt="Arcopedicousa"
                 className="w-full h-48 object-cover"
                 style={{ aspectRatio: "400/300", objectFit: "cover" }} />
+              </Link>
               <div className="p-4">
-                <h3 className="text-lg font-semibold">Project 2</h3>
-                <p className="text-muted-foreground">A custom e-commerce platform for a small business.</p>
+                <h3 className="text-lg font-semibold">Arcopedicousa</h3>
+                <p className="text-muted-foreground">Plataforma AWS E-commerce de venta de zapatos</p>
               </div>
             </div>
             <div className="bg-card rounded-lg overflow-hidden">
@@ -213,9 +222,9 @@ export function Component() {
                 className="w-full h-48 object-cover"
                 style={{ aspectRatio: "400/300", objectFit: "cover" }} />
               <div className="p-4">
-                <h3 className="text-lg font-semibold">Project 3</h3>
+                <h3 className="text-lg font-semibold">Proximamente...</h3>
                 <p className="text-muted-foreground">
-                  A sleek and modern web application for a non-profit organization.
+                  El sitio de tus sueños
                 </p>
               </div>
             </div>
