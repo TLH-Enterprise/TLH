@@ -20,7 +20,7 @@ export default function Layout({ children }) {
       <head>
         <link rel="shortcut icon" href="/favicon.ico" sizes="any" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>TLH Dev</title>
+        <title>TLH Development</title>
       </head>
       <body
         className={cn(
