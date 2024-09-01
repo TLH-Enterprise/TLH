@@ -36,7 +36,7 @@ export function Component() {
                   The Last Hope Development
                 </h1>
                 <p className="max-w-[550px] text-primary-foreground md:text-xl">
-                Nuestro talentoso equipo de expertos freelance se especializa en crear soluciones digitales excepcionales, personalizadas para satisfacer tus necesidades únicas. Permítenos ayudarte a alcanzar tus objetivos.
+                  Nuestro talentoso equipo de expertos freelance se especializa en crear soluciones digitales excepcionales, personalizadas para satisfacer tus necesidades únicas. Permítenos ayudarte a alcanzar tus objetivos.
                 </p>
               </div>
             </div>
@@ -71,18 +71,18 @@ export function Component() {
                 <h3 className="text-lg font-semibold">John Doe</h3>
                 <p className="text-muted-foreground">Lead Designer</p>
                 <div className="flex items-center justify-left gap-2 mt-2">
-                    <Link
-                      href="#"
-                      className="text-muted-foreground hover:underline"
-                      prefetch={false}>
-                      <LinkedinIcon className="h-5 w-5" />
-                    </Link>
-                    <Link
-                      href="#"
-                      className="text-muted-foreground hover:underline"
-                      prefetch={false}>
-                      <TwitterIcon className="h-5 w-5" />
-                    </Link>
+                  <Link
+                    href="#"
+                    className="text-muted-foreground hover:underline"
+                    prefetch={false}>
+                    <LinkedinIcon className="h-5 w-5" />
+                  </Link>
+                  <Link
+                    href="#"
+                    className="text-muted-foreground hover:underline"
+                    prefetch={false}>
+                    <TwitterIcon className="h-5 w-5" />
+                  </Link>
                 </div>
               </div>
             </div>
@@ -98,18 +98,18 @@ export function Component() {
                 <h3 className="text-lg font-semibold">Jane Smith</h3>
                 <p className="text-muted-foreground">Frontend Developer</p>
                 <div className="flex items-center justify-left gap-3 mt-2">
-                    <Link
-                      href="#"
-                      className="text-muted-foreground hover:underline"
-                      prefetch={false}>
-                      <LinkedinIcon className="h-5 w-5" />
-                    </Link>
-                    <Link
-                      href="#"
-                      className="text-muted-foreground hover:underline"
-                      prefetch={false}>
-                      <TwitterIcon className="h-5 w-5" />
-                    </Link>
+                  <Link
+                    href="#"
+                    className="text-muted-foreground hover:underline"
+                    prefetch={false}>
+                    <LinkedinIcon className="h-5 w-5" />
+                  </Link>
+                  <Link
+                    href="#"
+                    className="text-muted-foreground hover:underline"
+                    prefetch={false}>
+                    <TwitterIcon className="h-5 w-5" />
+                  </Link>
                 </div>
               </div>
             </div>
@@ -125,18 +125,18 @@ export function Component() {
                 <h3 className="text-lg font-semibold">Michael Johnson</h3>
                 <p className="text-muted-foreground">Backend Developer</p>
                 <div className="flex items-center justify-left gap-3 mt-2">
-                    <Link
-                      href="#"
-                      className="text-muted-foreground hover:underline"
-                      prefetch={false}>
-                      <LinkedinIcon className="h-5 w-5" />
-                    </Link>
-                    <Link
-                      href="#"
-                      className="text-muted-foreground hover:underline"
-                      prefetch={false}>
-                      <TwitterIcon className="h-5 w-5" />
-                    </Link>
+                  <Link
+                    href="#"
+                    className="text-muted-foreground hover:underline"
+                    prefetch={false}>
+                    <LinkedinIcon className="h-5 w-5" />
+                  </Link>
+                  <Link
+                    href="#"
+                    className="text-muted-foreground hover:underline"
+                    prefetch={false}>
+                    <TwitterIcon className="h-5 w-5" />
+                  </Link>
                 </div>
               </div>
             </div>
@@ -152,18 +152,18 @@ export function Component() {
                 <h3 className="text-lg font-semibold">Emily Davis</h3>
                 <p className="text-muted-foreground">UI/UX Designer</p>
                 <div className="flex items-center justify-left gap-3 mt-2">
-                    <Link
-                      href="#"
-                      className="text-muted-foreground hover:underline"
-                      prefetch={false}>
-                      <LinkedinIcon className="h-5 w-5" />
-                    </Link>
-                    <Link
-                      href="#"
-                      className="text-muted-foreground hover:underline"
-                      prefetch={false}>
-                      <TwitterIcon className="h-5 w-5" />
-                    </Link>
+                  <Link
+                    href="#"
+                    className="text-muted-foreground hover:underline"
+                    prefetch={false}>
+                    <LinkedinIcon className="h-5 w-5" />
+                  </Link>
+                  <Link
+                    href="#"
+                    className="text-muted-foreground hover:underline"
+                    prefetch={false}>
+                    <TwitterIcon className="h-5 w-5" />
+                  </Link>
                 </div>
               </div>
             </div>
@@ -181,8 +181,8 @@ export function Component() {
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 mt-8">
             <div className="bg-card rounded-lg overflow-hidden">
               <Link
-              target="_blank"
-              href="https://premium-academy-ashy.vercel.app/">
+                target="_blank"
+                href="https://premium-academy-ashy.vercel.app/">
                 <Image
                   src="/pa.png"
                   width={400}
@@ -198,15 +198,15 @@ export function Component() {
             </div>
             <div className="bg-card rounded-lg overflow-hidden">
               <Link
-              target="_blank"
-              href="https://arcopedicousa.com">
+                target="_blank"
+                href="https://arcopedicousa.com">
                 <Image
-                src="/arcopedocousa.png"
-                width={400}
-                height={300}
-                alt="Arcopedicousa"
-                className="w-full h-48 object-cover"
-                style={{ aspectRatio: "400/300", objectFit: "cover" }} />
+                  src="/arcopedicousa.png"
+                  width={400}
+                  height={300}
+                  alt="Arcopedicousa"
+                  className="w-full h-48 object-cover"
+                  style={{ aspectRatio: "400/300", objectFit: "cover" }} />
               </Link>
               <div className="p-4">
                 <h3 className="text-lg font-semibold">Arcopedicousa</h3>
