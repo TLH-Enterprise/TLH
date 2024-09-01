@@ -1,6 +1,6 @@
-import { Manrope } from 'next/font/google';
-import { cn } from '@/lib/utils';
-import './globals.css';
+import { Manrope } from 'next/font/google'
+import { cn } from '@/lib/utils'
+import './globals.css'
 
 const fontHeading = Manrope({
   subsets: ['latin'],
@@ -16,21 +16,21 @@ const fontBody = Manrope({
 
 export default function Layout({ children }) {
   return (
-    <>
-      <link rel="icon" href="/favicon.ico" />
-      <meta name="viewport" content="width=device-width, initial-scale=1" />
-      <title>The Last Hope</title>
-      <html lang="en">
-        <body
-          className={cn(
-            'antialiased',
-            fontHeading.variable,
-            fontBody.variable
-          )}
-        >
-          {children}
-        </body>
-      </html>
-    </>
-  );
+    <html lang="en">
+      <head>
+        <link rel="shortcut icon" href="/favicon.ico" sizes="any" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>TLH Dev</title>
+      </head>
+      <body
+        className={cn(
+          'antialiased',
+          fontHeading.variable,
+          fontBody.variable
+        )}
+      >
+        {children}
+      </body>
+    </html>
+  )
 }
