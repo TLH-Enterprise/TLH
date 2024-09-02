@@ -60,25 +60,77 @@ export function Component() {
           <div
             className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mt-8">
             <div className="bg-card rounded-lg overflow-hidden">
-              <img
-                src="/placeholder.svg"
-                width="400"
-                height="400"
+              <Image
+                src="/maicol.png"
+                width={400}
+                height={400}
                 alt="Team Member"
                 className="w-full h-48 object-cover"
                 style={{ aspectRatio: "400/400", objectFit: "cover" }} />
               <div className="p-4">
-                <h3 className="text-lg font-semibold">John Doe</h3>
-                <p className="text-muted-foreground">Lead Designer</p>
+                <h3 className="text-lg font-semibold">Maicol Arroyave Alvarez</h3>
+                <p className="text-muted-foreground">Desarrollador Frontend</p>
                 <div className="flex items-center justify-left gap-2 mt-2">
                   <Link
-                    href="#"
+                      href="https://www.linkedin.com/in/maicolaa/"
+                      target="_blank"
+                      className="text-muted-foreground hover:underline"
+                      prefetch={false}>
+                      <LinkedinIcon className="h-5 w-5" />
+                    </Link>
+                    <Link
+                      href="https://www.instagram.com/maicol.arroyave.9/"
+                      target="_blank"
+                      className="text-muted-foreground hover:underline"
+                      prefetch={false}>
+                      <InstagramIcon className="h-5 w-5" />
+                    </Link>
+                    <Link
+                      href="https://github.com/MaicolAA"
+                      target="_blank"
+                      className="text-muted-foreground hover:underline"
+                      prefetch={false}>
+                      <GithubIcon className="h-5 w-5" />
+                    </Link>
+                </div>
+              </div>
+            </div>
+            <div className="bg-card rounded-lg overflow-hidden">
+              <Image
+                src="/emmanuel.png"
+                width={400}
+                height={400}
+                alt="Team Member"
+                className="w-full h-48 object-cover"
+                style={{ aspectRatio: "400/400", objectFit: "cover" }} />
+              <div className="p-4">
+                <h3 className="text-lg font-semibold">Emmanuel Monsalve Parra</h3>
+                <p className="text-muted-foreground">Desarrollador Full Stack</p>
+                <div className="flex items-center justify-left gap-3 mt-2">
+                  <Link
+                    href="https://www.linkedin.com/in/emmanuelmonsalve/"
+                    target="_blank"
                     className="text-muted-foreground hover:underline"
                     prefetch={false}>
                     <LinkedinIcon className="h-5 w-5" />
                   </Link>
                   <Link
-                    href="#"
+                    href="https://www.instagram.com/emmusmp/"
+                    target="_blank"
+                    className="text-muted-foreground hover:underline"
+                    prefetch={false}>
+                    <InstagramIcon className="h-5 w-5" />
+                  </Link>
+                  <Link
+                    href="https://github.com/MachinEmmus"
+                    target="_blank"
+                    className="text-muted-foreground hover:underline"
+                    prefetch={false}>
+                    <GithubIcon className="h-5 w-5" />
+                  </Link>
+                  <Link
+                    href="https://x.com/emmusmp"
+                    target="_blank"
                     className="text-muted-foreground hover:underline"
                     prefetch={false}>
                     <TwitterIcon className="h-5 w-5" />
@@ -87,82 +139,59 @@ export function Component() {
               </div>
             </div>
             <div className="bg-card rounded-lg overflow-hidden">
-              <img
-                src="/placeholder.svg"
-                width="400"
-                height="400"
+              <Image
+                src="/camilo.png"
+                width={400}
+                height={400}
                 alt="Team Member"
                 className="w-full h-48 object-cover"
                 style={{ aspectRatio: "400/400", objectFit: "cover" }} />
               <div className="p-4">
-                <h3 className="text-lg font-semibold">Jane Smith</h3>
-                <p className="text-muted-foreground">Frontend Developer</p>
+                <h3 className="text-lg font-semibold">Juan Camilo Gonzalez Hoyos</h3>
+                <p className="text-muted-foreground">Desarrolador Backend</p>
                 <div className="flex items-center justify-left gap-3 mt-2">
                   <Link
-                    href="#"
+                    href="https://www.linkedin.com/in/juan-camilo-gonzalez-hoyos/"
+                    target="_blank"
                     className="text-muted-foreground hover:underline"
                     prefetch={false}>
                     <LinkedinIcon className="h-5 w-5" />
                   </Link>
                   <Link
-                    href="#"
+                    href="https://www.linkedin.com/in/juan-camilo-gonzalez-hoyos/"
+                    target="_blank"
                     className="text-muted-foreground hover:underline"
                     prefetch={false}>
-                    <TwitterIcon className="h-5 w-5" />
+                    <GithubIcon className="h-5 w-5" />
                   </Link>
                 </div>
               </div>
             </div>
             <div className="bg-card rounded-lg overflow-hidden">
-              <img
-                src="/placeholder.svg"
-                width="400"
-                height="400"
+              <Image
+                src="/santiago.png"
+                width={400}
+                height={400}
                 alt="Team Member"
                 className="w-full h-48 object-cover"
                 style={{ aspectRatio: "400/400", objectFit: "cover" }} />
               <div className="p-4">
-                <h3 className="text-lg font-semibold">Michael Johnson</h3>
-                <p className="text-muted-foreground">Backend Developer</p>
+                <h3 className="text-lg font-semibold">Santiago Lopez Vallejo</h3>
+                <p className="text-muted-foreground">Desarrollador Full Stack</p>
                 <div className="flex items-center justify-left gap-3 mt-2">
                   <Link
-                    href="#"
+                    href="https://www.linkedin.com/in/santyago43/"
+                    target="_blank"
                     className="text-muted-foreground hover:underline"
                     prefetch={false}>
                     <LinkedinIcon className="h-5 w-5" />
                   </Link>
                   <Link
-                    href="#"
+                    href="https://github.com/santyago43"
+                    target="_blank"
                     className="text-muted-foreground hover:underline"
                     prefetch={false}>
-                    <TwitterIcon className="h-5 w-5" />
-                  </Link>
-                </div>
-              </div>
-            </div>
-            <div className="bg-card rounded-lg overflow-hidden">
-              <img
-                src="/placeholder.svg"
-                width="400"
-                height="400"
-                alt="Team Member"
-                className="w-full h-48 object-cover"
-                style={{ aspectRatio: "400/400", objectFit: "cover" }} />
-              <div className="p-4">
-                <h3 className="text-lg font-semibold">Emily Davis</h3>
-                <p className="text-muted-foreground">UI/UX Designer</p>
-                <div className="flex items-center justify-left gap-3 mt-2">
-                  <Link
-                    href="#"
-                    className="text-muted-foreground hover:underline"
-                    prefetch={false}>
-                    <LinkedinIcon className="h-5 w-5" />
-                  </Link>
-                  <Link
-                    href="#"
-                    className="text-muted-foreground hover:underline"
-                    prefetch={false}>
-                    <TwitterIcon className="h-5 w-5" />
+                    <GithubIcon className="h-5 w-5" />
                   </Link>
                 </div>
               </div>
@@ -214,8 +243,8 @@ export function Component() {
               </div>
             </div>
             <div className="bg-card rounded-lg overflow-hidden">
-              <img
-                src="/placeholder.svg"
+              <Image
+                src="/coding.png"
                 width="400"
                 height="300"
                 alt="Project 3"
