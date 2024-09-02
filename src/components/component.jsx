@@ -158,7 +158,7 @@ export function Component() {
                     <LinkedinIcon className="h-5 w-5" />
                   </Link>
                   <Link
-                    href="https://www.linkedin.com/in/juan-camilo-gonzalez-hoyos/"
+                    href="https://github.com/ZeikoDev"
                     target="_blank"
                     className="text-muted-foreground hover:underline"
                     prefetch={false}>
