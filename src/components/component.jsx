@@ -245,8 +245,8 @@ export function Component() {
             <div className="bg-card rounded-lg overflow-hidden">
               <Image
                 src="/coding.png"
-                width="400"
-                height="300"
+                width={400}
+                height={300}
                 alt="Project 3"
                 className="w-full h-48 object-cover"
                 style={{ aspectRatio: "400/300", objectFit: "cover" }} />
