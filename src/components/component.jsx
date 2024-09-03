@@ -16,15 +16,59 @@ To read more about using these font, please visit the Next.js documentation:
 - App Directory: https://nextjs.org/docs/app/building-your-application/optimizing/fonts
 - Pages Directory: https://nextjs.org/docs/pages/building-your-application/optimizing/fonts
 **/
+"use client";
+
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
+import emailjs from "emailjs-com";
 import Image from "next/image"
 import Link from "next/link"
 
 export function Component() {
+  const sendEmail = (e) => {
+    e.preventDefault();
+
+    emailjs.sendForm(
+      "service_08ypoqn", // ID service
+      "template_52gikj2", // Id Temple
+      e.target,
+      "8WhVfhy_arB0kXh8_" // Public key
+    )
+    .then(
+      (result) => {
+        console.log(result.text);
+        alert("Mensaje enviado con éxito");
+      },
+      (error) => {
+        console.log(error.text);
+        alert("Hubo un error al enviar el mensaje");
+      }
+    );
+  };
+
   return (
     (<div className="flex flex-col min-h-[100dvh]">
+      <header className="px-4 lg:px-6 h-14 flex items-center bg-primary">
+        <Link href="#" className="flex items-center justify-center" prefetch={false}>
+          <ThlIcon className="h-6 w-6" />
+          <span className="sr-only">TLH Dev</span>
+        </Link>
+        <nav className="ml-auto flex gap-4 sm:gap-6 text-primary-foreground">
+          <a className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
+            Nosotros
+          </a>
+          <Link href="#team" className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
+            Equipo
+          </Link>
+          <Link href="#porjects" className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
+            Proyectos
+          </Link>
+          <Link href="#contact" className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
+            Contacto
+          </Link>
+        </nav>
+      </header>
       <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 bg-primary">
         <div className="container px-4 md:px-6">
           <div
@@ -49,7 +93,7 @@ export function Component() {
           </div>
         </div>
       </section>
-      <section className="w-full py-12 md:py-24 lg:py-32">
+      <section className="w-full py-12 md:py-24 lg:py-32" id="team">
         <div className="container px-4 md:px-6">
           <div className="space-y-4 text-center">
             <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl">Conoce a nuestro equipo</h2>
@@ -199,7 +243,7 @@ export function Component() {
           </div>
         </div>
       </section>
-      <section className="w-full py-12 md:py-24 lg:py-32 bg-muted">
+      <section className="w-full py-12 md:py-24 lg:py-32 bg-muted" id="project">
         <div className="container px-4 md:px-6">
           <div className="space-y-4 text-center">
             <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl">Proyectos realizados</h2>
@@ -260,22 +304,22 @@ export function Component() {
           </div>
         </div>
       </section>
-      <section className="w-full py-12 md:py-24 lg:py-32">
+      <section className="w-full py-12 md:py-24 lg:py-32" id="contact">
         <div className="container px-4 md:px-6">
           <div className="space-y-4 text-center">
-            <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl">Contáctanos</h2>
-            <p className="max-w-[600px] mx-auto text-muted-foreground md:text-xl">
-              ¿Tienes un proyecto en mente? Completa el formulario a continuación y nos pondremos en contacto contigo lo antes posible.
-            </p>
+              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl">Contáctanos</h2>
+              <p className="max-w-[600px] mx-auto text-muted-foreground md:text-xl">
+                ¿Tienes un proyecto en mente? Completa el formulario a continuación y nos pondremos en contacto contigo lo antes posible.
+              </p>
+              <form onSubmit={sendEmail} className="max-w-md mx-auto mt-8 space-y-4">
+              <Input type="text" name="from_name" placeholder="Nombre" className="w-full" />
+              <Input type="email" name="to_name" placeholder="Email" className="w-full" />
+              <Textarea name="message" placeholder="Mensaje" className="w-full" />
+              <Button type="submit" className="w-full">
+                Enviar
+              </Button>
+              </form>
           </div>
-          <form className="max-w-md mx-auto mt-8 space-y-4">
-            <Input type="text" placeholder="Nombre" className="w-full" />
-            <Input type="email" placeholder="Email" className="w-full" />
-            <Textarea placeholder="Mensaje" className="w-full" />
-            <Button type="submit" className="w-full">
-              Enviar
-            </Button>
-          </form>
         </div>
       </section>
       <footer
@@ -378,4 +422,19 @@ function TwitterIcon(props) {
         d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" />
     </svg>)
   );
+}
+
+function ThlIcon() {
+  return (
+    <Image
+      src="/tlh.ico"
+      width={50}
+      height={50}
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  )
 }
