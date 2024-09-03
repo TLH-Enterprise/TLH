@@ -55,21 +55,21 @@ export function Component() {
           <span className="sr-only">TLH Dev</span>
         </Link>
         <nav className="ml-auto flex gap-4 sm:gap-6 text-primary-foreground">
-          <a className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
+          <a className="text-sm font-bold hover:underline underline-offset-4" prefetch={false}>
             Nosotros
           </a>
-          <Link href="#team" className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
+          <Link href="#team" className="text-sm font-bold hover:underline underline-offset-4" prefetch={false}>
             Equipo
           </Link>
-          <Link href="#porjects" className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
+          <Link href="#projects" className="text-sm font-bold hover:underline underline-offset-4" prefetch={false}>
             Proyectos
           </Link>
-          <Link href="#contact" className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
+          <Link href="#contact" className="text-sm font-bold hover:underline underline-offset-4" prefetch={false}>
             Contacto
           </Link>
         </nav>
       </header>
-      <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 bg-primary">
+      <section className="w-full flex items-center justify-center py-12 md:py-24 lg:py-32 xl:py-48 bg-primary">
         <div className="container px-4 md:px-6">
           <div
             className="grid gap-6 lg:grid-cols-[1fr_400px] lg:gap-12 xl:grid-cols-[1fr_600px]">
@@ -93,7 +93,7 @@ export function Component() {
           </div>
         </div>
       </section>
-      <section className="w-full py-12 md:py-24 lg:py-32" id="team">
+      <section className="w-full flex items-center justify-center py-12 md:py-24 lg:py-32" id="team">
         <div className="container px-4 md:px-6">
           <div className="space-y-4 text-center">
             <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl">Conoce a nuestro equipo</h2>
@@ -243,7 +243,7 @@ export function Component() {
           </div>
         </div>
       </section>
-      <section className="w-full py-12 md:py-24 lg:py-32 bg-muted" id="project">
+      <section className="w-full flex items-center justify-center py-12 md:py-24 lg:py-32 bg-muted" id="projects">
         <div className="container px-4 md:px-6">
           <div className="space-y-4 text-center">
             <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl">Proyectos realizados</h2>
@@ -304,7 +304,7 @@ export function Component() {
           </div>
         </div>
       </section>
-      <section className="w-full py-12 md:py-24 lg:py-32" id="contact">
+      <section className="w-full flex items-center justify-center py-12 md:py-24 lg:py-32" id="contact">
         <div className="container px-4 md:px-6">
           <div className="space-y-4 text-center">
               <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl">Contáctanos</h2>
