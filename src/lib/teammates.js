@@ -43,8 +43,7 @@ const teammates = [
         full_name: "Juan Pablo Deossa",
         rol: "Desarrollador Frontend",
         instagram: null,
-        linkedin:
-            "https://www.linkedin.com/in/juan-pablo-deossa-ramirez-1b252424b/",
+        linkedin: "https://www.linkedin.com/in/juan-pablo-deossa-ramirez-1b252424b/",
         twitter: null,
         github: "https://github.com/JuanPabloDeossa",
     },
