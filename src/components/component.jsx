@@ -55,7 +55,7 @@ export function Component() {
           <span className="sr-only">TLH Dev</span>
         </Link>
         <nav className="ml-auto flex gap-4 sm:gap-6 text-primary-foreground">
-          <a className="text-sm font-bold hover:underline underline-offset-4bold" prefetch={false}>
+          <a className="text-sm font-bold hover:underline underline-offset-4" prefetch={false}>
             Nosotros
           </a>
           <Link href="#team" className="text-sm font-bold hover:underline underline-offset-4" prefetch={false}>
