@@ -21,7 +21,6 @@ To read more about using these font, please visit the Next.js documentation:
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
-import React from "react";
 import emailjs from "emailjs-com";
 import Image from "next/image"
 import Link from "next/link"
