@@ -1,7 +1,7 @@
 const teammates = [
   {
     full_name: "Emmanuel Monsalve Parra",
-    rol: "Lider de Desarrollo",
+    rol: "CEO",
     instagram: "https://www.instagram.com/emmusmp/",
     linkedin: "https://www.linkedin.com/in/emmanuelmonsalve/",
     twitter: "https://x.com/emmusmp",
@@ -15,7 +15,7 @@ const teammates = [
     linkedin: "https://www.linkedin.com/in/erick-fragoso-905067229/",
     twitter: null,
     github: "https://github.com/erickfrago",
-    image: "/home.png",
+    image: "/erick.png",
   },
   {
     full_name: "Yeison Andrés Garzon Toro",
@@ -24,7 +24,7 @@ const teammates = [
     linkedin: "https://www.linkedin.com/in/yeison-toro",
     twitter: null,
     github: "https://github.com/devyeisont",
-    image: "/home.png",
+    image: "/yeison.png",
   },
   {
     full_name: "Alexander Rendón londoño",
@@ -33,7 +33,7 @@ const teammates = [
     linkedin: "https://www.linkedin.com/in/alex-rl",
     twitter: null,
     github: "https://github.com/AlexRL-12",
-    image: "/emmanuel.png",
+    image: "/alex.png",
   },
   {
     full_name: "Santiago Lopez Vallejo",
@@ -60,7 +60,7 @@ const teammates = [
     linkedin: "https://www.linkedin.com/in/juan-pablo-deossa-ramirez-1b252424b/",
     twitter: null,
     github: "https://github.com/JuanPabloDeossa",
-    image: "/emmanuel.png",
+    image: "/deossa.png",
   },
   {
     full_name: "Juan Camilo Gonzalez Hoyos",
@@ -69,7 +69,7 @@ const teammates = [
     linkedin: "https://www.linkedin.com/in/juan-camilo-gonzalez-hoyos/",
     twitter: null,
     github: "https://github.com/ZeikoDev",
-    image: "/emmanuel.png",
+    image: "/camilo.png",
   },
 ];
 
