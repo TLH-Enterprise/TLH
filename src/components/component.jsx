@@ -31,7 +31,6 @@ import { TlhIcon } from "../components/icons/icons";
 import {
   Code2,
   Palette,
-  Smartphone,
   Database,
   Cloud,
   Server,
@@ -44,7 +43,11 @@ import {
   CloudIcon,
   BuildingIcon,
   LightbulbIcon,
-  Bot
+  Bot,
+  Coffee,
+  Puzzle,
+  Leaf,
+  Container
 } from "lucide-react";
 
 import { useEffect, useState } from "react";
@@ -54,7 +57,7 @@ export function Component() {
 
   useEffect(() => {
     emailjs.init(process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY);
-    
+
     const handleScroll = () => {
     };
     window.addEventListener('scroll', handleScroll);
@@ -67,7 +70,7 @@ export function Component() {
 
     const formData = {
       from_name: e.target.elements.from_name.value,
-      to_name: e.target.elements.to_name.value, 
+      to_name: e.target.elements.to_name.value,
       message: e.target.elements.message.value,
       origin: "TLH Development",
       date: new Date().toLocaleString('es-ES')
@@ -80,20 +83,16 @@ export function Component() {
         {
           from_name: formData.from_name,
           from_email: formData.to_name,
-          to_email: "emonsalvep38@gmail.com", 
+          to_email: "emonsalvep38@gmail.com",
           message: formData.message,
           origin: formData.origin,
           date: formData.date
         }
       );
 
-      console.log('Email enviado exitosamente:', result);
       setSubmitStatus("success");
-      
       e.target.reset();
-      
     } catch (error) {
-      console.error('Error al enviar email:', error);
       setSubmitStatus("error");
     }
   };
@@ -104,11 +103,15 @@ export function Component() {
     { name: "TypeScript", icon: <Code2 className="w-8 h-8" />, color: "text-blue-600" },
     { name: "Node.js", icon: <Server className="w-8 h-8" />, color: "text-green-600" },
     { name: "Python", icon: <Cpu className="w-8 h-8" />, color: "text-yellow-600" },
+    { name: "Java", icon: <Coffee className="w-8 h-8" />, color: "text-red-500" },
+    { name: "Spring Boot", icon: <Leaf className="w-8 h-8" />, color: "text-green-500" },
+    { name: "Microservicios", icon: <Puzzle className="w-8 h-8" />, color: "text-purple-500" },
     { name: "AWS", icon: <Cloud className="w-8 h-8" />, color: "text-orange-500" },
     { name: "Tailwind", icon: <Palette className="w-8 h-8" />, color: "text-teal-400" },
     { name: "MongoDB", icon: <Database className="w-8 h-8" />, color: "text-green-500" },
     { name: "PostgreSQL", icon: <Database className="w-8 h-8" />, color: "text-blue-700" },
-    { name: "Docker", icon: <Shield className="w-8 h-8" />, color: "text-blue-400" }
+    { name: "Docker", icon: <Shield className="w-8 h-8" />, color: "text-blue-400" },
+    { name: "Kubernetes", icon: <Container className="w-8 h-8" />, color: "text-blue-600" }
   ];
 
   return (
@@ -156,15 +159,15 @@ export function Component() {
         </div>
       </section>
       <section className="w-full py-12 md:py-24 bg-gradient-to-br from-gray-50 to-gray-100">
-        <div className="container px-4 md:px-6">
+        <div className="container mx-auto px-4 md:px-6 max-w-6xl">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">Nuestros Servicios</h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Soluciones integrales para transformar tus ideas en realidad digital
             </p>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="bg-white rounded-lg p-6 text-center shadow-sm hover:shadow-md transition-shadow duration-300">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center">
+            <div className="bg-white rounded-lg p-6 text-center shadow-sm hover:shadow-md transition-shadow duration-300 max-w-sm w-full">
               <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
                 <CodeIcon className="w-8 h-8 text-blue-600" />
               </div>
@@ -174,7 +177,7 @@ export function Component() {
               </p>
             </div>
 
-            <div className="bg-white rounded-lg p-6 text-center shadow-sm hover:shadow-md transition-shadow duration-300">
+            <div className="bg-white rounded-lg p-6 text-center shadow-sm hover:shadow-md transition-shadow duration-300 max-w-sm w-full">
               <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4">
                 <SmartphoneIcon className="w-8 h-8 text-green-600" />
               </div>
@@ -184,7 +187,7 @@ export function Component() {
               </p>
             </div>
 
-            <div className="bg-white rounded-lg p-6 text-center shadow-sm hover:shadow-md transition-shadow duration-300">
+            <div className="bg-white rounded-lg p-6 text-center shadow-sm hover:shadow-md transition-shadow duration-300 max-w-sm w-full">
               <div className="w-16 h-16 bg-purple-50 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Bot className="w-8 h-8 text-purple-600" />
               </div>
@@ -194,7 +197,7 @@ export function Component() {
               </p>
             </div>
 
-            <div className="bg-white rounded-lg p-6 text-center shadow-sm hover:shadow-md transition-shadow duration-300">
+            <div className="bg-white rounded-lg p-6 text-center shadow-sm hover:shadow-md transition-shadow duration-300 max-w-sm w-full">
               <div className="w-16 h-16 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-4">
                 <CloudIcon className="w-8 h-8 text-orange-600" />
               </div>
@@ -204,7 +207,7 @@ export function Component() {
               </p>
             </div>
 
-            <div className="bg-white rounded-lg p-6 text-center shadow-sm hover:shadow-md transition-shadow duration-300">
+            <div className="bg-white rounded-lg p-6 text-center shadow-sm hover:shadow-md transition-shadow duration-300 max-w-sm w-full">
               <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
                 <BuildingIcon className="w-8 h-8 text-red-600" />
               </div>
@@ -214,7 +217,7 @@ export function Component() {
               </p>
             </div>
 
-            <div className="bg-white rounded-lg p-6 text-center shadow-sm hover:shadow-md transition-shadow duration-300">
+            <div className="bg-white rounded-lg p-6 text-center shadow-sm hover:shadow-md transition-shadow duration-300 max-w-sm w-full">
               <div className="w-16 h-16 bg-yellow-50 rounded-full flex items-center justify-center mx-auto mb-4">
                 <LightbulbIcon className="w-8 h-8 text-yellow-600" />
               </div>
@@ -301,7 +304,7 @@ export function Component() {
         </div>
       </section>
       <section className="w-full py-12 md:py-24 bg-gradient-to-br from-gray-50 bg-muted text-center">
-        <div className="container px-4 md:px-6">
+        <div className="container mx-auto px-4 md:px-6 max-w-6xl">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">Tecnologías que Dominamos</h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -311,7 +314,7 @@ export function Component() {
           <div className="flex flex-wrap justify-center gap-6 md:gap-8">
             {technologies.map((tech) => (
               <div key={tech.name} className="text-center group">
-                <div className="w-20 h-20 bg-white rounded-2xl shadow-sm border border-gray-100 flex items-center justify-center mb-3 transition-all duration-300 group-hover:shadow-lg group-hover:scale-110">
+                <div className="w-20 h-20 bg-white rounded-2xl shadow-sm border border-gray-100 flex items-center justify-center mb-3 transition-all duration-300 group-hover:shadow-lg group-hover:scale-110 mx-auto">
                   <div className={tech.color}>
                     {tech.icon}
                   </div>
@@ -329,7 +332,7 @@ export function Component() {
             <p className="max-w-[600px] mx-auto text-muted-foreground md:text-xl">
               ¿Tienes un proyecto en mente? Completa el formulario a continuación y nos pondremos en contacto contigo lo antes posible.
             </p>
-            
+
             {/* Mensajes de estado */}
             {submitStatus === 'success' && (
               <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6 max-w-md mx-auto">
@@ -350,29 +353,29 @@ export function Component() {
             )}
 
             <form onSubmit={sendEmail} className="max-w-md mx-auto mt-8 space-y-4">
-              <Input 
-                type="text" 
-                name="from_name" 
-                placeholder="Tu nombre" 
-                className="w-full" 
-                required 
+              <Input
+                type="text"
+                name="from_name"
+                placeholder="Tu nombre"
+                className="w-full"
+                required
               />
-              <Input 
-                type="email" 
-                name="to_name" 
-                placeholder="Tu email" 
-                className="w-full" 
-                required 
+              <Input
+                type="email"
+                name="to_name"
+                placeholder="Tu email"
+                className="w-full"
+                required
               />
-              <Textarea 
-                name="message" 
-                placeholder="Tu mensaje" 
-                className="w-full" 
+              <Textarea
+                name="message"
+                placeholder="Tu mensaje"
+                className="w-full"
                 rows={5}
-                required 
+                required
               />
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="w-full"
                 disabled={submitStatus === 'loading'}
               >
