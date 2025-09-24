@@ -57,7 +57,6 @@ export function Component() {
 
   useEffect(() => {
     emailjs.init(process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY);
-
     const handleScroll = () => {
     };
     window.addEventListener('scroll', handleScroll);
