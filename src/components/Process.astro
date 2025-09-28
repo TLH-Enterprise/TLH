@@ -1,0 +1,444 @@
+---
+const processSteps = [
+  {
+    number: "01",
+    title: "Descubrimiento",
+    description:
+      "Analizamos tus necesidades, objetivos y audiencia objetivo para crear una estrategia sólida.",
+    details: [
+      "Reunión inicial",
+      "Análisis de competencia",
+      "Definición de objetivos",
+      "Investigación de usuarios",
+    ],
+    icon: "🔍",
+  },
+  {
+    number: "02",
+    title: "Planificación",
+    description:
+      "Desarrollamos un plan detallado con cronogramas, recursos y metodologías específicas para tu proyecto.",
+    details: [
+      "Arquitectura de información",
+      "Wireframes y prototipos",
+      "Plan de desarrollo",
+      "Cronograma de entregas",
+    ],
+    icon: "📋",
+  },
+  {
+    number: "03",
+    title: "Diseño",
+    description:
+      "Creamos diseños visuales atractivos y funcionales que reflejan la identidad de tu marca.",
+    details: [
+      "Diseño de interfaz",
+      "Sistema de diseño",
+      "Prototipos interactivos",
+      "Revisión y feedback",
+    ],
+    icon: "🎨",
+  },
+  {
+    number: "04",
+    title: "Desarrollo",
+    description:
+      "Implementamos la solución técnica utilizando las mejores prácticas y tecnologías modernas.",
+    details: [
+      "Desarrollo frontend",
+      "Desarrollo backend",
+      "Integración de APIs",
+      "Testing y QA",
+    ],
+    icon: "⚡",
+  },
+  {
+    number: "05",
+    title: "Lanzamiento",
+    description:
+      "Desplegamos tu proyecto en producción con monitoreo continuo y soporte técnico.",
+    details: [
+      "Deploy a producción",
+      "Configuración de servidores",
+      "Monitoreo de performance",
+      "Capacitación del equipo",
+    ],
+    icon: "🚀",
+  },
+  {
+    number: "06",
+    title: "Mantenimiento",
+    description:
+      "Ofrecemos soporte continuo, actualizaciones y mejoras para mantener tu proyecto actualizado.",
+    details: [
+      "Soporte técnico",
+      "Actualizaciones de seguridad",
+      "Mejoras de performance",
+      "Nuevas funcionalidades",
+    ],
+    icon: "🔧",
+  },
+];
+---
+
+<section id="proceso" class="process">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">Nuestro Proceso</h2>
+      <p class="section-description">
+        Seguimos una metodología probada que garantiza resultados excepcionales
+        en cada proyecto
+      </p>
+    </div>
+
+    <div class="process-timeline">
+      {
+        processSteps.map((step, index) => (
+          <div class={`process-step ${index % 2 === 0 ? "left" : "right"}`}>
+            <div class="step-content">
+              <div class="step-number">{step.number}</div>
+              <div class="step-icon">
+                <span class="icon">{step.icon}</span>
+              </div>
+              <div class="step-info">
+                <h3 class="step-title">{step.title}</h3>
+                <p class="step-description">{step.description}</p>
+                <ul class="step-details">
+                  {step.details.map((detail) => (
+                    <li class="detail-item">{detail}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+
+    <div class="process-cta">
+      <div class="cta-content">
+        <h3>¿Listo para comenzar tu proyecto?</h3>
+        <p>
+          Contáctanos y descubre cómo podemos ayudarte a alcanzar tus objetivos
+        </p>
+        <div class="cta-buttons">
+          <a href="#contacto" class="btn btn-primary">Iniciar Proyecto</a>
+          <a href="#portafolio" class="btn btn-secondary">Ver Casos de Éxito</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .process {
+    padding: 6rem 0;
+    background: linear-gradient(180deg, #16213e 0%, #0f0f23 100%);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .process::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(
+        circle at 20% 20%,
+        rgba(102, 126, 234, 0.1) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 80% 80%,
+        rgba(118, 75, 162, 0.1) 0%,
+        transparent 50%
+      );
+    z-index: 1;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    position: relative;
+    z-index: 2;
+  }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 4rem;
+  }
+
+  .section-title {
+    font-size: 3rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 0 1rem 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .section-description {
+    font-size: 1.25rem;
+    color: #a0a0a0;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  .process-timeline {
+    position: relative;
+    margin: 4rem 0;
+  }
+
+  .process-timeline::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+    transform: translateX(-50%);
+    z-index: 1;
+  }
+
+  .process-step {
+    display: flex;
+    margin-bottom: 4rem;
+    position: relative;
+  }
+
+  .process-step.left {
+    justify-content: flex-start;
+  }
+
+  .process-step.right {
+    justify-content: flex-end;
+  }
+
+  .step-content {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 2.5rem;
+    width: 45%;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    position: relative;
+  }
+
+  .step-content:hover {
+    transform: translateY(-5px);
+    border-color: rgba(102, 126, 234, 0.3);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+  }
+
+  .step-content::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px 20px 0 0;
+  }
+
+  .step-number {
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.1rem;
+    z-index: 2;
+  }
+
+  .step-icon {
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .icon {
+    font-size: 3rem;
+    display: inline-block;
+    filter: drop-shadow(0 4px 8px rgba(102, 126, 234, 0.3));
+  }
+
+  .step-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 0 1rem 0;
+    text-align: center;
+  }
+
+  .step-description {
+    color: #a0a0a0;
+    line-height: 1.6;
+    margin: 0 0 1.5rem 0;
+    text-align: center;
+  }
+
+  .step-details {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .detail-item {
+    color: #c0c0c0;
+    padding: 0.5rem 0;
+    position: relative;
+    padding-left: 1.5rem;
+    font-size: 0.9rem;
+  }
+
+  .detail-item::before {
+    content: "→";
+    position: absolute;
+    left: 0;
+    color: #667eea;
+    font-weight: bold;
+  }
+
+  .process-cta {
+    text-align: center;
+    margin-top: 4rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 3rem;
+    backdrop-filter: blur(10px);
+  }
+
+  .cta-content h3 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 0 1rem 0;
+  }
+
+  .cta-content p {
+    color: #a0a0a0;
+    font-size: 1.1rem;
+    margin: 0 0 2rem 0;
+  }
+
+  .cta-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    padding: 1rem 2rem;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    display: inline-block;
+    border: 2px solid transparent;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(102, 126, 234, 0.6);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: #ffffff;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: translateY(-2px);
+  }
+
+  @media (max-width: 768px) {
+    .process {
+      padding: 4rem 0;
+    }
+
+    .section-title {
+      font-size: 2.5rem;
+    }
+
+    .section-description {
+      font-size: 1.1rem;
+    }
+
+    .process-timeline::before {
+      left: 20px;
+    }
+
+    .process-step {
+      justify-content: flex-start !important;
+      margin-left: 2rem;
+    }
+
+    .step-content {
+      width: calc(100% - 2rem);
+    }
+
+    .step-number {
+      left: -2rem;
+      transform: translateX(0);
+    }
+
+    .process-cta {
+      padding: 2rem;
+    }
+
+    .cta-content h3 {
+      font-size: 1.5rem;
+    }
+
+    .cta-buttons {
+      flex-direction: column;
+      align-items: center;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .section-title {
+      font-size: 2rem;
+    }
+
+    .step-content {
+      padding: 2rem;
+    }
+
+    .icon {
+      font-size: 2.5rem;
+    }
+
+    .step-title {
+      font-size: 1.3rem;
+    }
+  }
+</style>
