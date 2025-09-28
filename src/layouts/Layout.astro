@@ -1,22 +1,133 @@
+---
+import MusicPlayer from "../components/MusicPlayer.astro";
+
+export interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = "TLH - Transformamos ideas en experiencias digitales",
+  description = "Creamos soluciones web modernas y escalables que impulsan el crecimiento de tu negocio. Desarrollo web, aplicaciones móviles, diseño UX/UI y más.",
+} = Astro.props;
+---
+
 <!doctype html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
-    <link rel="icon" type="image/svg+xml" href="/tlh.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/x-icon" href="/tlh.ico" />
     <meta name="generator" content={Astro.generator} />
-    <title>Astro Basics</title>
+
+    <!-- SEO Meta Tags -->
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta
+      name="keywords"
+      content="desarrollo web, aplicaciones móviles, diseño UX/UI, desarrollo frontend, desarrollo backend, consultoría tecnológica"
+    />
+    <meta name="author" content="TLH" />
+
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={Astro.url} />
+    <meta property="og:image" content="/tlh.ico" />
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content="/tlh.ico" />
+
+    <!-- Additional Meta Tags -->
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#667eea" />
+
+    <!-- Preconnect to external domains -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <body>
     <slot />
+    <MusicPlayer />
   </body>
 </html>
 
 <style>
+  html {
+    scroll-behavior: smooth;
+  }
+
   html,
   body {
     margin: 0;
+    padding: 0;
     width: 100%;
-    height: 100%;
+    min-height: 100%;
+    font-family:
+      "Inter",
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      Roboto,
+      "Helvetica Neue",
+      Arial,
+      sans-serif;
+    background: #0f0f23;
+    color: #ffffff;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #1a1a2e;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+  }
+
+  /* Selection styles */
+  ::selection {
+    background: rgba(102, 126, 234, 0.3);
+    color: #ffffff;
+  }
+
+  /* Focus styles */
+  *:focus {
+    outline: 2px solid #667eea;
+    outline-offset: 2px;
+  }
+
+  /* Smooth transitions for all interactive elements */
+  a,
+  button,
+  input,
+  textarea,
+  select {
+    transition: all 0.3s ease;
   }
 </style>

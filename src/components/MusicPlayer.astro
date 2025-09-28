@@ -1,0 +1,172 @@
+---
+// Componente reproductor de música
+---
+
+<div class="music-player">
+  <button id="musicToggle" class="music-control" aria-label="Toggle music">
+    <span id="musicIcon">🎵</span>
+  </button>
+
+  <audio id="backgroundMusic" loop autoplay preload="metadata">
+    <source
+      src="/audio/PASIEMPRE - Tainy, Arcangel, Myke Towers, Jhayco, Omar Courtz, Arca (Official Visualizer) - Tainy.mp3"
+      type="audio/mpeg"
+    />
+    Tu navegador no soporta el elemento audio.
+  </audio>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const musicToggle = document.getElementById(
+      "musicToggle"
+    ) as HTMLButtonElement;
+    const backgroundMusic = document.getElementById(
+      "backgroundMusic"
+    ) as HTMLAudioElement;
+    const musicIcon = document.getElementById("musicIcon") as HTMLSpanElement;
+
+    if (!musicToggle || !backgroundMusic || !musicIcon) return;
+
+    // Configurar volumen inicial (más bajo para música de fondo)
+    backgroundMusic.volume = 0.3;
+
+    // Intentar reproducir automáticamente al cargar la página
+    backgroundMusic
+      .play()
+      .then(() => {
+        musicIcon.textContent = "🔊";
+        musicToggle.classList.add("playing");
+      })
+      .catch((error) => {
+        console.log("Autoplay bloqueado por el navegador:", error);
+        // Si falla el autoplay, mostrar que está listo para reproducir
+        musicIcon.textContent = "▶️";
+      });
+
+    // Manejar el toggle de música
+    musicToggle.addEventListener("click", function () {
+      if (backgroundMusic.paused) {
+        backgroundMusic
+          .play()
+          .then(() => {
+            musicIcon.textContent = "🔊";
+            musicToggle.classList.add("playing");
+          })
+          .catch((error) => {
+            console.log("No se pudo reproducir el audio:", error);
+            // Si falla el autoplay, mostrar mensaje al usuario
+            musicIcon.textContent = "▶️";
+          });
+      } else {
+        backgroundMusic.pause();
+        musicIcon.textContent = "🔇";
+        musicToggle.classList.remove("playing");
+      }
+    });
+
+    // Manejar cuando el audio termina (aunque tenga loop)
+    backgroundMusic.addEventListener("ended", function () {
+      musicIcon.textContent = "🔇";
+      musicToggle.classList.remove("playing");
+    });
+
+    // Manejar errores de carga de audio
+    backgroundMusic.addEventListener("error", function () {
+      console.log("Error al cargar el archivo de audio");
+      musicToggle.style.display = "none"; // Ocultar botón si no hay audio
+    });
+
+    // Manejar cambios en el volumen
+    backgroundMusic.addEventListener("volumechange", function () {
+      if (backgroundMusic.volume === 0) {
+        musicIcon.textContent = "🔇";
+      } else if (backgroundMusic.volume < 0.5) {
+        musicIcon.textContent = "🔉";
+      } else {
+        musicIcon.textContent = "🔊";
+      }
+    });
+  });
+</script>
+
+<style>
+  .music-player {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+  }
+
+  .music-control {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    transition: all 0.3s ease;
+    font-size: 24px;
+  }
+
+  .music-control:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+  }
+
+  .music-control:active {
+    transform: translateY(0);
+  }
+
+  .music-control.playing {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    box-shadow: 0 4px 15px rgba(240, 147, 251, 0.4);
+  }
+
+  .music-control.playing:hover {
+    box-shadow: 0 6px 20px rgba(240, 147, 251, 0.6);
+  }
+
+  #musicIcon {
+    transition: transform 0.3s ease;
+  }
+
+  .music-control:hover #musicIcon {
+    transform: scale(1.1);
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .music-player {
+      bottom: 15px;
+      right: 15px;
+    }
+
+    .music-control {
+      width: 50px;
+      height: 50px;
+      font-size: 20px;
+    }
+  }
+
+  /* Animación de pulso cuando está reproduciendo */
+  .music-control.playing {
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 4px 15px rgba(240, 147, 251, 0.4);
+    }
+    50% {
+      box-shadow: 0 4px 15px rgba(240, 147, 251, 0.8);
+    }
+    100% {
+      box-shadow: 0 4px 15px rgba(240, 147, 251, 0.4);
+    }
+  }
+</style>

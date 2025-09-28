@@ -1,0 +1,494 @@
+---
+const projects = [
+  {
+    id: 1,
+    title: "E-commerce Moderno",
+    description:
+      "Plataforma de comercio electrónico completa con carrito de compras, pagos integrados y panel administrativo.",
+    image: "/api/placeholder/400/300",
+    technologies: ["React", "Node.js", "MongoDB", "Stripe"],
+    category: "Web Development",
+    link: "#",
+  },
+  {
+    id: 2,
+    title: "App Móvil Fitness",
+    description:
+      "Aplicación móvil para seguimiento de ejercicios con rutinas personalizadas y estadísticas de progreso.",
+    image: "/api/placeholder/400/300",
+    technologies: ["React Native", "Firebase", "Redux"],
+    category: "Mobile App",
+    link: "#",
+  },
+  {
+    id: 3,
+    title: "Dashboard Analytics",
+    description:
+      "Panel de control empresarial con visualizaciones de datos en tiempo real y reportes automatizados.",
+    image: "/api/placeholder/400/300",
+    technologies: ["Vue.js", "D3.js", "Python", "PostgreSQL"],
+    category: "Data Visualization",
+    link: "#",
+  },
+  {
+    id: 4,
+    title: "Sitio Web Corporativo",
+    description:
+      "Sitio web corporativo moderno con diseño responsivo y optimización SEO avanzada.",
+    image: "/api/placeholder/400/300",
+    technologies: ["Astro", "TypeScript", "Tailwind CSS"],
+    category: "Web Development",
+    link: "#",
+  },
+  {
+    id: 5,
+    title: "Plataforma SaaS",
+    description:
+      "Software como servicio con suscripciones, facturación automática y gestión de usuarios.",
+    image: "/api/placeholder/400/300",
+    technologies: ["Next.js", "Prisma", "Stripe", "AWS"],
+    category: "SaaS Platform",
+    link: "#",
+  },
+  {
+    id: 6,
+    title: "App de Delivery",
+    description:
+      "Aplicación de delivery con geolocalización, seguimiento en tiempo real y sistema de calificaciones.",
+    image: "/api/placeholder/400/300",
+    technologies: ["Flutter", "Firebase", "Google Maps API"],
+    category: "Mobile App",
+    link: "#",
+  },
+];
+
+const categories = [
+  "Todos",
+  "Web Development",
+  "Mobile App",
+  "Data Visualization",
+  "SaaS Platform",
+];
+---
+
+<section id="portafolio" class="portfolio">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">Nuestro Portafolio</h2>
+      <p class="section-description">
+        Descubre algunos de los proyectos que hemos desarrollado para nuestros
+        clientes
+      </p>
+    </div>
+
+    <div class="portfolio-filters">
+      {
+        categories.map((category) => (
+          <button
+            class={`filter-btn ${category === "Todos" ? "active" : ""}`}
+            data-filter={category.toLowerCase()}
+          >
+            {category}
+          </button>
+        ))
+      }
+    </div>
+
+    <div class="portfolio-grid">
+      {
+        projects.map((project) => (
+          <div
+            class="portfolio-item"
+            data-category={project.category.toLowerCase()}
+          >
+            <div class="portfolio-image">
+              <img src={project.image} alt={project.title} />
+              <div class="portfolio-overlay">
+                <div class="portfolio-actions">
+                  <a
+                    href={project.link}
+                    class="action-btn"
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    <span>Ver Proyecto</span>
+                  </a>
+                  <button class="action-btn secondary">
+                    <span>Detalles</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="portfolio-content">
+              <div class="portfolio-category">{project.category}</div>
+              <h3 class="portfolio-title">{project.title}</h3>
+              <p class="portfolio-description">{project.description}</p>
+              <div class="portfolio-technologies">
+                {project.technologies.map((tech) => (
+                  <span class="tech-tag">{tech}</span>
+                ))}
+              </div>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+
+    <div class="portfolio-cta">
+      <h3>¿Tienes un proyecto en mente?</h3>
+      <p>Hablemos sobre cómo podemos ayudarte a hacerlo realidad</p>
+      <a href="#contacto" class="btn btn-primary">Iniciar Proyecto</a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .portfolio {
+    padding: 6rem 0;
+    background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+    position: relative;
+  }
+
+  .portfolio::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(
+      circle at 30% 50%,
+      rgba(255, 119, 198, 0.1) 0%,
+      transparent 70%
+    );
+    z-index: 1;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    position: relative;
+    z-index: 2;
+  }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .section-title {
+    font-size: 3rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 0 1rem 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .section-description {
+    font-size: 1.25rem;
+    color: #a0a0a0;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  .portfolio-filters {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 3rem;
+    flex-wrap: wrap;
+  }
+
+  .filter-btn {
+    padding: 0.75rem 1.5rem;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    background: transparent;
+    color: #a0a0a0;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+  }
+
+  .filter-btn:hover,
+  .filter-btn.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: transparent;
+    color: white;
+    transform: translateY(-2px);
+  }
+
+  .portfolio-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+    margin-bottom: 4rem;
+  }
+
+  .portfolio-item {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+  }
+
+  .portfolio-item:hover {
+    transform: translateY(-10px);
+    border-color: rgba(102, 126, 234, 0.3);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  }
+
+  .portfolio-image {
+    position: relative;
+    height: 250px;
+    overflow: hidden;
+  }
+
+  .portfolio-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+
+  .portfolio-item:hover .portfolio-image img {
+    transform: scale(1.1);
+  }
+
+  .portfolio-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .portfolio-item:hover .portfolio-overlay {
+    opacity: 1;
+  }
+
+  .portfolio-actions {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .action-btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+  }
+
+  .action-btn:not(.secondary) {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+
+  .action-btn.secondary {
+    background: transparent;
+    color: white;
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  .action-btn:hover {
+    transform: translateY(-2px);
+  }
+
+  .portfolio-content {
+    padding: 2rem;
+  }
+
+  .portfolio-category {
+    color: #667eea;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+  }
+
+  .portfolio-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 0 1rem 0;
+  }
+
+  .portfolio-description {
+    color: #a0a0a0;
+    line-height: 1.6;
+    margin: 0 0 1.5rem 0;
+  }
+
+  .portfolio-technologies {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .tech-tag {
+    background: rgba(102, 126, 234, 0.2);
+    color: #667eea;
+    padding: 0.25rem 0.75rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 500;
+  }
+
+  .portfolio-cta {
+    text-align: center;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 3rem;
+    backdrop-filter: blur(10px);
+  }
+
+  .portfolio-cta h3 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 0 1rem 0;
+  }
+
+  .portfolio-cta p {
+    color: #a0a0a0;
+    font-size: 1.1rem;
+    margin: 0 0 2rem 0;
+  }
+
+  .btn {
+    padding: 1rem 2rem;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    display: inline-block;
+    border: 2px solid transparent;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(102, 126, 234, 0.6);
+  }
+
+  @media (max-width: 768px) {
+    .portfolio {
+      padding: 4rem 0;
+    }
+
+    .section-title {
+      font-size: 2.5rem;
+    }
+
+    .section-description {
+      font-size: 1.1rem;
+    }
+
+    .portfolio-grid {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+
+    .portfolio-filters {
+      gap: 0.5rem;
+    }
+
+    .filter-btn {
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+    }
+
+    .portfolio-cta {
+      padding: 2rem;
+    }
+
+    .portfolio-cta h3 {
+      font-size: 1.5rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .section-title {
+      font-size: 2rem;
+    }
+
+    .portfolio-content {
+      padding: 1.5rem;
+    }
+
+    .portfolio-image {
+      height: 200px;
+    }
+  }
+</style>
+
+<script>
+  // Portfolio filtering functionality
+  document.addEventListener("DOMContentLoaded", function () {
+    const filterButtons = document.querySelectorAll(
+      ".filter-btn"
+    ) as NodeListOf<HTMLButtonElement>;
+    const portfolioItems = document.querySelectorAll(
+      ".portfolio-item"
+    ) as NodeListOf<HTMLElement>;
+
+    filterButtons.forEach((button) => {
+      button.addEventListener("click", function (this: HTMLButtonElement) {
+        // Remove active class from all buttons
+        filterButtons.forEach((btn) => btn.classList.remove("active"));
+        // Add active class to clicked button
+        this.classList.add("active");
+
+        const filterValue = this.getAttribute("data-filter");
+
+        portfolioItems.forEach((item) => {
+          if (
+            filterValue === "todos" ||
+            item.getAttribute("data-category") === filterValue
+          ) {
+            item.style.display = "block";
+            item.style.animation = "fadeIn 0.5s ease-in-out";
+          } else {
+            item.style.display = "none";
+          }
+        });
+      });
+    });
+  });
+</script>
+
+<style>
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>

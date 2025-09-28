@@ -1,0 +1,417 @@
+---
+const footerLinks = {
+  servicios: [
+    { name: "Desarrollo Web", href: "#servicios" },
+    { name: "Aplicaciones Móviles", href: "#servicios" },
+    { name: "Diseño UX/UI", href: "#servicios" },
+    { name: "Optimización", href: "#servicios" },
+  ],
+  empresa: [
+    { name: "Sobre Nosotros", href: "#" },
+    { name: "Nuestro Equipo", href: "#" },
+    { name: "Carreras", href: "#" },
+    { name: "Blog", href: "#" },
+  ],
+  recursos: [
+    { name: "Portafolio", href: "#portafolio" },
+    { name: "Proceso", href: "#proceso" },
+    { name: "Casos de Éxito", href: "#" },
+    { name: "Testimonios", href: "#" },
+  ],
+  legal: [
+    { name: "Política de Privacidad", href: "#" },
+    { name: "Términos de Servicio", href: "#" },
+    { name: "Cookies", href: "#" },
+    { name: "Aviso Legal", href: "#" },
+  ],
+};
+
+const socialLinks = [
+  { name: "LinkedIn", icon: "💼", href: "#" },
+  { name: "GitHub", icon: "🐙", href: "#" },
+  { name: "Twitter", icon: "🐦", href: "#" },
+  { name: "Instagram", icon: "📸", href: "#" },
+  { name: "YouTube", icon: "📺", href: "#" },
+];
+---
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-brand">
+        <div class="brand-logo">
+          <img src="/tlh.ico" alt="TLH Logo" class="logo" />
+          <span class="brand-name">TLH</span>
+        </div>
+        <p class="brand-description">
+          Transformamos ideas en experiencias digitales excepcionales. Creamos
+          soluciones web modernas que impulsan el crecimiento de tu negocio.
+        </p>
+        <div class="social-links">
+          {
+            socialLinks.map((social) => (
+              <a
+                href={social.href}
+                class="social-link"
+                target="_blank"
+                rel="noopener"
+                aria-label={social.name}
+              >
+                <span class="social-icon">{social.icon}</span>
+              </a>
+            ))
+          }
+        </div>
+      </div>
+
+      <div class="footer-links">
+        <div class="link-group">
+          <h3 class="link-title">Servicios</h3>
+          <ul class="link-list">
+            {
+              footerLinks.servicios.map((link) => (
+                <li>
+                  <a href={link.href} class="link-item">
+                    {link.name}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+
+        <div class="link-group">
+          <h3 class="link-title">Empresa</h3>
+          <ul class="link-list">
+            {
+              footerLinks.empresa.map((link) => (
+                <li>
+                  <a href={link.href} class="link-item">
+                    {link.name}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+
+        <div class="link-group">
+          <h3 class="link-title">Recursos</h3>
+          <ul class="link-list">
+            {
+              footerLinks.recursos.map((link) => (
+                <li>
+                  <a href={link.href} class="link-item">
+                    {link.name}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+
+        <div class="link-group">
+          <h3 class="link-title">Legal</h3>
+          <ul class="link-list">
+            {
+              footerLinks.legal.map((link) => (
+                <li>
+                  <a href={link.href} class="link-item">
+                    {link.name}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div class="footer-bottom-content">
+        <p class="copyright">
+          © {new Date().getFullYear()} TLH. Todos los derechos reservados.
+        </p>
+        <div class="footer-bottom-links">
+          <a href="#" class="bottom-link">Política de Privacidad</a>
+          <a href="#" class="bottom-link">Términos de Servicio</a>
+          <a href="#" class="bottom-link">Cookies</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-background">
+    <div class="bg-element bg-element-1"></div>
+    <div class="bg-element bg-element-2"></div>
+    <div class="bg-element bg-element-3"></div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    background: linear-gradient(180deg, #1a1a2e 0%, #0f0f23 100%);
+    position: relative;
+    overflow: hidden;
+    padding: 4rem 0 0;
+  }
+
+  .footer::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      #667eea 50%,
+      transparent 100%
+    );
+  }
+
+  .footer-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .bg-element {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle,
+      rgba(102, 126, 234, 0.1) 0%,
+      transparent 70%
+    );
+    animation: float 20s ease-in-out infinite;
+  }
+
+  .bg-element-1 {
+    width: 300px;
+    height: 300px;
+    top: 20%;
+    left: 10%;
+    animation-delay: 0s;
+  }
+
+  .bg-element-2 {
+    width: 200px;
+    height: 200px;
+    top: 60%;
+    right: 20%;
+    animation-delay: -7s;
+  }
+
+  .bg-element-3 {
+    width: 150px;
+    height: 150px;
+    bottom: 20%;
+    left: 60%;
+    animation-delay: -14s;
+  }
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0px) rotate(0deg);
+    }
+    50% {
+      transform: translateY(-30px) rotate(180deg);
+    }
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    position: relative;
+    z-index: 2;
+  }
+
+  .footer-content {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 4rem;
+    margin-bottom: 3rem;
+  }
+
+  .footer-brand {
+    max-width: 400px;
+  }
+
+  .brand-logo {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .logo {
+    width: 40px;
+    height: 40px;
+    filter: drop-shadow(0 4px 8px rgba(102, 126, 234, 0.3));
+  }
+
+  .brand-name {
+    font-size: 1.8rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .brand-description {
+    color: #a0a0a0;
+    line-height: 1.6;
+    margin: 0 0 2rem 0;
+  }
+
+  .social-links {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .social-link {
+    width: 45px;
+    height: 45px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+
+  .social-link:hover {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: transparent;
+    transform: translateY(-2px);
+  }
+
+  .social-icon {
+    font-size: 1.2rem;
+  }
+
+  .footer-links {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+  }
+
+  .link-group {
+    min-width: 0;
+  }
+
+  .link-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 0 1.5rem 0;
+  }
+
+  .link-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .link-item {
+    display: block;
+    color: #a0a0a0;
+    text-decoration: none;
+    padding: 0.5rem 0;
+    transition: color 0.3s ease;
+    font-size: 0.95rem;
+  }
+
+  .link-item:hover {
+    color: #667eea;
+  }
+
+  .footer-bottom {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 2rem 0;
+  }
+
+  .footer-bottom-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .copyright {
+    color: #a0a0a0;
+    margin: 0;
+    font-size: 0.9rem;
+  }
+
+  .footer-bottom-links {
+    display: flex;
+    gap: 2rem;
+  }
+
+  .bottom-link {
+    color: #a0a0a0;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.3s ease;
+  }
+
+  .bottom-link:hover {
+    color: #667eea;
+  }
+
+  @media (max-width: 768px) {
+    .footer {
+      padding: 3rem 0 0;
+    }
+
+    .footer-content {
+      grid-template-columns: 1fr;
+      gap: 3rem;
+    }
+
+    .footer-links {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2rem;
+    }
+
+    .footer-bottom-content {
+      flex-direction: column;
+      text-align: center;
+    }
+
+    .footer-bottom-links {
+      gap: 1rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .footer-links {
+      grid-template-columns: 1fr;
+    }
+
+    .social-links {
+      justify-content: center;
+    }
+
+    .brand-logo {
+      justify-content: center;
+    }
+
+    .brand-description {
+      text-align: center;
+    }
+  }
+</style>

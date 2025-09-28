@@ -1,0 +1,48 @@
+---
+import "../styles/navbar.css";
+
+const navLinks = [
+  { name: "Servicios", href: "#servicios" },
+  { name: "Portafolio", href: "#portafolio" },
+  { name: "Proceso", href: "#proceso" },
+  { name: "Contacto", href: "#contacto" },
+];
+---
+
+<nav id="navbar" class="navbar">
+  <div class="nav-container">
+    <div class="nav-brand">
+      <a href="#hero" class="brand-link">
+        <img src="/tlh.ico" alt="TLH Logo" class="brand-logo" />
+        <span class="brand-name">TLH</span>
+      </a>
+    </div>
+
+    <div class="nav-menu" id="navMenu">
+      <ul class="nav-list">
+        {
+          navLinks.map((link) => (
+            <li class="nav-item">
+              <a href={link.href} class="nav-link">
+                {link.name}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+
+    <div class="nav-actions">
+      <a href="#contacto" class="btn btn-primary nav-button"
+        >Comenzar Proyecto</a
+      >
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<script src="../scripts/navbar.ts"></script>
