@@ -1,4 +1,6 @@
 ---
+import MusicPlayer from "../components/MusicPlayer.astro";
+
 export interface Props {
   title?: string;
   description?: string;
@@ -56,6 +58,7 @@ const {
   </head>
   <body>
     <slot />
+    <MusicPlayer />
   </body>
 </html>
 
