@@ -62,7 +62,12 @@ const socialLinks = [
                   </div>
                   <div class="contact-details">
                     <h4 class="contact-title">{item.title}</h4>
-                    <a href={item.link} class="contact-value">
+                    <a
+                      href={item.link}
+                      class="contact-value"
+                      target={item.link.includes("wa.me") ? "_blank" : "_self"}
+                      rel={item.link.includes("wa.me") ? "noopener" : ""}
+                    >
                       {item.value}
                     </a>
                   </div>
@@ -91,7 +96,7 @@ const socialLinks = [
           </div>
         </div>
       </div>
-
+      <!--
       <div class="contact-form">
         <form class="form" id="contactForm">
           <div class="form-group">
@@ -146,6 +151,7 @@ const socialLinks = [
           </button>
         </form>
       </div>
+      -->
     </div>
   </div>
 </section>
@@ -205,10 +211,12 @@ const socialLinks = [
   }
 
   .contact-content {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 4rem;
-    align-items: start;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    max-width: 1000px;
+    margin: 0 auto;
+    width: 100%;
   }
 
   .contact-info {
@@ -223,6 +231,10 @@ const socialLinks = [
     border-radius: 20px;
     padding: 2.5rem;
     backdrop-filter: blur(10px);
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto;
+    width: 100%;
   }
 
   .info-section h3 {
@@ -237,6 +249,7 @@ const socialLinks = [
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
+    align-items: center;
   }
 
   .contact-item {
@@ -288,9 +301,12 @@ const socialLinks = [
   }
 
   .social-links {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    display: flex;
+    justify-content: center;
     gap: 1rem;
+    flex-wrap: wrap;
+    max-width: 500px;
+    margin: 0 auto;
   }
 
   .social-link {
@@ -304,6 +320,8 @@ const socialLinks = [
     text-decoration: none;
     color: #ffffff;
     transition: all 0.3s ease;
+    min-width: 140px;
+    justify-content: center;
   }
 
   .social-link:hover {
@@ -395,7 +413,44 @@ const socialLinks = [
     transform: translate(-50%, -50%);
   }
 
-  @media (max-width: 768px) {
+  /* Large desktop styles */
+  @media screen and (min-width: 1400px) {
+    .contact-content {
+      max-width: 1200px;
+    }
+
+    .info-section {
+      max-width: 800px;
+      padding: 3rem;
+    }
+
+    .social-links {
+      max-width: 600px;
+    }
+
+    .contact-item {
+      padding: 1.25rem;
+    }
+  }
+
+  /* Tablet styles */
+  @media screen and (max-width: 1024px) {
+    .contact-content {
+      max-width: 900px;
+    }
+
+    .info-section {
+      max-width: 650px;
+      padding: 2.25rem;
+    }
+
+    .social-links {
+      max-width: 450px;
+    }
+  }
+
+  /* Mobile landscape and small tablets */
+  @media screen and (max-width: 768px) {
     .contact {
       padding: 4rem 0;
     }
@@ -409,8 +464,10 @@ const socialLinks = [
     }
 
     .contact-content {
-      grid-template-columns: 1fr;
+      flex-direction: column;
       gap: 2rem;
+      max-width: 100%;
+      padding: 0 1rem;
     }
 
     .contact-info {
@@ -419,6 +476,7 @@ const socialLinks = [
 
     .info-section {
       padding: 2rem;
+      max-width: 100%;
     }
 
     .contact-form {
@@ -426,29 +484,92 @@ const socialLinks = [
     }
 
     .social-links {
-      grid-template-columns: 1fr;
+      flex-direction: column;
+      align-items: center;
+      max-width: 100%;
+    }
+
+    .social-link {
+      width: 100%;
+      max-width: 300px;
     }
   }
 
-  @media (max-width: 480px) {
+  /* Mobile portrait */
+  @media screen and (max-width: 480px) {
+    .contact {
+      padding: 3rem 0;
+    }
+
+    .container {
+      padding: 0 1rem;
+    }
+
     .section-title {
       font-size: 2rem;
+    }
+
+    .section-description {
+      font-size: 1rem;
     }
 
     .info-section,
     .contact-form {
       padding: 1.5rem;
+      margin: 0;
+    }
+
+    .contact-content {
+      padding: 0;
     }
 
     .contact-item {
       flex-direction: column;
       text-align: center;
       gap: 0.5rem;
+      padding: 0.75rem;
     }
 
     .contact-icon {
       width: 40px;
       height: 40px;
+    }
+
+    .contact-icon .icon {
+      font-size: 1.25rem;
+    }
+
+    .contact-title {
+      font-size: 0.8rem;
+    }
+
+    .contact-value {
+      font-size: 0.9rem;
+    }
+
+    .social-link {
+      padding: 0.75rem;
+      font-size: 0.9rem;
+    }
+
+    .social-icon {
+      font-size: 1.25rem;
+    }
+  }
+
+  /* Extra small devices */
+  @media screen and (max-width: 320px) {
+    .info-section {
+      padding: 1rem;
+    }
+
+    .contact-item {
+      padding: 0.5rem;
+    }
+
+    .social-link {
+      padding: 0.5rem;
+      font-size: 0.8rem;
     }
   }
 </style>
