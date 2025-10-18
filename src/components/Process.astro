@@ -383,22 +383,21 @@ const processSteps = [
       font-size: 1.1rem;
     }
 
-    .process-timeline::before {
-      left: 20px;
-    }
-
     .process-step {
-      justify-content: flex-start !important;
-      margin-left: 2rem;
+      justify-content: center !important;
+      margin-left: 0;
+      margin-bottom: 3rem;
     }
 
     .step-content {
-      width: calc(100% - 2rem);
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto;
     }
 
     .step-number {
-      left: -2rem;
-      transform: translateX(0);
+      left: 50%;
+      transform: translateX(-50%);
     }
 
     .process-cta {
@@ -422,6 +421,7 @@ const processSteps = [
 
     .step-content {
       padding: 2rem;
+      max-width: 100%;
     }
 
     .icon {
@@ -430,6 +430,11 @@ const processSteps = [
 
     .step-title {
       font-size: 1.3rem;
+    }
+
+    .step-number {
+      left: 50%;
+      transform: translateX(-50%);
     }
   }
 </style>
