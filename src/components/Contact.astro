@@ -1,44 +1,3 @@
----
-const contactInfo = [
-  {
-    icon: "📧",
-    title: "Email",
-    value: "tlh3sports@gmail.com",
-    link: "mailto:tlh3sport@gmail.com",
-  },
-  {
-    icon: "📍",
-    title: "Ubicación",
-    value: "Medellín, Colombia",
-    link: "#contact",
-  },
-  {
-    icon: "💬",
-    title: "WhatsApp",
-    value: "+57 (300) 208-7254",
-    link: "https://wa.me/573002087254",
-  },
-];
-
-const socialLinks = [
-  {
-    name: "LinkedIn",
-    icon: "💼",
-    link: "https://www.linkedin.com/company/tlh-the-last-hope",
-  },
-  {
-    name: "X",
-    icon: "🐦",
-    link: "https://x.com/tlh_dev",
-  },
-  {
-    name: "Instagram",
-    icon: "📸",
-    link: "https://www.instagram.com/tlh.dev/",
-  },
-];
----
-
 <section id="contacto" class="contact">
   <div class="container">
     <div class="section-header">
@@ -48,110 +7,59 @@ const socialLinks = [
         realidad
       </p>
     </div>
-
-    <div class="contact-content">
-      <div class="contact-info">
-        <div class="info-section">
-          <h3>Información de Contacto</h3>
-          <div class="contact-items">
-            {
-              contactInfo.map((item) => (
-                <div class="contact-item">
-                  <div class="contact-icon">
-                    <span class="icon">{item.icon}</span>
-                  </div>
-                  <div class="contact-details">
-                    <h4 class="contact-title">{item.title}</h4>
-                    <a
-                      href={item.link}
-                      class="contact-value"
-                      target={item.link.includes("wa.me") ? "_blank" : "_self"}
-                      rel={item.link.includes("wa.me") ? "noopener" : ""}
-                    >
-                      {item.value}
-                    </a>
-                  </div>
-                </div>
-              ))
-            }
-          </div>
+    <div class="contact-form">
+      <form class="form" id="contactForm">
+        <div class="form-group">
+          <label for="name" class="form-label">Nombre completo</label>
+          <input
+            type="text"
+            id="name"
+            name="name"
+            class="form-input"
+            required
+            placeholder="Tu nombre completo"
+          />
         </div>
 
-        <div class="info-section">
-          <h3>Síguenos</h3>
-          <div class="social-links">
-            {
-              socialLinks.map((social) => (
-                <a
-                  href={social.link}
-                  class="social-link"
-                  target="_blank"
-                  rel="noopener"
-                >
-                  <span class="social-icon">{social.icon}</span>
-                  <span class="social-name">{social.name}</span>
-                </a>
-              ))
-            }
-          </div>
+        <div class="form-group">
+          <label for="email" class="form-label">Email</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            class="form-input"
+            required
+            placeholder="tu@email.com"
+          />
         </div>
-      </div>
-      <!--
-      <div class="contact-form">
-        <form class="form" id="contactForm">
-          <div class="form-group">
-            <label for="name" class="form-label">Nombre completo</label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              class="form-input"
-              required
-              placeholder="Tu nombre completo"
-            />
-          </div>
 
-          <div class="form-group">
-            <label for="email" class="form-label">Email</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              class="form-input"
-              required
-              placeholder="tu@email.com"
-            />
-          </div>
+        <div class="form-group">
+          <label for="phone" class="form-label">Teléfono (opcional)</label>
+          <input
+            type="tel"
+            id="phone"
+            name="phone"
+            class="form-input"
+            placeholder="+1 (555) 123-4567"
+          />
+        </div>
 
-          <div class="form-group">
-            <label for="phone" class="form-label">Teléfono (opcional)</label>
-            <input
-              type="tel"
-              id="phone"
-              name="phone"
-              class="form-input"
-              placeholder="+1 (555) 123-4567"
-            />
-          </div>
+        <div class="form-group">
+          <label for="message" class="form-label">Mensaje</label>
+          <textarea
+            id="message"
+            name="message"
+            class="form-textarea"
+            rows="5"
+            required
+            placeholder="Cuéntanos sobre tu proyecto..."></textarea>
+        </div>
 
-          <div class="form-group">
-            <label for="message" class="form-label">Mensaje</label>
-            <textarea
-              id="message"
-              name="message"
-              class="form-textarea"
-              rows="5"
-              required
-              placeholder="Cuéntanos sobre tu proyecto..."></textarea>
-          </div>
-
-          <button type="submit" class="btn btn-primary btn-submit">
-            <span class="btn-text">Enviar Mensaje</span>
-            <span class="btn-loading" style="display: none;">Enviando...</span>
-          </button>
-        </form>
-      </div>
-      -->
+        <button type="submit" class="btn btn-primary btn-submit">
+          <span class="btn-text">Enviar Mensaje</span>
+          <span class="btn-loading" style="display: none;">Enviando...</span>
+        </button>
+      </form>
     </div>
   </div>
 </section>
@@ -344,6 +252,10 @@ const socialLinks = [
     border-radius: 20px;
     padding: 2.5rem;
     backdrop-filter: blur(10px);
+    max-width: 600px;
+    margin: 0 auto;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .form-group {
@@ -362,13 +274,14 @@ const socialLinks = [
   .form-select,
   .form-textarea {
     width: 100%;
-    padding: 1rem;
+    padding: 1rem 1.25rem;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 12px;
     color: #ffffff;
     font-size: 1rem;
     transition: all 0.3s ease;
+    box-sizing: border-box;
   }
 
   .form-input:focus,
@@ -424,6 +337,18 @@ const socialLinks = [
       padding: 3rem;
     }
 
+    .contact-form {
+      max-width: 700px;
+      padding: 3rem;
+    }
+
+    .form-input,
+    .form-select,
+    .form-textarea {
+      padding: 1.25rem 1.5rem;
+      font-size: 1.1rem;
+    }
+
     .social-links {
       max-width: 600px;
     }
@@ -442,6 +367,17 @@ const socialLinks = [
     .info-section {
       max-width: 650px;
       padding: 2.25rem;
+    }
+
+    .contact-form {
+      max-width: 550px;
+      padding: 2.25rem;
+    }
+
+    .form-input,
+    .form-select,
+    .form-textarea {
+      padding: 1rem 1.125rem;
     }
 
     .social-links {
@@ -480,7 +416,20 @@ const socialLinks = [
     }
 
     .contact-form {
-      padding: 2rem;
+      max-width: 100%;
+      padding: 1.5rem;
+      margin: 0 1rem;
+    }
+
+    .form-input,
+    .form-select,
+    .form-textarea {
+      padding: 0.875rem 1rem;
+      font-size: 0.95rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
     }
 
     .social-links {
@@ -515,8 +464,25 @@ const socialLinks = [
 
     .info-section,
     .contact-form {
-      padding: 1.5rem;
-      margin: 0;
+      padding: 1.25rem;
+      margin: 0 0.5rem;
+      max-width: calc(100% - 1rem);
+    }
+
+    .form-input,
+    .form-select,
+    .form-textarea {
+      padding: 0.75rem 0.875rem;
+      font-size: 0.9rem;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .btn-submit {
+      padding: 1rem;
+      font-size: 1rem;
     }
 
     .contact-content {
@@ -561,6 +527,27 @@ const socialLinks = [
   @media screen and (max-width: 320px) {
     .info-section {
       padding: 1rem;
+    }
+
+    .contact-form {
+      padding: 1rem;
+      margin: 0 0.25rem;
+    }
+
+    .form-input,
+    .form-select,
+    .form-textarea {
+      padding: 0.625rem 0.75rem;
+      font-size: 0.85rem;
+    }
+
+    .form-group {
+      margin-bottom: 0.875rem;
+    }
+
+    .btn-submit {
+      padding: 0.875rem;
+      font-size: 0.9rem;
     }
 
     .contact-item {
