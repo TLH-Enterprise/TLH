@@ -1,13 +1,17 @@
-<section id="contacto" class="contact">
+<section id="contacto" class="contact section">
   <div class="container">
     <div class="section-header">
-      <h2 class="section-title">Contáctanos</h2>
-      <p class="section-description">
+      <div class="kicker">Contact</div>
+      <h2 class="h2">
+        Hablemos y definamos tu
+        <span class="gradient-text">próximo paso</span>
+      </h2>
+      <p class="lead">
         ¿Tienes un proyecto en mente? Estamos aquí para ayudarte a hacerlo
         realidad
       </p>
     </div>
-    <div class="contact-form">
+    <div class="contact-form card">
       <form class="form" id="contactForm">
         <div class="form-group">
           <label for="name" class="form-label">Nombre completo</label>
@@ -66,8 +70,6 @@
 
 <style>
   .contact {
-    padding: 6rem 0;
-    background: linear-gradient(180deg, #0f0f23 0%, #1a1a2e 100%);
     position: relative;
   }
 
@@ -78,44 +80,18 @@
     left: 0;
     right: 0;
     bottom: 0;
+    pointer-events: none;
     background: radial-gradient(
-      circle at 70% 30%,
-      rgba(120, 119, 198, 0.1) 0%,
-      transparent 70%
-    );
-    z-index: 1;
-  }
-
-  .container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 2rem;
-    position: relative;
-    z-index: 2;
-  }
-
-  .section-header {
-    text-align: center;
-    margin-bottom: 4rem;
-  }
-
-  .section-title {
-    font-size: 3rem;
-    font-weight: 800;
-    color: #ffffff;
-    margin: 0 0 1rem 0;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .section-description {
-    font-size: 1.25rem;
-    color: #a0a0a0;
-    max-width: 600px;
-    margin: 0 auto;
-    line-height: 1.6;
+        900px 520px at 70% 30%,
+        rgba(139, 92, 246, 0.12) 0%,
+        transparent 62%
+      ),
+      radial-gradient(
+        700px 520px at 20% 70%,
+        rgba(34, 211, 238, 0.06) 0%,
+        transparent 60%
+      );
+    z-index: 0;
   }
 
   .contact-content {
@@ -247,15 +223,12 @@
   }
 
   .contact-form {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 20px;
     padding: 2.5rem;
-    backdrop-filter: blur(10px);
     max-width: 600px;
     margin: 0 auto;
     width: 100%;
     box-sizing: border-box;
+    border: 1px solid rgba(255, 255, 255, 0.12);
   }
 
   .form-group {
@@ -266,7 +239,7 @@
     display: block;
     font-size: 0.9rem;
     font-weight: 600;
-    color: #ffffff;
+    color: rgba(255, 255, 255, 0.92);
     margin-bottom: 0.5rem;
   }
 
@@ -275,8 +248,8 @@
   .form-textarea {
     width: 100%;
     padding: 1rem 1.25rem;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.14);
     border-radius: 12px;
     color: #ffffff;
     font-size: 1rem;
@@ -288,13 +261,13 @@
   .form-select:focus,
   .form-textarea:focus {
     outline: none;
-    border-color: #667eea;
-    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(167, 139, 250, 0.85);
+    background: rgba(0, 0, 0, 0.26);
   }
 
   .form-input::placeholder,
   .form-textarea::placeholder {
-    color: #a0a0a0;
+    color: rgba(255, 255, 255, 0.5);
   }
 
   .form-select {
@@ -302,7 +275,7 @@
   }
 
   .form-select option {
-    background: #1a1a2e;
+    background: #0b0b18;
     color: #ffffff;
   }
 
@@ -387,18 +360,6 @@
 
   /* Mobile landscape and small tablets */
   @media screen and (max-width: 768px) {
-    .contact {
-      padding: 4rem 0;
-    }
-
-    .section-title {
-      font-size: 2.5rem;
-    }
-
-    .section-description {
-      font-size: 1.1rem;
-    }
-
     .contact-content {
       flex-direction: column;
       gap: 2rem;
@@ -446,22 +407,6 @@
 
   /* Mobile portrait */
   @media screen and (max-width: 480px) {
-    .contact {
-      padding: 3rem 0;
-    }
-
-    .container {
-      padding: 0 1rem;
-    }
-
-    .section-title {
-      font-size: 2rem;
-    }
-
-    .section-description {
-      font-size: 1rem;
-    }
-
     .info-section,
     .contact-form {
       padding: 1.25rem;

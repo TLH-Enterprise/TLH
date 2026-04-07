@@ -1,5 +1,6 @@
 ---
 import MusicPlayer from "../components/MusicPlayer.astro";
+import "../styles/theme.css";
 
 export interface Props {
   title?: string;
@@ -63,10 +64,6 @@ const {
 </html>
 
 <style>
-  html {
-    scroll-behavior: smooth;
-  }
-
   html,
   body {
     margin: 0;
@@ -82,8 +79,6 @@ const {
       "Helvetica Neue",
       Arial,
       sans-serif;
-    background: #0f0f23;
-    color: #ffffff;
     line-height: 1.6;
     overflow-x: hidden;
   }
@@ -98,28 +93,29 @@ const {
   }
 
   ::-webkit-scrollbar-track {
-    background: #1a1a2e;
+    background: rgba(255, 255, 255, 0.06);
   }
 
   ::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 60%, rgba(34, 211, 238, 0.7) 140%);
     border-radius: 4px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+    background: linear-gradient(135deg, rgba(167, 139, 250, 0.95) 0%, rgba(139, 92, 246, 0.95) 60%, rgba(34, 211, 238, 0.8) 140%);
   }
 
   /* Selection styles */
   ::selection {
-    background: rgba(102, 126, 234, 0.3);
-    color: #ffffff;
+    background: rgba(139, 92, 246, 0.28);
+    color: rgba(255, 255, 255, 0.95);
   }
 
   /* Focus styles */
-  *:focus {
-    outline: 2px solid #667eea;
+  :where(a, button, input, textarea, select, [tabindex]):focus-visible {
+    outline: 2px solid rgba(167, 139, 250, 0.9);
     outline-offset: 2px;
+    border-radius: 10px;
   }
 
   /* Smooth transitions for all interactive elements */

@@ -27,14 +27,15 @@ const projects = [
 const categories = ["Todos", "Web Development", "Outsourcing"];
 ---
 
-<section id="portafolio" class="portfolio">
+<section id="portafolio" class="portfolio section">
   <div class="container">
     <div class="section-header">
-      <h2 class="section-title">Nuestro Portafolio</h2>
-      <p class="section-description">
-        Descubre algunos de los proyectos que hemos desarrollado para nuestros
-        clientes
-      </p>
+      <div class="kicker">Selected work</div>
+      <h2 class="h2">
+        Casos que demuestran
+        <span class="gradient-text">ejecución y detalle</span>
+      </h2>
+      <p class="lead">Algunos proyectos que hemos construido para clientes.</p>
     </div>
 
     <div class="portfolio-filters">
@@ -54,7 +55,7 @@ const categories = ["Todos", "Web Development", "Outsourcing"];
       {
         projects.map((project) => (
           <div
-            class="portfolio-item"
+            class="portfolio-item card card-hover"
             data-category={project.category.toLowerCase()}
           >
             <div class="portfolio-image">
@@ -90,7 +91,7 @@ const categories = ["Todos", "Web Development", "Outsourcing"];
       }
     </div>
 
-    <div class="portfolio-cta">
+    <div class="portfolio-cta card">
       <h3>¿Tienes un proyecto en mente?</h3>
       <p>Hablemos sobre cómo podemos ayudarte a hacerlo realidad</p>
       <a href="#contacto" class="btn btn-primary">Iniciar Proyecto</a>
@@ -100,8 +101,6 @@ const categories = ["Todos", "Web Development", "Outsourcing"];
 
 <style>
   .portfolio {
-    padding: 6rem 0;
-    background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
     position: relative;
   }
 
@@ -112,44 +111,18 @@ const categories = ["Todos", "Web Development", "Outsourcing"];
     left: 0;
     right: 0;
     bottom: 0;
+    pointer-events: none;
     background: radial-gradient(
-      circle at 30% 50%,
-      rgba(255, 119, 198, 0.1) 0%,
-      transparent 70%
-    );
-    z-index: 1;
-  }
-
-  .container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 2rem;
-    position: relative;
-    z-index: 2;
-  }
-
-  .section-header {
-    text-align: center;
-    margin-bottom: 3rem;
-  }
-
-  .section-title {
-    font-size: 3rem;
-    font-weight: 800;
-    color: #ffffff;
-    margin: 0 0 1rem 0;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .section-description {
-    font-size: 1.25rem;
-    color: #a0a0a0;
-    max-width: 600px;
-    margin: 0 auto;
-    line-height: 1.6;
+        900px 500px at 20% 55%,
+        rgba(139, 92, 246, 0.12) 0%,
+        transparent 60%
+      ),
+      radial-gradient(
+        700px 450px at 80% 30%,
+        rgba(34, 211, 238, 0.06) 0%,
+        transparent 60%
+      );
+    z-index: 0;
   }
 
   .portfolio-filters {
@@ -163,8 +136,8 @@ const categories = ["Todos", "Web Development", "Outsourcing"];
   .filter-btn {
     padding: 0.75rem 1.5rem;
     border: 2px solid rgba(255, 255, 255, 0.2);
-    background: transparent;
-    color: #a0a0a0;
+    background: rgba(255, 255, 255, 0.03);
+    color: rgba(255, 255, 255, 0.72);
     border-radius: 25px;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -173,7 +146,7 @@ const categories = ["Todos", "Web Development", "Outsourcing"];
 
   .filter-btn:hover,
   .filter-btn.active {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.9) 0%, rgba(109, 40, 217, 0.9) 70%, rgba(34, 211, 238, 0.35) 140%);
     border-color: transparent;
     color: white;
     transform: translateY(-2px);
@@ -187,18 +160,7 @@ const categories = ["Todos", "Web Development", "Outsourcing"];
   }
 
   .portfolio-item {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 20px;
     overflow: hidden;
-    transition: all 0.3s ease;
-    backdrop-filter: blur(10px);
-  }
-
-  .portfolio-item:hover {
-    transform: translateY(-10px);
-    border-color: rgba(102, 126, 234, 0.3);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
   }
 
   .portfolio-image {
@@ -224,7 +186,7 @@ const categories = ["Todos", "Web Development", "Outsourcing"];
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.78);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -251,7 +213,7 @@ const categories = ["Todos", "Web Development", "Outsourcing"];
   }
 
   .action-btn:not(.secondary) {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.95) 0%, rgba(109, 40, 217, 0.95) 70%, rgba(34, 211, 238, 0.35) 140%);
     color: white;
   }
 
@@ -270,7 +232,7 @@ const categories = ["Todos", "Web Development", "Outsourcing"];
   }
 
   .portfolio-category {
-    color: #667eea;
+    color: rgba(167, 139, 250, 0.95);
     font-size: 0.9rem;
     font-weight: 600;
     text-transform: uppercase;
@@ -286,7 +248,7 @@ const categories = ["Todos", "Web Development", "Outsourcing"];
   }
 
   .portfolio-description {
-    color: #a0a0a0;
+    color: rgba(255, 255, 255, 0.72);
     line-height: 1.6;
     margin: 0 0 1.5rem 0;
   }
@@ -298,8 +260,8 @@ const categories = ["Todos", "Web Development", "Outsourcing"];
   }
 
   .tech-tag {
-    background: rgba(102, 126, 234, 0.2);
-    color: #667eea;
+    background: rgba(139, 92, 246, 0.16);
+    color: rgba(167, 139, 250, 0.95);
     padding: 0.25rem 0.75rem;
     border-radius: 15px;
     font-size: 0.8rem;
@@ -308,11 +270,8 @@ const categories = ["Todos", "Web Development", "Outsourcing"];
 
   .portfolio-cta {
     text-align: center;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 20px;
     padding: 3rem;
-    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
   }
 
   .portfolio-cta h3 {
@@ -323,46 +282,12 @@ const categories = ["Todos", "Web Development", "Outsourcing"];
   }
 
   .portfolio-cta p {
-    color: #a0a0a0;
+    color: rgba(255, 255, 255, 0.72);
     font-size: 1.1rem;
     margin: 0 0 2rem 0;
   }
 
-  .btn {
-    padding: 1rem 2rem;
-    border-radius: 12px;
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-    display: inline-block;
-    border: 2px solid transparent;
-  }
-
-  .btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
-  }
-
-  .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 30px rgba(102, 126, 234, 0.6);
-  }
-
   @media (max-width: 768px) {
-    .portfolio {
-      padding: 4rem 0;
-    }
-
-    .section-title {
-      font-size: 2.5rem;
-    }
-
-    .section-description {
-      font-size: 1.1rem;
-    }
-
     .portfolio-grid {
       grid-template-columns: 1fr;
       gap: 1.5rem;
@@ -387,10 +312,6 @@ const categories = ["Todos", "Web Development", "Outsourcing"];
   }
 
   @media (max-width: 480px) {
-    .section-title {
-      font-size: 2rem;
-    }
-
     .portfolio-content {
       padding: 1.5rem;
     }

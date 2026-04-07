@@ -81,13 +81,16 @@ const processSteps = [
 ];
 ---
 
-<section id="proceso" class="process">
+<section id="proceso" class="process section section--split">
   <div class="container">
     <div class="section-header">
-      <h2 class="section-title">Nuestro Proceso</h2>
-      <p class="section-description">
-        Seguimos una metodología probada que garantiza resultados excepcionales
-        en cada proyecto
+      <div class="kicker">How we work</div>
+      <h2 class="h2">
+        Un proceso claro para reducir riesgo y
+        <span class="gradient-text">acelerar resultados</span>
+      </h2>
+      <p class="lead">
+        Metodología probada, comunicación constante y entregas iterativas.
       </p>
     </div>
 
@@ -95,7 +98,7 @@ const processSteps = [
       {
         processSteps.map((step, index) => (
           <div class={`process-step ${index % 2 === 0 ? "left" : "right"}`}>
-            <div class="step-content">
+            <div class="step-content card card-hover">
               <div class="step-number">{step.number}</div>
               <div class="step-icon">
                 <span class="icon">{step.icon}</span>
@@ -116,7 +119,7 @@ const processSteps = [
     </div>
 
     <div class="process-cta">
-      <div class="cta-content">
+      <div class="cta-content card">
         <h3>¿Listo para comenzar tu proyecto?</h3>
         <p>
           Contáctanos y descubre cómo podemos ayudarte a alcanzar tus objetivos
@@ -132,8 +135,6 @@ const processSteps = [
 
 <style>
   .process {
-    padding: 6rem 0;
-    background: linear-gradient(180deg, #16213e 0%, #0f0f23 100%);
     position: relative;
     overflow: hidden;
   }
@@ -145,49 +146,18 @@ const processSteps = [
     left: 0;
     right: 0;
     bottom: 0;
+    pointer-events: none;
     background: radial-gradient(
-        circle at 20% 20%,
-        rgba(102, 126, 234, 0.1) 0%,
-        transparent 50%
+        900px 520px at 20% 20%,
+        rgba(139, 92, 246, 0.12) 0%,
+        transparent 60%
       ),
       radial-gradient(
-        circle at 80% 80%,
-        rgba(118, 75, 162, 0.1) 0%,
-        transparent 50%
+        800px 520px at 80% 80%,
+        rgba(34, 211, 238, 0.06) 0%,
+        transparent 60%
       );
-    z-index: 1;
-  }
-
-  .container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 2rem;
-    position: relative;
-    z-index: 2;
-  }
-
-  .section-header {
-    text-align: center;
-    margin-bottom: 4rem;
-  }
-
-  .section-title {
-    font-size: 3rem;
-    font-weight: 800;
-    color: #ffffff;
-    margin: 0 0 1rem 0;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .section-description {
-    font-size: 1.25rem;
-    color: #a0a0a0;
-    max-width: 600px;
-    margin: 0 auto;
-    line-height: 1.6;
+    z-index: 0;
   }
 
   /* Codigo de la linea central
@@ -223,21 +193,9 @@ const processSteps = [
   }
 
   .step-content {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 20px;
     padding: 2.5rem;
     width: 45%;
-    backdrop-filter: blur(10px);
-    transition: all 0.3s ease;
     position: relative;
-  }
-
-  .step-content:hover {
-    transform: translateY(-5px);
-    border-top-color: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-    border-color: rgba(102, 126, 234, 0.3);
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
   }
 
   .step-number {
@@ -245,7 +203,7 @@ const processSteps = [
     top: -15px;
     left: 50%;
     transform: translateX(-50%);
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.95) 0%, rgba(109, 40, 217, 0.95) 70%, rgba(34, 211, 238, 0.35) 140%);
     color: white;
     width: 40px;
     height: 40px;
@@ -266,7 +224,7 @@ const processSteps = [
   .icon {
     font-size: 3rem;
     display: inline-block;
-    filter: drop-shadow(0 4px 8px rgba(102, 126, 234, 0.3));
+    filter: drop-shadow(0 12px 30px rgba(139, 92, 246, 0.22));
   }
 
   .step-title {
@@ -278,7 +236,7 @@ const processSteps = [
   }
 
   .step-description {
-    color: #a0a0a0;
+    color: rgba(255, 255, 255, 0.72);
     line-height: 1.6;
     margin: 0 0 1.5rem 0;
     text-align: center;
@@ -291,7 +249,7 @@ const processSteps = [
   }
 
   .detail-item {
-    color: #c0c0c0;
+    color: rgba(255, 255, 255, 0.72);
     padding: 0.5rem 0;
     position: relative;
     padding-left: 1.5rem;
@@ -302,18 +260,20 @@ const processSteps = [
     content: "→";
     position: absolute;
     left: 0;
-    color: #667eea;
+    color: rgba(167, 139, 250, 0.95);
     font-weight: bold;
   }
 
   .process-cta {
     text-align: center;
     margin-top: 4rem;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 20px;
     padding: 3rem;
-    backdrop-filter: blur(10px);
+  }
+
+  .cta-content {
+    padding: 3rem;
+    border-radius: 22px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
   }
 
   .cta-content h3 {
@@ -324,7 +284,7 @@ const processSteps = [
   }
 
   .cta-content p {
-    color: #a0a0a0;
+    color: rgba(255, 255, 255, 0.72);
     font-size: 1.1rem;
     margin: 0 0 2rem 0;
   }
@@ -336,53 +296,7 @@ const processSteps = [
     flex-wrap: wrap;
   }
 
-  .btn {
-    padding: 1rem 2rem;
-    border-radius: 12px;
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-    display: inline-block;
-    border: 2px solid transparent;
-  }
-
-  .btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
-  }
-
-  .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 30px rgba(102, 126, 234, 0.6);
-  }
-
-  .btn-secondary {
-    background: transparent;
-    color: #ffffff;
-    border: 2px solid rgba(255, 255, 255, 0.2);
-  }
-
-  .btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.4);
-    transform: translateY(-2px);
-  }
-
   @media (max-width: 768px) {
-    .process {
-      padding: 4rem 0;
-    }
-
-    .section-title {
-      font-size: 2.5rem;
-    }
-
-    .section-description {
-      font-size: 1.1rem;
-    }
-
     .process-step {
       justify-content: center !important;
       margin-left: 0;
@@ -401,6 +315,10 @@ const processSteps = [
     }
 
     .process-cta {
+      padding: 0;
+    }
+
+    .cta-content {
       padding: 2rem;
     }
 
@@ -415,10 +333,6 @@ const processSteps = [
   }
 
   @media (max-width: 480px) {
-    .section-title {
-      font-size: 2rem;
-    }
-
     .step-content {
       padding: 2rem;
       max-width: 100%;
