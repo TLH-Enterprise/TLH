@@ -4,14 +4,34 @@
   left: 50%;
   transform: translateX(-50%);
   z-index: 1000;
-  background: rgba(15, 15, 35, 0.75);
-  backdrop-filter: blur(25px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(22px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 60px;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
-  transition: all 0.3s ease;
+  box-shadow: 0 18px 70px rgba(0, 0, 0, 0.4);
+  transition: transform 0.25s ease, box-shadow 0.25s ease,
+    background 0.25s ease, border-color 0.25s ease;
   width: 90%;
   max-width: 1200px;
+}
+
+.navbar::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: 60px;
+  pointer-events: none;
+  background: radial-gradient(
+      400px 100px at 20% 0%,
+      rgba(139, 92, 246, 0.22) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      360px 100px at 80% 0%,
+      rgba(34, 211, 238, 0.12) 0%,
+      transparent 60%
+    );
+  opacity: 0.9;
 }
 
 .nav-container {
@@ -21,7 +41,7 @@
   height: 70px;
   padding: 0 3rem;
   gap: 2rem;
-  transition: all 0.3s ease;
+  transition: padding 0.25s ease, height 0.25s ease;
 }
 
 .nav-brand {
@@ -44,14 +64,19 @@
 .brand-logo {
   width: 40px;
   height: 40px;
-  filter: drop-shadow(0 2px 4px rgba(102, 126, 234, 0.3));
+  filter: drop-shadow(0 12px 30px rgba(139, 92, 246, 0.22));
   transition: all 0.3s ease;
 }
 
 .brand-name {
   font-size: 1.7rem;
   font-weight: 800;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(167, 139, 250, 0.95) 0%,
+    rgba(139, 92, 246, 0.95) 60%,
+    rgba(34, 211, 238, 0.6) 140%
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -76,7 +101,7 @@
 }
 
 .nav-link {
-  color: #ffffff;
+  color: rgba(255, 255, 255, 0.9);
   text-decoration: none;
   font-weight: 500;
   padding: 0.5rem 1rem;
@@ -87,14 +112,14 @@
 }
 
 .nav-link:hover {
-  color: #667eea;
-  background: rgba(102, 126, 234, 0.15);
+  color: rgba(167, 139, 250, 0.95);
+  background: rgba(139, 92, 246, 0.12);
   transform: translateY(-1px);
 }
 
 .nav-link.active {
-  color: #667eea;
-  background: rgba(102, 126, 234, 0.15);
+  color: rgba(167, 139, 250, 0.95);
+  background: rgba(139, 92, 246, 0.14);
 }
 
 .nav-actions {
@@ -113,15 +138,20 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(139, 92, 246, 0.95) 0%,
+    rgba(109, 40, 217, 0.95) 70%,
+    rgba(34, 211, 238, 0.35) 140%
+  );
   color: white;
-  box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
-  border: 1px solid rgba(102, 126, 234, 0.3);
+  box-shadow: 0 18px 60px rgba(139, 92, 246, 0.18);
+  border: 1px solid rgba(167, 139, 250, 0.25);
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 22px 72px rgba(139, 92, 246, 0.25);
 }
 
 .nav-button {
@@ -177,7 +207,7 @@
     top: 78px;
     left: 50%;
     transform: translateX(-50%) translateY(-100%);
-    background: rgba(15, 15, 35, 0.95);
+    background: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(25px);
     border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 20px;

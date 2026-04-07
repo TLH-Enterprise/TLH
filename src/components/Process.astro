@@ -1,4 +1,6 @@
 ---
+import Icon from "./Icon.astro";
+
 const processSteps = [
   {
     number: "01",
@@ -11,7 +13,7 @@ const processSteps = [
       "Definición de objetivos",
       "Investigación de usuarios",
     ],
-    icon: "🔍",
+    icon: "search",
   },
   {
     number: "02",
@@ -24,7 +26,7 @@ const processSteps = [
       "Plan de desarrollo",
       "Cronograma de entregas",
     ],
-    icon: "📋",
+    icon: "clipboard",
   },
   {
     number: "03",
@@ -37,7 +39,7 @@ const processSteps = [
       "Prototipos interactivos",
       "Revisión y feedback",
     ],
-    icon: "🎨",
+    icon: "layers",
   },
   {
     number: "04",
@@ -50,7 +52,7 @@ const processSteps = [
       "Integración de APIs",
       "Testing y QA",
     ],
-    icon: "⚡",
+    icon: "bolt",
   },
   {
     number: "05",
@@ -63,7 +65,7 @@ const processSteps = [
       "Monitoreo de performance",
       "Capacitación del equipo",
     ],
-    icon: "🚀",
+    icon: "launch",
   },
   {
     number: "06",
@@ -76,14 +78,14 @@ const processSteps = [
       "Mejoras de performance",
       "Nuevas funcionalidades",
     ],
-    icon: "🔧",
+    icon: "shield",
   },
-];
+] as const;
 ---
 
-<section id="proceso" class="process section section--split">
+<section id="proceso" class="process section section--split" data-reveal="slow">
   <div class="container">
-    <div class="section-header">
+    <div class="section-header" data-reveal>
       <div class="kicker">How we work</div>
       <h2 class="h2">
         Un proceso claro para reducir riesgo y
@@ -94,14 +96,16 @@ const processSteps = [
       </p>
     </div>
 
-    <div class="process-timeline">
+    <div class="process-timeline" data-reveal>
       {
         processSteps.map((step, index) => (
           <div class={`process-step ${index % 2 === 0 ? "left" : "right"}`}>
-            <div class="step-content card card-hover">
+            <div class="step-content card card-hover" data-tilt="4">
               <div class="step-number">{step.number}</div>
               <div class="step-icon">
-                <span class="icon">{step.icon}</span>
+                <span class="icon" aria-hidden="true">
+                  <Icon name={step.icon} size={22} />
+                </span>
               </div>
               <div class="step-info">
                 <h3 class="step-title">{step.title}</h3>
@@ -119,13 +123,13 @@ const processSteps = [
     </div>
 
     <div class="process-cta">
-      <div class="cta-content card">
+      <div class="cta-content card" data-reveal>
         <h3>¿Listo para comenzar tu proyecto?</h3>
         <p>
           Contáctanos y descubre cómo podemos ayudarte a alcanzar tus objetivos
         </p>
         <div class="cta-buttons">
-          <a href="#contacto" class="btn btn-primary">Iniciar Proyecto</a>
+          <a href="#contacto" class="btn btn-primary" data-magnetic="12">Iniciar Proyecto</a>
           <!--a href="#portafolio" class="btn btn-secondary">Ver Casos de Éxito</a>-->
         </div>
       </div>
@@ -222,9 +226,19 @@ const processSteps = [
   }
 
   .icon {
-    font-size: 3rem;
-    display: inline-block;
-    filter: drop-shadow(0 12px 30px rgba(139, 92, 246, 0.22));
+    width: 44px;
+    height: 44px;
+    display: inline-grid;
+    place-items: center;
+    border-radius: 14px;
+    color: rgba(255, 255, 255, 0.92);
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.07) 0%,
+      rgba(255, 255, 255, 0.03) 100%
+    );
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 18px 50px rgba(139, 92, 246, 0.12);
   }
 
   .step-title {
@@ -336,10 +350,6 @@ const processSteps = [
     .step-content {
       padding: 2rem;
       max-width: 100%;
-    }
-
-    .icon {
-      font-size: 2.5rem;
     }
 
     .step-title {

@@ -1,0 +1,83 @@
+---
+export interface Props {
+  items: string[];
+  label?: string;
+}
+
+const { items, label = "Capacidades" } = Astro.props;
+---
+
+<section class="marquee section section--split" aria-label={label} data-reveal="slow">
+  <div class="signal-lines" aria-hidden="true"></div>
+  <div class="container">
+    <div class="marquee-inner card" data-reveal>
+      <div class="kicker">{label}</div>
+      <div class="marquee-track" role="presentation">
+        <div class="marquee-row" aria-hidden="true">
+          {items.map((t) => (
+            <span class="chip">{t}</span>
+          ))}
+          {items.map((t) => (
+            <span class="chip">{t}</span>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .marquee {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .marquee-inner {
+    padding: 1.5rem 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  .marquee-track {
+    margin-top: 1.15rem;
+    overflow: hidden;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.16);
+  }
+
+  .marquee-row {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.9rem 0.9rem;
+    width: max-content;
+    animation: marquee 26s linear infinite;
+    will-change: transform;
+  }
+
+  .chip {
+    padding: 0.55rem 0.8rem;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.82);
+    font-weight: 650;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+  }
+
+  @keyframes marquee {
+    0% {
+      transform: translate3d(0, 0, 0);
+    }
+    100% {
+      transform: translate3d(-50%, 0, 0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .marquee-row {
+      animation: none;
+    }
+  }
+</style>
+

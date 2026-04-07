@@ -1,7 +1,9 @@
 ---
+import Icon from "./Icon.astro";
+
 const services = [
   {
-    icon: "🚀",
+    icon: "rocket",
     title: "Desarollo de software a la medida",
     description:
       "Creamos soluciones software a la medida para satisfacer las necesidades de tu negocio.",
@@ -12,14 +14,14 @@ const services = [
     ],
   },
   {
-    icon: "📱",
+    icon: "mobile",
     title: "Desarrollo web y de aplicaciones móviles",
     description:
       "Desarrollamos aplicaciones móviles nativas e híbridas que conectan con tus usuarios en cualquier dispositivo.",
     features: ["React, Vue, Astro", "React Native", "Flutter", "PWA"],
   },
   {
-    icon: "⚡",
+    icon: "spark",
     title: "Inteligencia Artificial y Automatización",
     description:
       "Implementamos soluciones de IA y automatización para optimizar procesos y aumentar la eficiencia de tu negocio.",
@@ -35,14 +37,14 @@ const services = [
     ],
   },
   {
-    icon: "🎨",
+    icon: "palette",
     title: "Diseño UX/UI",
     description:
       "Diseñamos interfaces intuitivas y atractivas que mejoran la experiencia del usuario y aumentan la conversión.",
     features: ["User Research", "Prototipado", "Design Systems", "Usabilidad"],
   },
   {
-    icon: "📊",
+    icon: "chart",
     title: "Analytics",
     description:
       "Implementamos herramientas de análisis para ayudarte a entender el comportamiento de tus usuarios.",
@@ -55,7 +57,7 @@ const services = [
     ],
   },
   {
-    icon: "🔧",
+    icon: "wrench",
     title: "Consultoría y Outsourcing de TI",
     description:
       "Ofrecemos soporte continuo y actualizaciones para mantener tu proyecto siempre actualizado y funcionando.",
@@ -65,12 +67,12 @@ const services = [
       "Gestión de proyectos de software end-to-end.",
     ],
   },
-];
+] as const;
 ---
 
-<section id="servicios" class="services section section--split">
+<section id="servicios" class="services section section--split" data-reveal="slow">
   <div class="container">
-    <div class="section-header">
+    <div class="section-header" data-reveal>
       <div class="kicker">Capabilities</div>
       <h2 class="h2">
         Servicios para lanzar, escalar y optimizar
@@ -82,12 +84,14 @@ const services = [
       </p>
     </div>
 
-    <div class="services-grid">
+    <div class="services-grid" data-reveal>
       {
         services.map((service) => (
-          <div class="service-card card card-hover">
+          <div class="service-card card card-hover" data-tilt="5">
             <div class="service-icon">
-              <span class="icon">{service.icon}</span>
+              <span class="icon" aria-hidden="true">
+                <Icon name={service.icon} size={22} />
+              </span>
             </div>
             <h3 class="service-title">{service.title}</h3>
             <p class="service-description">{service.description}</p>
@@ -162,9 +166,19 @@ const services = [
   }
 
   .icon {
-    font-size: 3rem;
-    display: inline-block;
-    filter: drop-shadow(0 12px 30px rgba(139, 92, 246, 0.22));
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border-radius: 14px;
+    color: rgba(255, 255, 255, 0.92);
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.07) 0%,
+      rgba(255, 255, 255, 0.03) 100%
+    );
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 18px 50px rgba(139, 92, 246, 0.12);
   }
 
   .service-title {

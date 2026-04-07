@@ -27,9 +27,9 @@ const projects = [
 const categories = ["Todos", "Web Development", "Outsourcing"];
 ---
 
-<section id="portafolio" class="portfolio section">
+<section id="portafolio" class="portfolio section" data-reveal="slow">
   <div class="container">
-    <div class="section-header">
+    <div class="section-header" data-reveal>
       <div class="kicker">Selected work</div>
       <h2 class="h2">
         Casos que demuestran
@@ -38,7 +38,7 @@ const categories = ["Todos", "Web Development", "Outsourcing"];
       <p class="lead">Algunos proyectos que hemos construido para clientes.</p>
     </div>
 
-    <div class="portfolio-filters">
+    <div class="portfolio-filters" data-reveal>
       {
         categories.map((category) => (
           <button
@@ -51,12 +51,13 @@ const categories = ["Todos", "Web Development", "Outsourcing"];
       }
     </div>
 
-    <div class="portfolio-grid">
+    <div class="portfolio-grid" data-reveal>
       {
         projects.map((project) => (
           <div
             class="portfolio-item card card-hover"
             data-category={project.category.toLowerCase()}
+            data-tilt="5"
           >
             <div class="portfolio-image">
               <Image src={project.image} alt={project.title} width={350} height={250} />

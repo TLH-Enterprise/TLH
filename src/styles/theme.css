@@ -38,6 +38,7 @@
 
   /* Type */
   --title-tracking: -0.03em;
+  --text-tracking: -0.01em;
 }
 
 /* Base */
@@ -51,6 +52,111 @@ body {
     radial-gradient(900px 700px at 70% 78%, rgba(167, 139, 250, 0.12) 0%, transparent 60%),
     linear-gradient(180deg, var(--bg-0) 0%, var(--bg-1) 60%, var(--bg-0) 100%);
   color: var(--text-1);
+  letter-spacing: var(--text-tracking);
+}
+
+/* Enterprise polish */
+.h1,
+.h2 {
+  text-wrap: balance;
+}
+
+.lead {
+  text-wrap: pretty;
+}
+
+
+/* Enterprise "signal lines" background (Accenture-ish, subtle) */
+.signal-lines {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.65;
+  mask-image: radial-gradient(circle at 50% 30%, black 0%, transparent 70%);
+}
+
+.signal-lines::before {
+  content: "";
+  position: absolute;
+  inset: -30%;
+  background-image: repeating-linear-gradient(
+    115deg,
+    rgba(255, 255, 255, 0.06) 0px,
+    rgba(255, 255, 255, 0.06) 1px,
+    transparent 1px,
+    transparent 12px
+  );
+  transform: translate3d(0, 0, 0);
+  animation: signalShift 14s linear infinite;
+}
+
+.signal-lines::after {
+  content: "";
+  position: absolute;
+  inset: -30%;
+  background-image: repeating-linear-gradient(
+    115deg,
+    rgba(167, 139, 250, 0.1) 0px,
+    rgba(167, 139, 250, 0.1) 1px,
+    transparent 1px,
+    transparent 18px
+  );
+  animation: signalShift 22s linear infinite reverse;
+  opacity: 0.8;
+  filter: blur(0.2px);
+}
+
+@keyframes signalShift {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 800px 420px;
+  }
+}
+
+/* Scroll reveal */
+[data-reveal] {
+  opacity: 0.001;
+  transform: translate3d(0, 16px, 0);
+  filter: blur(6px);
+  transition: opacity 700ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    transform 700ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    filter 900ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  will-change: opacity, transform, filter;
+}
+
+[data-reveal].is-revealed {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  filter: blur(0);
+}
+
+[data-reveal="slow"] {
+  transition-duration: 950ms, 950ms, 1200ms;
+}
+
+[data-reveal="right"] {
+  transform: translate3d(18px, 0, 0);
+}
+
+[data-reveal="left"] {
+  transform: translate3d(-18px, 0, 0);
+}
+
+/* Glow ring utility for premium separators */
+.glow-divider {
+  height: 1px;
+  width: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(167, 139, 250, 0.65) 45%,
+    rgba(34, 211, 238, 0.28) 70%,
+    transparent 100%
+  );
+  opacity: 0.75;
 }
 
 /* Subtle grain overlay */
@@ -210,6 +316,15 @@ footer {
   transform: translateY(-8px);
   border-color: rgba(139, 92, 246, 0.35);
   box-shadow: 0 26px 90px rgba(0, 0, 0, 0.5);
+}
+
+/* Smoother hover cues */
+.card {
+  transform: translateZ(0);
+}
+
+.btn {
+  transform: translateZ(0);
 }
 
 /* Accessibility */
