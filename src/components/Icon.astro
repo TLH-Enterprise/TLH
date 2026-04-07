@@ -7,6 +7,8 @@ export interface Props {
     | "palette"
     | "chart"
     | "wrench"
+    | "camera"
+    | "megaphone"
     | "search"
     | "clipboard"
     | "layers"
@@ -95,6 +97,23 @@ const common = {
       name === "wrench" ? (
         <>
           <path d="M21 7a6 6 0 0 1-8.5 5.5L7 18l-3-3 5.5-5.5A6 6 0 0 1 17 3l-3 3 4 4 3-3Z" />
+        </>
+      ) : null
+    }
+    {
+      name === "camera" ? (
+        <>
+          <path d="M7 7h10l2 3v9a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-9l2-3Z" />
+          <circle cx="12" cy="14" r="3" />
+        </>
+      ) : null
+    }
+    {
+      name === "megaphone" ? (
+        <>
+          <path d="M4 11v2a2 2 0 0 0 2 2h1l5 3V6L7 9H6a2 2 0 0 0-2 2Z" />
+          <path d="M16 10v4" />
+          <path d="M19 9v6" />
         </>
       ) : null
     }

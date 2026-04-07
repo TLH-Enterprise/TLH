@@ -6,6 +6,15 @@ function prefersReducedMotion() {
   return window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches ?? false;
 }
 
+function preventContactHashJumpOnReload() {
+  // If the URL contains #contacto (often kept after clicking CTAs),
+  // browsers will auto-scroll there on refresh. For a landing, we prefer top.
+  if (window.location.hash !== "#contacto") return;
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+  history.replaceState(null, "", window.location.pathname + window.location.search);
+  window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+}
+
 function initScrollReveal(options: MotionOptions = {}) {
   const elements = document.querySelectorAll<HTMLElement>("[data-reveal]");
   if (!elements.length) return;
@@ -162,6 +171,7 @@ function initCountUp() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  preventContactHashJumpOnReload();
   initScrollReveal();
   initMagneticButtons();
   initTiltCards();

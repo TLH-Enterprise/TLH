@@ -26,10 +26,11 @@
   --shadow-2: 0 18px 50px rgba(139, 92, 246, 0.14);
 
   /* Radii */
-  --r-xs: 10px;
-  --r-sm: 14px;
-  --r-md: 18px;
-  --r-lg: 24px;
+  --r-xs: 8px;
+  --r-sm: 10px;
+  --r-md: 14px;
+  --r-lg: 18px;
+  --r-xl: 22px;
 
   /* Layout */
   --container: 1200px;
@@ -39,6 +40,8 @@
   /* Type */
   --title-tracking: -0.03em;
   --text-tracking: -0.01em;
+  --font-sans: "IBM Plex Sans", "Inter", -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 /* Base */
@@ -53,6 +56,7 @@ body {
     linear-gradient(180deg, var(--bg-0) 0%, var(--bg-1) 60%, var(--bg-0) 100%);
   color: var(--text-1);
   letter-spacing: var(--text-tracking);
+  font-family: var(--font-sans);
 }
 
 /* Enterprise polish */
@@ -262,7 +266,7 @@ footer {
   justify-content: center;
   gap: 0.6rem;
   padding: 0.95rem 1.25rem;
-  border-radius: 999px;
+  border-radius: var(--r-sm);
   text-decoration: none;
   font-weight: 650;
   border: 1px solid transparent;
@@ -270,6 +274,18 @@ footer {
     border-color 0.18s ease;
   user-select: none;
   will-change: transform;
+}
+
+/* Legacy: prevent capsule rounding from creeping in */
+.btn,
+.btn-primary,
+.btn-secondary {
+  border-radius: var(--r-sm);
+}
+
+/* Chips / pills (keep slightly rounded, not capsule) */
+.pill {
+  border-radius: var(--r-sm);
 }
 
 .btn:active {
@@ -303,7 +319,7 @@ footer {
 .card {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.035) 100%);
   border: 1px solid var(--stroke-1);
-  border-radius: var(--r-lg);
+  border-radius: var(--r-md);
   box-shadow: var(--shadow-1);
   backdrop-filter: blur(14px);
 }
