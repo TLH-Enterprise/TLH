@@ -1,0 +1,146 @@
+---
+const stats = [
+  { k: "Time to value", v: 6, suffix: "–10 semanas", note: "Dependiendo del alcance" },
+  { k: "Core Web Vitals", v: 95, suffix: "+", note: "En proyectos orientados a performance" },
+  { k: "Disponibilidad", v: 99.9, suffix: "%", note: "Con monitoreo y buenas prácticas" },
+];
+---
+
+<section class="stats section" aria-label="Métricas" data-reveal="slow">
+  <div class="container">
+    <div class="stats-card card" data-reveal>
+      <div class="stats-head">
+        <div class="kicker">Impact</div>
+        <h2 class="h2">
+          Señales claras de una ejecución
+          <span class="gradient-text">de alto nivel</span>
+        </h2>
+        <p class="lead">
+          Métricas orientativas (no marketing vacío): enfoque en entrega, calidad y
+          estabilidad en producción.
+        </p>
+      </div>
+
+      <div class="glow-divider" role="presentation"></div>
+
+      <div class="stats-grid" data-reveal>
+        {
+          stats.map((s) => (
+            <div class="stat" data-tilt="3">
+              <div class="stat-k">{s.k}</div>
+              <div class="stat-v">
+                <span
+                  class="stat-num"
+                  data-count
+                  data-count-to={String(s.v)}
+                  data-count-decimals={String(String(s.v).includes(".") ? 1 : 0)}
+                >
+                  0
+                </span>
+                <span class="stat-suffix">{s.suffix}</span>
+              </div>
+              <div class="stat-note">{s.note}</div>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .stats {
+    position: relative;
+  }
+
+  .stats::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(
+        1000px 520px at 70% 20%,
+        rgba(139, 92, 246, 0.14) 0%,
+        transparent 62%
+      ),
+      radial-gradient(
+        900px 520px at 20% 80%,
+        rgba(34, 211, 238, 0.06) 0%,
+        transparent 60%
+      );
+    z-index: 0;
+  }
+
+  .stats-card {
+    padding: clamp(1.5rem, 3.5vw, 3rem);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  .stats-head {
+    text-align: center;
+    display: grid;
+    gap: 0.85rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .stats-grid {
+    margin-top: 1.75rem;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .stat {
+    border-radius: 18px;
+    padding: 1.35rem 1.25rem;
+    background: rgba(0, 0, 0, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    transition: transform 0.22s ease, border-color 0.22s ease, background 0.22s ease;
+  }
+
+  .stat:hover {
+    background: rgba(0, 0, 0, 0.26);
+    border-color: rgba(167, 139, 250, 0.25);
+  }
+
+  .stat-k {
+    color: rgba(255, 255, 255, 0.62);
+    font-weight: 650;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+  }
+
+  .stat-v {
+    margin-top: 0.6rem;
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    letter-spacing: -0.03em;
+  }
+
+  .stat-num {
+    font-size: clamp(2rem, 3vw, 2.6rem);
+    font-weight: 860;
+    line-height: 1;
+  }
+
+  .stat-suffix {
+    color: rgba(255, 255, 255, 0.82);
+    font-weight: 700;
+  }
+
+  .stat-note {
+    margin-top: 0.55rem;
+    color: rgba(255, 255, 255, 0.62);
+    line-height: 1.6;
+    font-size: 0.95rem;
+  }
+
+  @media (max-width: 900px) {
+    .stats-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+

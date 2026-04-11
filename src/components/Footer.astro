@@ -4,12 +4,12 @@ import { Image } from "astro:assets";
 const socialLinks = [
   {
     name: "LinkedIn",
-    icon: "💼",
+    key: "linkedin",
     href: "https://www.linkedin.com/company/tlh-the-last-hope",
   },
-  { name: "X", icon: "🐦", href: "https://x.com/tlh_dev" },
-  { name: "Instagram", icon: "📸", href: "https://www.instagram.com/tlh.dev/" },
-];
+  { name: "X", key: "x", href: "https://x.com/tlh_dev" },
+  { name: "Instagram", key: "instagram", href: "https://www.instagram.com/tlh.dev/" },
+] as const;
 ---
 
 <footer class="footer">
@@ -40,7 +40,96 @@ const socialLinks = [
                 rel="noopener"
                 aria-label={social.name}
               >
-                <span class="social-icon">{social.icon}</span>
+                <span class="social-icon" aria-hidden="true">
+                  {
+                    social.key === "linkedin" ? (
+                      <svg
+                        width="22"
+                        height="22"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M6.5 10.5V18.5"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                          stroke-linecap="round"
+                        />
+                        <path
+                          d="M6.5 7.25h0.01"
+                          stroke="currentColor"
+                          stroke-width="3.2"
+                          stroke-linecap="round"
+                        />
+                        <path
+                          d="M10.5 18.5v-4.4c0-1.8 1.1-3 2.8-3 1.6 0 2.4 1.1 2.4 3v4.4"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        />
+                        <path
+                          d="M10.5 10.5v1.2"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                          stroke-linecap="round"
+                        />
+                      </svg>
+                    ) : social.key === "x" ? (
+                      <svg
+                        width="22"
+                        height="22"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M7 7h3.2l6.8 10H13.8L7 7Z"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                          stroke-linejoin="round"
+                        />
+                        <path
+                          d="M17 7h-3l-7 10h3l7-10Z"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                          stroke-linejoin="round"
+                        />
+                      </svg>
+                    ) : (
+                      <svg
+                        width="22"
+                        height="22"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <rect
+                          x="7"
+                          y="7"
+                          width="10"
+                          height="10"
+                          rx="3"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                        />
+                        <path
+                          d="M16.2 7.8h0.01"
+                          stroke="currentColor"
+                          stroke-width="3.2"
+                          stroke-linecap="round"
+                        />
+                        <path
+                          d="M12 11a1.9 1.9 0 1 0 0 3.8A1.9 1.9 0 0 0 12 11Z"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                          stroke-linejoin="round"
+                        />
+                      </svg>
+                    )
+                  }
+                </span>
               </a>
             ))
           }
@@ -68,7 +157,6 @@ const socialLinks = [
 
   <style>
     .footer {
-      background: linear-gradient(180deg, #1a1a2e 0%, #0f0f23 100%);
       position: relative;
       overflow: hidden;
       padding: 4rem 0 0;
@@ -87,7 +175,7 @@ const socialLinks = [
       background: linear-gradient(
         90deg,
         transparent 0%,
-        #667eea 50%,
+        rgba(167, 139, 250, 0.95) 50%,
         transparent 100%
       );
     }
@@ -107,7 +195,7 @@ const socialLinks = [
       border-radius: 50%;
       background: radial-gradient(
         circle,
-        rgba(102, 126, 234, 0.1) 0%,
+        rgba(139, 92, 246, 0.12) 0%,
         transparent 70%
       );
       animation: float 20s ease-in-out infinite;
@@ -148,9 +236,6 @@ const socialLinks = [
     }
 
     .container {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 0 2rem;
       position: relative;
       z-index: 2;
     }
@@ -191,20 +276,25 @@ const socialLinks = [
     .logo {
       width: 40px;
       height: 40px;
-      filter: drop-shadow(0 4px 8px rgba(102, 126, 234, 0.3));
+      filter: drop-shadow(0 12px 30px rgba(139, 92, 246, 0.22));
     }
 
     .brand-name {
       font-size: 1.8rem;
       font-weight: 800;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(
+        135deg,
+        rgba(167, 139, 250, 0.95) 0%,
+        rgba(139, 92, 246, 0.95) 60%,
+        rgba(34, 211, 238, 0.6) 140%
+      );
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
 
     .brand-description {
-      color: #a0a0a0;
+      color: rgba(255, 255, 255, 0.72);
       line-height: 1.6;
       margin: 0 0 2rem 0;
       text-align: center;
@@ -222,8 +312,8 @@ const socialLinks = [
     .social-link {
       width: 45px;
       height: 45px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.045);
+      border: 1px solid rgba(255, 255, 255, 0.12);
       border-radius: 12px;
       display: flex;
       align-items: center;
@@ -233,13 +323,20 @@ const socialLinks = [
     }
 
     .social-link:hover {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(
+        135deg,
+        rgba(139, 92, 246, 0.95) 0%,
+        rgba(109, 40, 217, 0.95) 70%,
+        rgba(34, 211, 238, 0.35) 140%
+      );
       border-color: transparent;
       transform: translateY(-2px);
     }
 
     .social-icon {
-      font-size: 1.2rem;
+      width: 22px;
+      height: 22px;
+      color: rgba(255, 255, 255, 0.88);
     }
 
     .footer-links {
@@ -295,7 +392,7 @@ const socialLinks = [
     }
 
     .copyright {
-      color: #a0a0a0;
+      color: rgba(255, 255, 255, 0.56);
       margin: 0;
       font-size: 0.9rem;
     }
@@ -306,7 +403,7 @@ const socialLinks = [
     }
 
     .location-text {
-      color: #a0a0a0;
+      color: rgba(255, 255, 255, 0.56);
       font-size: 0.9rem;
       margin: 0;
     }
@@ -314,7 +411,6 @@ const socialLinks = [
     /* Large desktop styles */
     @media screen and (min-width: 1400px) {
       .container {
-        max-width: 1600px;
         padding: 0 3rem;
       }
 
@@ -329,7 +425,6 @@ const socialLinks = [
 
     @media (max-width: 1024px) {
       .container {
-        max-width: 100%;
         padding: 0 1.5rem;
       }
 
