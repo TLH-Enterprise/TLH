@@ -7,20 +7,13 @@ export interface Props {
 const { items, label = "Capacidades" } = Astro.props;
 ---
 
-<section class="marquee section section--split" aria-label={label} data-reveal="slow">
-  <div class="signal-lines" aria-hidden="true"></div>
-  <div class="container">
-    <div class="marquee-inner card" data-reveal>
-      <div class="kicker">{label}</div>
-      <div class="marquee-track" role="presentation">
-        <div class="marquee-row" aria-hidden="true">
-          {items.map((t) => (
-            <span class="chip">{t}</span>
-          ))}
-          {items.map((t) => (
-            <span class="chip">{t}</span>
-          ))}
-        </div>
+<section class="marquee" aria-label={label} data-reveal>
+  <div class="container marquee-layout">
+    <div class="marquee-label">{label}</div>
+    <div class="marquee-track" role="presentation">
+      <div class="marquee-row" aria-hidden="true">
+        {items.map((t) => <span class="chip">{t}</span>)}
+        {items.map((t) => <span class="chip">{t}</span>)}
       </div>
     </div>
   </div>
@@ -28,40 +21,47 @@ const { items, label = "Capacidades" } = Astro.props;
 
 <style>
   .marquee {
-    position: relative;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid var(--stroke-1);
+    background: var(--bg-0);
     overflow: hidden;
   }
 
-  .marquee-inner {
-    padding: 1.5rem 1.5rem;
-    border: 1px solid rgba(255, 255, 255, 0.12);
+  .marquee-layout {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .marquee-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    white-space: nowrap;
+    padding-right: 1.5rem;
+    border-right: 1px solid var(--stroke-1);
   }
 
   .marquee-track {
-    margin-top: 1.15rem;
     overflow: hidden;
-    border-radius: var(--r-sm);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(0, 0, 0, 0.16);
+    flex: 1;
+    mask-image: linear-gradient(90deg, transparent 0%, black 4%, black 96%, transparent 100%);
   }
 
   .marquee-row {
     display: flex;
-    gap: 0.75rem;
-    padding: 0.9rem 0.9rem;
+    gap: 2.25rem;
     width: max-content;
-    animation: marquee 26s linear infinite;
+    animation: marquee 32s linear infinite;
     will-change: transform;
   }
 
   .chip {
-    padding: 0.55rem 0.8rem;
-    border-radius: var(--r-sm);
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    background: rgba(255, 255, 255, 0.04);
-    color: rgba(255, 255, 255, 0.82);
-    font-weight: 650;
-    letter-spacing: 0.01em;
+    color: var(--text-2);
+    font-weight: 500;
+    font-size: 0.95rem;
     white-space: nowrap;
   }
 
@@ -79,5 +79,10 @@ const { items, label = "Capacidades" } = Astro.props;
       animation: none;
     }
   }
-</style>
 
+  @media (max-width: 600px) {
+    .marquee-label {
+      display: none;
+    }
+  }
+</style>

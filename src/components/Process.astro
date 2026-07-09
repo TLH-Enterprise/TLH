@@ -1,84 +1,70 @@
 ---
-import Icon from "./Icon.astro";
-
 const processSteps = [
   {
     number: "01",
     title: "Descubrimiento",
     description:
-      "Analizamos tus necesidades, objetivos y audiencia objetivo para crear una estrategia sólida.",
+      "Entendemos tu negocio, tus objetivos y tu audiencia antes de proponer cualquier solución.",
     details: [
-      "Reunión inicial",
+      "Reunión inicial y levantamiento de contexto",
       "Análisis de competencia",
-      "Definición de objetivos",
-      "Investigación de usuarios",
+      "Definición de objetivos y alcance",
     ],
-    icon: "search",
   },
   {
     number: "02",
     title: "Planificación",
     description:
-      "Desarrollamos un plan detallado con cronogramas, recursos y metodologías específicas para tu proyecto.",
+      "Definimos un plan con cronograma, responsables y entregables verificables para cada etapa.",
     details: [
       "Arquitectura de información",
-      "Wireframes y prototipos",
-      "Plan de desarrollo",
+      "Plan de desarrollo y recursos",
       "Cronograma de entregas",
     ],
-    icon: "clipboard",
   },
   {
     number: "03",
     title: "Diseño",
     description:
-      "Creamos diseños visuales atractivos y funcionales que reflejan la identidad de tu marca.",
+      "Diseñamos interfaces claras y consistentes que reflejan la identidad de tu marca.",
     details: [
-      "Diseño de interfaz",
-      "Sistema de diseño",
+      "Diseño de interfaz y sistema de diseño",
       "Prototipos interactivos",
-      "Revisión y feedback",
+      "Revisión y feedback contigo",
     ],
-    icon: "layers",
   },
   {
     number: "04",
     title: "Desarrollo",
     description:
-      "Implementamos la solución técnica utilizando las mejores prácticas y tecnologías modernas.",
+      "Construimos con buenas prácticas de ingeniería, calidad de código y entregas iterativas.",
     details: [
-      "Desarrollo frontend",
-      "Desarrollo backend",
+      "Desarrollo frontend y backend",
       "Integración de APIs",
-      "Testing y QA",
+      "Testing y aseguramiento de calidad",
     ],
-    icon: "bolt",
   },
   {
     number: "05",
     title: "Lanzamiento",
     description:
-      "Desplegamos tu proyecto en producción con monitoreo continuo y soporte técnico.",
+      "Desplegamos a producción con monitoreo, documentación y acompañamiento a tu equipo.",
     details: [
-      "Deploy a producción",
-      "Configuración de servidores",
+      "Despliegue a producción",
       "Monitoreo de performance",
       "Capacitación del equipo",
     ],
-    icon: "launch",
   },
   {
     number: "06",
-    title: "Mantenimiento",
+    title: "Evolución",
     description:
-      "Ofrecemos soporte continuo, actualizaciones y mejoras para mantener tu proyecto actualizado.",
+      "Acompañamos la operación con soporte, mejoras continuas y nuevas funcionalidades.",
     details: [
-      "Soporte técnico",
-      "Actualizaciones de seguridad",
+      "Soporte técnico y actualizaciones",
       "Mejoras de performance",
       "Nuevas funcionalidades",
     ],
-    icon: "shield",
   },
 ] as const;
 ---
@@ -86,174 +72,72 @@ const processSteps = [
 <section id="proceso" class="process section section--split" data-reveal="slow">
   <div class="container">
     <div class="section-header" data-reveal>
-      <div class="kicker">How we work</div>
+      <div class="kicker">Metodología</div>
       <h2 class="h2">
         Un proceso claro para reducir riesgo y
         <span class="gradient-text">acelerar resultados</span>
       </h2>
       <p class="lead">
-        Metodología probada, comunicación constante y entregas iterativas.
+        Trabajamos con etapas definidas, comunicación constante y entregas
+        iterativas que puedes revisar en cada paso.
       </p>
     </div>
 
-    <div class="process-timeline" data-reveal>
+    <div class="process-grid" data-reveal>
       {
-        processSteps.map((step, index) => (
-          <div class={`process-step ${index % 2 === 0 ? "left" : "right"}`}>
-            <div class="step-content card card-hover" data-tilt="4">
-              <div class="step-number">{step.number}</div>
-              <div class="step-icon">
-                <span class="icon" aria-hidden="true">
-                  <Icon name={step.icon} size={22} />
-                </span>
-              </div>
-              <div class="step-info">
-                <h3 class="step-title">{step.title}</h3>
-                <p class="step-description">{step.description}</p>
-                <ul class="step-details">
-                  {step.details.map((detail) => (
-                    <li class="detail-item">{detail}</li>
-                  ))}
-                </ul>
-              </div>
-            </div>
+        processSteps.map((step) => (
+          <div class="process-step card">
+            <div class="step-number">{step.number}</div>
+            <h3 class="step-title">{step.title}</h3>
+            <p class="step-description">{step.description}</p>
+            <ul class="step-details">
+              {step.details.map((detail) => (
+                <li class="detail-item">{detail}</li>
+              ))}
+            </ul>
           </div>
         ))
       }
-    </div>
-
-    <div class="process-cta">
-      <div class="cta-content card" data-reveal>
-        <h3>¿Listo para comenzar tu proyecto?</h3>
-        <p>
-          Contáctanos y descubre cómo podemos ayudarte a alcanzar tus objetivos
-        </p>
-        <div class="cta-buttons">
-          <a href="#contacto" class="btn btn-primary" data-magnetic="12">Iniciar Proyecto</a>
-          <!--a href="#portafolio" class="btn btn-secondary">Ver Casos de Éxito</a>-->
-        </div>
-      </div>
     </div>
   </div>
 </section>
 
 <style>
-  .process {
-    position: relative;
-    overflow: hidden;
+  .process-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.25rem;
   }
-
-  .process::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    pointer-events: none;
-    background: radial-gradient(
-        900px 520px at 20% 20%,
-        rgba(139, 92, 246, 0.12) 0%,
-        transparent 60%
-      ),
-      radial-gradient(
-        800px 520px at 80% 80%,
-        rgba(34, 211, 238, 0.06) 0%,
-        transparent 60%
-      );
-    z-index: 0;
-  }
-
-  /* Codigo de la linea central
-  .process-timeline {
-    position: relative;
-    margin: 4rem 0;
-  }
-
-  .process-timeline::before {
-    content: "";
-    position: absolute;
-    left: 50%;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
-    transform: translateX(-50%);
-    z-index: 1;
-  }*/
 
   .process-step {
-    display: flex;
-    margin-bottom: 4rem;
-    position: relative;
-  }
-
-  .process-step.left {
-    justify-content: flex-start;
-  }
-
-  .process-step.right {
-    justify-content: flex-end;
-  }
-
-  .step-content {
-    padding: 2.5rem;
-    width: 45%;
-    position: relative;
+    padding: 1.75rem;
   }
 
   .step-number {
-    position: absolute;
-    top: -15px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.95) 0%, rgba(109, 40, 217, 0.95) 70%, rgba(34, 211, 238, 0.35) 140%);
-    color: white;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 1.1rem;
-    z-index: 2;
-  }
-
-  .step-icon {
-    text-align: center;
-    margin-bottom: 1.5rem;
-  }
-
-  .icon {
-    width: 44px;
-    height: 44px;
-    display: inline-grid;
-    place-items: center;
-    border-radius: 14px;
-    color: rgba(255, 255, 255, 0.92);
-    background: linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.07) 0%,
-      rgba(255, 255, 255, 0.03) 100%
-    );
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    box-shadow: 0 18px 50px rgba(139, 92, 246, 0.12);
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--brand-1);
+    font-variant-numeric: tabular-nums;
+    padding-bottom: 0.85rem;
+    margin-bottom: 1.1rem;
+    border-bottom: 2px solid var(--brand-1);
+    width: fit-content;
   }
 
   .step-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #ffffff;
-    margin: 0 0 1rem 0;
-    text-align: center;
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-1);
+    letter-spacing: -0.015em;
+    margin: 0 0 0.6rem 0;
   }
 
   .step-description {
-    color: rgba(255, 255, 255, 0.72);
+    color: var(--text-2);
     line-height: 1.6;
-    margin: 0 0 1.5rem 0;
-    text-align: center;
+    margin: 0 0 1rem 0;
+    font-size: 0.98rem;
   }
 
   .step-details {
@@ -263,102 +147,33 @@ const processSteps = [
   }
 
   .detail-item {
-    color: rgba(255, 255, 255, 0.72);
-    padding: 0.5rem 0;
+    color: var(--text-3);
+    padding: 0.3rem 0 0.3rem 1.15rem;
     position: relative;
-    padding-left: 1.5rem;
     font-size: 0.9rem;
+    line-height: 1.5;
   }
 
   .detail-item::before {
-    content: "→";
+    content: "";
     position: absolute;
     left: 0;
-    color: rgba(167, 139, 250, 0.95);
-    font-weight: bold;
+    top: 0.85rem;
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--brand-1);
   }
 
-  .process-cta {
-    text-align: center;
-    margin-top: 4rem;
-    padding: 3rem;
-  }
-
-  .cta-content {
-    padding: 3rem;
-    border-radius: 22px;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-  }
-
-  .cta-content h3 {
-    font-size: 2rem;
-    font-weight: 700;
-    color: #ffffff;
-    margin: 0 0 1rem 0;
-  }
-
-  .cta-content p {
-    color: rgba(255, 255, 255, 0.72);
-    font-size: 1.1rem;
-    margin: 0 0 2rem 0;
-  }
-
-  .cta-buttons {
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-
-  @media (max-width: 768px) {
-    .process-step {
-      justify-content: center !important;
-      margin-left: 0;
-      margin-bottom: 3rem;
-    }
-
-    .step-content {
-      width: 100%;
-      max-width: 400px;
-      margin: 0 auto;
-    }
-
-    .step-number {
-      left: 50%;
-      transform: translateX(-50%);
-    }
-
-    .process-cta {
-      padding: 0;
-    }
-
-    .cta-content {
-      padding: 2rem;
-    }
-
-    .cta-content h3 {
-      font-size: 1.5rem;
-    }
-
-    .cta-buttons {
-      flex-direction: column;
-      align-items: center;
+  @media (max-width: 900px) {
+    .process-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
 
-  @media (max-width: 480px) {
-    .step-content {
-      padding: 2rem;
-      max-width: 100%;
-    }
-
-    .step-title {
-      font-size: 1.3rem;
-    }
-
-    .step-number {
-      left: 50%;
-      transform: translateX(-50%);
+  @media (max-width: 620px) {
+    .process-grid {
+      grid-template-columns: 1fr;
     }
   }
 </style>
