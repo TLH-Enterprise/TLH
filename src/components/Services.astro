@@ -1,90 +1,126 @@
 ---
 import Icon from "./Icon.astro";
 
-const businessLines = [
+const services = [
   {
-    number: "01",
     icon: "rocket",
-    title: "Desarrollo de software",
+    title: "Desarollo de software a la medida",
     description:
-      "Diseñamos y construimos software a la medida: desde aplicaciones web y móviles hasta soluciones empresariales e integraciones con IA.",
+      "Creamos soluciones software a la medida para satisfacer las necesidades de tu negocio.",
     features: [
-      "Aplicaciones web y móviles (React, Astro, React Native, Flutter)",
-      "Soluciones empresariales: ERP, CRM, BPM e integraciones con sistemas legados",
-      "IA y automatización: chatbots, RPA, modelos de predicción e IA generativa",
-      "Diseño UX/UI: research, prototipado y design systems",
+      "Aplicaciones web personalizadas",
+      "Soluciones empresariales (ERP, CRM, BPM, etc.)",
+      "Integraciones con APIs y sistemas legados",
     ],
   },
   {
-    number: "02",
-    icon: "wrench",
-    title: "Consultoría y outsourcing TI",
+    icon: "mobile",
+    title: "Desarrollo web y de aplicaciones móviles",
     description:
-      "Acompañamos a las empresas en su estrategia tecnológica y ampliamos sus equipos con talento senior cuando lo necesitan.",
+      "Desarrollamos aplicaciones móviles nativas e híbridas que conectan con tus usuarios en cualquier dispositivo.",
+    features: ["React, Vue, Astro", "React Native", "Flutter", "PWA"],
+  },
+  {
+    icon: "spark",
+    title: "Inteligencia Artificial y Automatización",
+    description:
+      "Implementamos soluciones de IA y automatización para optimizar procesos y aumentar la eficiencia de tu negocio.",
     features: [
-      "Equipos extendidos (staff augmentation)",
-      "Consultoría en transformación digital, arquitectura y DevOps",
-      "Gestión de proyectos de software end-to-end",
-      "Soporte, mantenimiento y evolución de plataformas",
+      "Chatbots",
+      "Automatización de procesos",
+      "Asistentes virtuales",
+      "RPA",
+      "Modelos de predicción",
+      "Análisis de datos",
+      "Sistemas de recomendación e IA generativa",
+      "Y mucho más...",
     ],
   },
   {
-    number: "03",
-    icon: "megaphone",
-    title: "Marketing y growth",
-    description:
-      "Estrategia y ejecución para que tu producto no solo exista: que se posicione, se entienda y convierta.",
-    features: [
-      "Estrategia de lanzamiento y posicionamiento",
-      "Landing pages orientadas a conversión",
-      "Campañas, creatividades y pauta",
-      "Analytics, experimentación y A/B testing",
-    ],
-  },
-  {
-    number: "04",
     icon: "camera",
-    title: "Filmmaking y contenido",
+    title: "Filmmaking & Contenido",
     description:
-      "Producción audiovisual con estándar profesional: video, piezas para campañas y storytelling alineado a tu marca.",
+      "Producimos contenido que se siente premium: video, piezas para campañas, y storytelling alineado a tu marca.",
     features: [
-      "Producción y edición de video",
-      "Motion graphics para redes y campañas",
+      "Producción y edición",
+      "Motion básico para redes",
       "Brand storytelling",
       "Contenido para ads y lanzamientos",
+    ],
+  },
+  {
+    icon: "megaphone",
+    title: "Marketing & Growth",
+    description:
+      "Estrategia y ejecución para que el producto no solo exista: que se posicione, se entienda y convierta.",
+    features: [
+      "Estrategia de lanzamiento",
+      "Landing pages orientadas a conversión",
+      "Campañas y creatividades",
+      "Analytics + experimentación",
+    ],
+  },
+  {
+    icon: "palette",
+    title: "Diseño UX/UI",
+    description:
+      "Diseñamos interfaces intuitivas y atractivas que mejoran la experiencia del usuario y aumentan la conversión.",
+    features: ["User Research", "Prototipado", "Design Systems", "Usabilidad"],
+  },
+  {
+    icon: "chart",
+    title: "Analytics",
+    description:
+      "Implementamos herramientas de análisis para ayudarte a entender el comportamiento de tus usuarios.",
+    features: [
+      "Google Analytics",
+      "Power BI",
+      "Heatmaps",
+      "A/B Testing",
+      "Reportes",
+    ],
+  },
+  {
+    icon: "wrench",
+    title: "Consultoría y Outsourcing de TI",
+    description:
+      "Ofrecemos soporte continuo y actualizaciones para mantener tu proyecto siempre actualizado y funcionando.",
+    features: [
+      "Desarrollo de equipos extendidos (staff augmentation)",
+      "Consultoría tecnológica (transformación digital, arquitectura, DevOps).",
+      "Gestión de proyectos de software end-to-end.",
     ],
   },
 ] as const;
 ---
 
-<section id="servicios" class="services section section--dark" data-reveal="slow">
+<section id="servicios" class="services section section--split" data-reveal="slow">
   <div class="container">
     <div class="section-header" data-reveal>
-      <div class="kicker">Líneas de negocio</div>
+      <div class="kicker">Capabilities</div>
       <h2 class="h2">
-        Cuatro disciplinas para construir y hacer crecer
+        Servicios para lanzar, escalar y optimizar
         <span class="gradient-text">productos digitales</span>
       </h2>
       <p class="lead">
-        Cubrimos el ciclo completo: estrategia, construcción, lanzamiento y
-        crecimiento, con un mismo equipo responsable de principio a fin.
+        Ofrecemos soluciones completas para llevar tu proyecto digital al
+        siguiente nivel
       </p>
     </div>
 
-    <div class="services-grid" data-reveal data-stagger>
+    <div class="services-grid" data-reveal>
       {
-        businessLines.map((line) => (
-          <div class="service-card card card-hover" data-spotlight>
-            <div class="service-head">
-              <span class="service-icon" aria-hidden="true">
-                <Icon name={line.icon} size={22} />
+        services.map((service) => (
+          <div class="service-card card card-hover" data-tilt="5">
+            <div class="service-icon">
+              <span class="icon" aria-hidden="true">
+                <Icon name={service.icon} size={22} />
               </span>
-              <span class="service-number">{line.number}</span>
             </div>
-            <h3 class="service-title">{line.title}</h3>
-            <p class="service-description">{line.description}</p>
+            <h3 class="service-title">{service.title}</h3>
+            <p class="service-description">{service.description}</p>
             <ul class="service-features">
-              {line.features.map((feature) => (
+              {service.features.map((feature) => (
                 <li class="feature-item">{feature}</li>
               ))}
             </ul>
@@ -96,131 +132,132 @@ const businessLines = [
 </section>
 
 <style>
+  .services {
+    position: relative;
+  }
+
+  .services::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    background: radial-gradient(
+        900px 420px at 50% 0%,
+        rgba(139, 92, 246, 0.14) 0%,
+        transparent 60%
+      ),
+      radial-gradient(
+        700px 420px at 15% 55%,
+        rgba(34, 211, 238, 0.06) 0%,
+        transparent 60%
+      );
+    z-index: 0;
+  }
+
   .services-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
   }
 
   .service-card {
-    padding: 2.25rem;
+    padding: 2.5rem;
     position: relative;
     overflow: hidden;
-    background: linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.055) 0%,
-      rgba(255, 255, 255, 0.02) 100%
-    );
   }
 
-  /* Cursor spotlight */
-  .service-card::after {
+  .service-card::before {
     content: "";
     position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background: radial-gradient(
-      340px circle at var(--mx, 50%) var(--my, 0%),
-      rgba(167, 139, 250, 0.16),
-      transparent 60%
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(167, 139, 250, 0.7) 45%,
+      rgba(34, 211, 238, 0.35) 70%,
+      transparent 100%
     );
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-
-  .service-card:hover::after {
-    opacity: 1;
-  }
-
-  .service-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 1.5rem;
-    position: relative;
-    z-index: 1;
-  }
-
-  .service-title,
-  .service-description,
-  .service-features {
-    position: relative;
-    z-index: 1;
-  }
-
-  .service-title {
-    font-family: var(--font-display);
   }
 
   .service-icon {
+    margin-bottom: 1.5rem;
+  }
+
+  .icon {
     width: 44px;
     height: 44px;
     display: grid;
     place-items: center;
-    border-radius: var(--r-sm);
-    color: var(--brand-1);
-    background: var(--brand-3);
-  }
-
-  .service-number {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--text-3);
-    font-variant-numeric: tabular-nums;
+    border-radius: 14px;
+    color: rgba(255, 255, 255, 0.92);
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.07) 0%,
+      rgba(255, 255, 255, 0.03) 100%
+    );
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 18px 50px rgba(139, 92, 246, 0.12);
   }
 
   .service-title {
-    font-size: 1.4rem;
-    font-weight: 600;
-    color: var(--text-1);
-    margin: 0 0 0.75rem 0;
-    letter-spacing: -0.015em;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.96);
+    margin: 0 0 1rem 0;
+    letter-spacing: -0.01em;
   }
 
   .service-description {
-    color: var(--text-2);
-    line-height: 1.65;
-    margin: 0 0 1.25rem 0;
+    color: rgba(255, 255, 255, 0.72);
+    line-height: 1.6;
+    margin: 0 0 1.5rem 0;
   }
 
   .service-features {
     list-style: none;
     padding: 0;
     margin: 0;
-    border-top: 1px solid var(--stroke-1);
   }
 
   .feature-item {
-    color: var(--text-2);
-    padding: 0.6rem 0 0.6rem 1.4rem;
+    color: rgba(255, 255, 255, 0.72);
+    padding: 0.5rem 0;
     position: relative;
-    line-height: 1.5;
-    font-size: 0.95rem;
-  }
-
-  .feature-item + .feature-item {
-    border-top: 1px solid var(--stroke-1);
+    padding-left: 1.5rem;
   }
 
   .feature-item::before {
-    content: "";
+    content: "✓";
     position: absolute;
     left: 0;
-    top: 1.15rem;
-    width: 7px;
-    height: 7px;
-    border-radius: 999px;
-    background: var(--brand-1);
+    color: rgba(167, 139, 250, 0.95);
+    font-weight: bold;
   }
 
-  @media (max-width: 900px) {
+  @media (max-width: 768px) {
     .services-grid {
       grid-template-columns: 1fr;
-      gap: 1.25rem;
+      gap: 1.5rem;
     }
 
     .service-card {
-      padding: 1.75rem;
+      padding: 2rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .service-card {
+      padding: 1.5rem;
+    }
+
+    .icon {
+      font-size: 2.5rem;
     }
   }
 </style>
