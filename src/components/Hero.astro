@@ -1,282 +1,145 @@
 ---
-import tlhLogo from "../assets/tlh-sin-fondo.svg";
 ---
 
-<section id="hero" class="hero section" data-reveal="slow">
-  <div class="signal-lines" aria-hidden="true"></div>
+<section id="hero" class="hero" data-reveal="slow">
+  <div class="hero-bg" aria-hidden="true"></div>
   <div class="container hero-grid">
     <div class="hero-content" data-reveal>
-      <div class="kicker-row">
-        <img src={tlhLogo.src} alt="TLH" class="logo" />
-        <span class="kicker">Agencia + Consultoría</span>
-      </div>
+      <div class="kicker">Consultoría · Ingeniería · Marketing · Contenido</div>
 
       <h1 class="h1">
-        Ingeniería, marketing y IA para
-        <span class="gradient-text">empresas modernas</span>.
+        Tecnología y estrategia para
+        <span class="gradient-text">resultados de negocio</span>.
       </h1>
 
       <p class="lead hero-lead">
-        TLH une developers senior, filmmakers y un equipo de marketing para
-        construir, lanzar y escalar: producto, contenido y automatización con IA
-        integrados desde el día uno.
+        TLH es una firma de consultoría y desarrollo de software. Unimos
+        ingenieros senior, consultores, especialistas en marketing y producción
+        audiovisual para diseñar, construir y escalar productos digitales de
+        principio a fin.
       </p>
 
       <div class="hero-cta">
-        <a href="#contacto" class="btn btn-primary cta-primary" data-magnetic="12"
-          >Agendar llamada</a
-        >
-        <a href="#portafolio" class="btn btn-secondary" data-magnetic="10">Ver casos</a>
+        <a href="#contacto" class="btn btn-primary cta-primary">Agendar una llamada</a>
+        <a href="#portafolio" class="btn btn-secondary">Ver casos de trabajo</a>
       </div>
 
-      <div class="proof">
-        <div class="proof-item">
-          <div class="proof-title">Engineering</div>
-          <div class="proof-value">Senior delivery</div>
-        </div>
-        <div class="proof-item">
-          <div class="proof-title">Marketing</div>
-          <div class="proof-value">Contenido + growth</div>
-        </div>
-        <div class="proof-item">
-          <div class="proof-title">AI</div>
-          <div class="proof-value">Integraciones reales</div>
-        </div>
-      </div>
+      <p class="hero-meta">
+        Medellín, Colombia — trabajamos con clientes en América Latina y
+        Estados Unidos.
+      </p>
     </div>
 
-    <div class="hero-visual" aria-hidden="true" data-reveal="right">
-      <div class="orb orb-1"></div>
-      <div class="orb orb-2"></div>
-      <div class="orb orb-3"></div>
-
-      <div class="hero-panel" data-tilt="3">
-        <div class="panel-top">
-          <div class="panel-eyebrow">Industries / Solutions</div>
-          <div class="panel-tabs" role="tablist" aria-label="Industries and solutions">
-            <button
-              class="tab is-active"
-              type="button"
-              role="tab"
-              aria-selected="true"
-              aria-controls="panel-industries"
-              id="tab-industries"
-              data-tab="industries"
-            >
-              Industries
-            </button>
-            <button
-              class="tab"
-              type="button"
-              role="tab"
-              aria-selected="false"
-              aria-controls="panel-solutions"
-              id="tab-solutions"
-              data-tab="solutions"
-            >
-              Solutions
-            </button>
-          </div>
-        </div>
-
-        <div class="panel-body">
-          <div
-            class="tab-panel is-active"
-            role="tabpanel"
-            id="panel-industries"
-            aria-labelledby="tab-industries"
-            data-panel="industries"
-          >
-            <div class="panel-title">Industries</div>
-            <ul class="panel-list">
-              <li>Tech & SaaS: onboarding, billing, retention</li>
-              <li>Retail & eCommerce: performance, catálogos, conversion</li>
-              <li>Servicios: automatización, CRM/ERP, operaciones</li>
-            </ul>
-          </div>
-
-          <div
-            class="tab-panel"
-            role="tabpanel"
-            id="panel-solutions"
-            aria-labelledby="tab-solutions"
-            data-panel="solutions"
-            hidden
-          >
-            <div class="panel-title">Solutions</div>
-            <ul class="panel-list">
-              <li>Product engineering: delivery release‑ready</li>
-              <li>Content & campaigns: creative that ships</li>
-              <li>AI integrations: copilots, RAG, automation</li>
-            </ul>
-          </div>
-        </div>
+    <div class="hero-visual" data-reveal="right">
+      <div class="hero-canvas" id="heroCanvasWrap">
+        <div class="hero-orb" aria-hidden="true"></div>
+        <canvas id="hero3d" aria-hidden="true"></canvas>
       </div>
     </div>
+  </div>
+
+  <div class="hero-scroll" aria-hidden="true">
+    <span>Scroll</span>
+    <span class="hero-scroll-line"></span>
   </div>
 </section>
 
 <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const panel = document.querySelector(".hero-panel");
-    if (!panel) return;
+  import { initHero3D } from "../scripts/hero3d";
 
-    const tabs = panel.querySelectorAll('[role="tab"]') as NodeListOf<HTMLButtonElement>;
-    const panels = panel.querySelectorAll('[role="tabpanel"]') as NodeListOf<HTMLElement>;
+  function boot() {
+    const canvas = document.getElementById("hero3d") as HTMLCanvasElement | null;
+    if (!canvas) return;
+    try {
+      initHero3D(canvas);
+    } catch (err) {
+      console.warn("[hero3d] init failed", err);
+    }
+  }
 
-    const setActive = (key: string | null) => {
-      if (!key) return;
-      tabs.forEach((t) => {
-        const isActive = t.getAttribute("data-tab") === key;
-        t.classList.toggle("is-active", isActive);
-        t.setAttribute("aria-selected", isActive ? "true" : "false");
-        t.tabIndex = isActive ? 0 : -1;
-      });
-
-      panels.forEach((p) => {
-        const isActive = p.getAttribute("data-panel") === key;
-        p.classList.toggle("is-active", isActive);
-        if (isActive) p.removeAttribute("hidden");
-        else p.setAttribute("hidden", "");
-      });
-    };
-
-    tabs.forEach((tab) => {
-      tab.addEventListener("click", () => setActive(tab.getAttribute("data-tab")));
-      tab.addEventListener("keydown", (e: KeyboardEvent) => {
-        if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
-        e.preventDefault();
-        const list = Array.from(tabs);
-        const idx = list.indexOf(tab);
-        const next =
-          e.key === "ArrowRight"
-            ? list[(idx + 1) % list.length]
-            : list[(idx - 1 + list.length) % list.length];
-        next.focus();
-        setActive(next.getAttribute("data-tab"));
-      });
-    });
-  });
+  if (document.readyState !== "loading") boot();
+  else document.addEventListener("DOMContentLoaded", boot);
 </script>
 
 <style>
   .hero {
-    min-height: 100vh;
-    display: grid;
-    align-items: center;
+    position: relative;
+    padding: calc(72px + clamp(3.5rem, 8vw, 7rem)) 0 clamp(4rem, 7vw, 6.5rem);
+    border-bottom: 1px solid var(--stroke-1);
     overflow: hidden;
   }
 
-  .hero::after {
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background: radial-gradient(
+        900px 620px at 78% 8%,
+        rgba(124, 58, 237, 0.12) 0%,
+        transparent 60%
+      ),
+      radial-gradient(
+        700px 520px at 10% 100%,
+        rgba(109, 40, 217, 0.08) 0%,
+        transparent 60%
+      ),
+      linear-gradient(180deg, var(--bg-1) 0%, var(--bg-0) 55%);
+  }
+
+  .hero-bg::before {
     content: "";
     position: absolute;
-    inset: -1px;
-    pointer-events: none;
-    background: radial-gradient(800px 500px at 18% 65%, rgba(139, 92, 246, 0.28) 0%, transparent 60%),
-      radial-gradient(700px 500px at 80% 30%, rgba(34, 211, 238, 0.12) 0%, transparent 60%);
-    filter: blur(0px);
-    z-index: 0;
+    inset: 0;
+    background-image: linear-gradient(rgba(23, 19, 32, 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(23, 19, 32, 0.035) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: radial-gradient(680px 520px at 72% 20%, #000 0%, transparent 72%);
+    -webkit-mask-image: radial-gradient(
+      680px 520px at 72% 20%,
+      #000 0%,
+      transparent 72%
+    );
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
   }
 
   .hero-grid {
     display: grid;
-    grid-template-columns: 1.05fr 0.95fr;
-    gap: clamp(2.2rem, 5vw, 4.2rem);
+    grid-template-columns: 1.08fr 0.92fr;
+    gap: clamp(2rem, 5vw, 4rem);
     align-items: center;
   }
 
   .hero-content {
     display: grid;
-    gap: 1.35rem;
-  }
-
-  .kicker-row {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.9rem;
-    width: fit-content;
-    padding: 0.55rem 0.85rem;
-    border-radius: var(--r-sm);
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-  }
-
-  .logo {
-    width: 28px;
-    height: 28px;
-    filter: drop-shadow(0 10px 30px rgba(139, 92, 246, 0.35));
+    gap: 1.5rem;
+    justify-items: start;
   }
 
   .hero-lead {
-    margin: 0;
-    max-width: 62ch;
+    max-width: 54ch;
   }
 
   .hero-cta {
     display: flex;
     gap: 0.85rem;
     flex-wrap: wrap;
-    margin-top: 0.25rem;
+    margin-top: 0.5rem;
     align-items: center;
   }
 
   .hero-cta :global(.btn) {
-    min-height: 44px;
-    line-height: 1;
+    min-height: 50px;
   }
 
-  .cta-primary {
-    padding-left: 1.4rem;
-    padding-right: 1.4rem;
-    min-width: 220px;
-  }
-
-  @media (max-width: 480px) {
-    .cta-primary {
-      width: 100%;
-      justify-content: center;
-    }
-  }
-
-  .proof {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.75rem;
-    margin-top: 0.75rem;
-  }
-
-  .proof-item {
-    padding: 0.95rem 1rem;
-    border-radius: var(--r-sm);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(255, 255, 255, 0.045);
-  }
-
-  .proof-title {
-    color: rgba(255, 255, 255, 0.56);
-    font-weight: 650;
-    font-size: 0.85rem;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-  }
-
-  .proof-value {
-    margin-top: 0.25rem;
-    font-weight: 720;
-    color: rgba(255, 255, 255, 0.92);
-  }
-
-  .hero-visual {
-    position: relative;
-    min-height: 520px;
-  }
-
-  .orb {
-    position: absolute;
-    border-radius: 999px;
-    filter: blur(0px);
-    opacity: 0.95;
-    animation: drift 12s ease-in-out infinite;
+  .hero-meta {
+    margin: 0.5rem 0 0;
+    color: var(--text-3);
+    font-size: 0.92rem;
   }
 
   .orb-1 {
@@ -347,171 +210,132 @@ import tlhLogo from "../assets/tlh-sin-fondo.svg";
 
   .panel-top {
     position: relative;
-    padding: 1.1rem 1.2rem 0.9rem;
-    z-index: 1;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(0, 0, 0, 0.18);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
+    display: grid;
+    place-items: center;
+    min-height: 440px;
   }
 
-  .panel-eyebrow {
-    color: rgba(255, 255, 255, 0.62);
-    font-weight: 650;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    font-size: 0.78rem;
-    white-space: nowrap;
+  .hero-canvas {
+    position: relative;
+    width: 100%;
+    max-width: 520px;
+    aspect-ratio: 1 / 1;
   }
 
-  .panel-tabs {
-    display: inline-flex;
-    gap: 0.35rem;
-    padding: 0.25rem;
-    border-radius: var(--r-sm);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    background: rgba(255, 255, 255, 0.04);
-  }
-
-  .tab {
-    appearance: none;
-    border: 0;
-    background: transparent;
-    color: rgba(255, 255, 255, 0.72);
-    font-weight: 700;
-    padding: 0.55rem 0.85rem;
-    border-radius: var(--r-xs);
-    cursor: pointer;
-    transition: background 0.18s ease, color 0.18s ease;
-  }
-
-  .tab.is-active {
-    color: rgba(255, 255, 255, 0.92);
-    background: linear-gradient(
-      135deg,
-      rgba(139, 92, 246, 0.85) 0%,
-      rgba(109, 40, 217, 0.85) 75%,
-      rgba(34, 211, 238, 0.25) 140%
+  /* CSS fallback orb, shown until (and if) WebGL takes over */
+  .hero-orb {
+    position: absolute;
+    inset: 14%;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle at 34% 30%,
+      #c4b5fd 0%,
+      #7c3aed 45%,
+      #4c1d95 100%
     );
+    filter: blur(2px);
+    box-shadow: 0 40px 90px rgba(76, 29, 149, 0.35);
+    transition: opacity 0.6s ease;
   }
 
-  .panel-body {
-    position: relative;
-    padding: 1.25rem 1.35rem 1.35rem;
-    z-index: 1;
-    display: grid;
+  .hero-canvas.is-ready .hero-orb {
+    opacity: 0;
   }
 
-  .panel-title {
-    color: rgba(255, 255, 255, 0.86);
-    font-weight: 780;
-    letter-spacing: -0.02em;
-    font-size: 1.15rem;
-  }
-
-  .tab-panel {
-    display: grid;
-    gap: 0.85rem;
-    animation: panelIn 240ms ease-out;
-  }
-
-  @keyframes panelIn {
-    from {
-      opacity: 0;
-      transform: translate3d(0, 6px, 0);
-    }
-    to {
-      opacity: 1;
-      transform: translate3d(0, 0, 0);
-    }
-  }
-
-  .panel-list {
-    list-style: none;
-    padding: 0;
-    margin: 0.9rem 0 0;
-    display: grid;
-    gap: 0.65rem;
-    color: rgba(255, 255, 255, 0.74);
-    line-height: 1.6;
-    font-size: 1rem;
-  }
-
-  .panel-list li {
-    position: relative;
-    padding-left: 1.1rem;
-  }
-
-  .panel-list li::before {
+  /* Soft ground glow beneath the form */
+  .hero-canvas::after {
     content: "";
     position: absolute;
-    left: 0;
-    top: 0.65rem;
-    width: 6px;
-    height: 6px;
-    border-radius: 999px;
-    background: rgba(167, 139, 250, 0.85);
-    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.12);
+    left: 50%;
+    bottom: 6%;
+    width: 62%;
+    height: 42px;
+    transform: translateX(-50%);
+    background: radial-gradient(
+      ellipse at center,
+      rgba(76, 29, 149, 0.28) 0%,
+      transparent 70%
+    );
+    filter: blur(10px);
+    z-index: -1;
   }
 
-  .hero-panel:hover {
-    border-color: rgba(167, 139, 250, 0.22);
-    background: rgba(0, 0, 0, 0.5);
-    box-shadow: 0 54px 170px rgba(0, 0, 0, 0.68);
+  #hero3d {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: block;
   }
 
-  @media (max-width: 540px) {
-    .panel-top {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 0.75rem;
-    }
-
-    .panel-body {
-      padding: 1.1rem 1.15rem 1.2rem;
-    }
+  .hero-scroll {
+    position: absolute;
+    left: 50%;
+    bottom: 1.5rem;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-3);
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    z-index: 1;
   }
 
-  @keyframes drift {
+  .hero-scroll-line {
+    width: 1px;
+    height: 34px;
+    background: linear-gradient(180deg, var(--brand-1), transparent);
+    animation: scrollPulse 2.2s ease-in-out infinite;
+  }
+
+  @keyframes scrollPulse {
     0%,
     100% {
-      transform: translate3d(0, 0, 0);
+      transform: scaleY(0.4);
+      opacity: 0.4;
+      transform-origin: top;
     }
     50% {
-      transform: translate3d(0, -16px, 0);
+      transform: scaleY(1);
+      opacity: 1;
+      transform-origin: top;
     }
   }
 
-  @media (max-width: 768px) {
-    .hero {
-      min-height: auto;
-      padding-top: 7rem;
-    }
-
+  @media (max-width: 900px) {
     .hero-grid {
       grid-template-columns: 1fr;
     }
+  }
 
-    .proof {
-      grid-template-columns: 1fr;
+    .hero {
+      padding-top: calc(62px + 3rem);
     }
 
     .hero-visual {
-      min-height: 420px;
+      min-height: 340px;
+      order: -1;
     }
 
-    .hero-panel {
-      min-height: 300px;
+    .hero-canvas {
+      max-width: 360px;
+    }
+
+    .hero-scroll {
+      display: none;
     }
   }
 
   @media (max-width: 480px) {
-    .kicker-row {
+    .cta-primary {
       width: 100%;
       justify-content: center;
-      text-align: center;
+    }
+
+    .hero-canvas {
+      max-width: 300px;
     }
   }
 </style>
