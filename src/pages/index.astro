@@ -4,6 +4,7 @@ import Navbar from "../components/Navbar.astro";
 import Hero from "../components/Hero.astro";
 import Stats from "../components/Stats.astro";
 import Marquee from "../components/Marquee.astro";
+import Insights from "../components/Insights.astro";
 import Services from "../components/Services.astro";
 import Portfolio from "../components/Portfolio.astro";
 import Process from "../components/Process.astro";
@@ -12,32 +13,32 @@ import Footer from "../components/Footer.astro";
 ---
 
 <Layout
-  title="TLH — Consultoría, desarrollo de software y marketing"
-  description="Firma de consultoría y desarrollo de software. Construimos productos digitales, integramos IA y ejecutamos estrategias de marketing y contenido para empresas."
+  title="TLH - Transformamos ideas en experiencias digitales"
+  description="Creamos soluciones web modernas y escalables que impulsan el crecimiento de tu negocio. Desarrollo web, aplicaciones móviles, diseño UX/UI y más."
 >
   <Navbar />
 
   <main>
     <Hero />
+    <Stats />
     <Marquee
-      label="Capacidades"
+      label="Capabilities"
       items={[
-        "Estrategia de producto",
-        "Diseño UX/UI",
+        "Product strategy",
+        "UX/UI design",
         "Design systems",
-        "Plataformas web",
-        "Aplicaciones móviles",
-        "Integraciones con IA",
-        "Campañas de marketing",
-        "Producción audiovisual",
-        "Cloud y DevOps",
-        "Performance y SEO",
-        "Seguridad",
-        "Analítica",
+        "Web platforms",
+        "Mobile apps",
+        "AI integrations",
+        "Marketing campaigns",
+        "Filmmaking & content",
+        "Cloud & DevOps",
+        "Performance & SEO",
+        "Security",
+        "Analytics",
       ]}
     />
     <Services />
-    <Stats />
     <Portfolio />
     <Insights />
     <Process />

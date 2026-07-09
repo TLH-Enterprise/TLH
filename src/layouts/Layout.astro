@@ -1,4 +1,5 @@
 ---
+import MusicPlayer from "../components/MusicPlayer.astro";
 import "../styles/theme.css";
 
 export interface Props {
@@ -7,8 +8,8 @@ export interface Props {
 }
 
 const {
-  title = "TLH — Consultoría, desarrollo de software y marketing",
-  description = "Firma de consultoría y desarrollo de software. Construimos productos digitales, integramos IA y ejecutamos estrategias de marketing y contenido para empresas.",
+  title = "TLH - Transformamos ideas en experiencias digitales",
+  description = "Creamos soluciones web modernas y escalables que impulsan el crecimiento de tu negocio. Desarrollo web, aplicaciones móviles, diseño UX/UI y más.",
 } = Astro.props;
 ---
 
@@ -25,7 +26,7 @@ const {
     <meta name="description" content={description} />
     <meta
       name="keywords"
-      content="consultoría tecnológica, desarrollo de software a la medida, aplicaciones móviles, inteligencia artificial, marketing digital, producción audiovisual"
+      content="desarrollo web, aplicaciones móviles, diseño UX/UI, desarrollo frontend, desarrollo backend, consultoría tecnológica"
     />
     <meta name="author" content="TLH" />
 
@@ -44,7 +45,7 @@ const {
 
     <!-- Additional Meta Tags -->
     <meta name="robots" content="index, follow" />
-    <meta name="theme-color" content="#6d28d9" />
+    <meta name="theme-color" content="#667eea" />
 
     <!-- Preconnect to external domains -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -52,12 +53,13 @@ const {
 
     <!-- Google Fonts -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
   </head>
   <body>
     <slot />
+    <!-- MusicPlayer /> -->
     <script src="../scripts/motion.ts"></script>
   </body>
 </html>
@@ -83,28 +85,37 @@ const {
   }
 
   ::-webkit-scrollbar-track {
-    background: #f1f0f5;
+    background: rgba(255, 255, 255, 0.06);
   }
 
   ::-webkit-scrollbar-thumb {
-    background: #c9c5d4;
+    background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 60%, rgba(34, 211, 238, 0.7) 140%);
     border-radius: 4px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: #6d28d9;
+    background: linear-gradient(135deg, rgba(167, 139, 250, 0.95) 0%, rgba(139, 92, 246, 0.95) 60%, rgba(34, 211, 238, 0.8) 140%);
   }
 
   /* Selection styles */
   ::selection {
-    background: rgba(109, 40, 217, 0.16);
-    color: #18141f;
+    background: rgba(139, 92, 246, 0.28);
+    color: rgba(255, 255, 255, 0.95);
   }
 
   /* Focus styles */
   :where(a, button, input, textarea, select, [tabindex]):focus-visible {
-    outline: 2px solid #6d28d9;
+    outline: 2px solid rgba(167, 139, 250, 0.9);
     outline-offset: 2px;
-    border-radius: 4px;
+    border-radius: 10px;
+  }
+
+  /* Smooth transitions for all interactive elements */
+  a,
+  button,
+  input,
+  textarea,
+  select {
+    transition: all 0.3s ease;
   }
 </style>

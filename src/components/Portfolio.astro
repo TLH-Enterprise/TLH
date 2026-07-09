@@ -3,59 +3,79 @@ import { Image } from "astro:assets";
 
 const projects = [
   {
+    id: 1,
     title: "Premium Academy",
     description:
-      "Plataforma de educación online con acceso a cursos premium, pagos con Stripe y materiales exclusivos para estudiantes.",
+      "Plataforma de educación online con acceso a cursos premium y materiales exclusivos.",
     image: "/projects/premium-academy.png",
     technologies: ["React", "Node.js", "MongoDB", "Stripe"],
-    category: "Desarrollo web",
+    category: "Web Development",
     link: "https://www.premiumacademy.pro",
   },
   {
-    title: "Arcopedico USA",
+    id: 2,
+    title: "Arcopedicousa",
     description:
-      "Migración de la plataforma de e-commerce a una nueva infraestructura en AWS para mejorar el rendimiento y la escalabilidad.",
+      "Migración de la plataforma de Arcopedicousa a una nueva versión en aws para mejorar el rendimiento y la escalabilidad.",
     image: "/projects/arcopedicousa.png",
-    technologies: ["AWS", "WordPress", "PHP", "JavaScript"],
-    category: "Outsourcing TI",
+    technologies: ["AWS", "Wordpress", "PHP", "Javascript"],
+    category: "Outsourcing",
     link: "https://arcopedicousa.com",
   },
-  // Pendientes de assets (imagen, enlace y descripción definitiva):
-  // { title: "Aliantia", ... },
-  // { title: "Renovation Ideas", ... },
 ];
+
+const categories = ["Todos", "Web Development", "Outsourcing"];
 ---
 
-<section id="portafolio" class="portfolio section section--dark" data-reveal="slow">
+<section id="portafolio" class="portfolio section" data-reveal="slow">
   <div class="container">
     <div class="section-header" data-reveal>
-      <div class="kicker">Casos de trabajo</div>
+      <div class="kicker">Selected work</div>
       <h2 class="h2">
-        Proyectos que demuestran
+        Casos que demuestran
         <span class="gradient-text">ejecución y detalle</span>
       </h2>
-      <p class="lead">
-        Una muestra del trabajo que hemos construido y operado para nuestros
-        clientes.
-      </p>
+      <p class="lead">Algunos proyectos que hemos construido para clientes.</p>
     </div>
 
-    <div class="portfolio-grid" data-reveal data-stagger>
+    <div class="portfolio-filters" data-reveal>
+      {
+        categories.map((category) => (
+          <button
+            class={`filter-btn ${category === "Todos" ? "active" : ""}`}
+            data-filter={category.toLowerCase()}
+          >
+            {category}
+          </button>
+        ))
+      }
+    </div>
+
+    <div class="portfolio-grid" data-reveal>
       {
         projects.map((project) => (
-          <a
+          <div
             class="portfolio-item card card-hover"
-            href={project.link}
-            target="_blank"
-            rel="noopener"
+            data-category={project.category.toLowerCase()}
+            data-tilt="5"
           >
             <div class="portfolio-image">
-              <Image
-                src={project.image}
-                alt={project.title}
-                width={640}
-                height={400}
-              />
+              <Image src={project.image} alt={project.title} width={350} height={250} />
+              <div class="portfolio-overlay">
+                <div class="portfolio-actions">
+                  <a
+                    href={project.link}
+                    class="action-btn"
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    <span>Ver Proyecto</span>
+                  </a>
+                  <!-- <button class="action-btn secondary"> Se esta dejando comendado ya que no tiene utilidad por el momento
+                    <span>Detalles</span>
+                  </button>-->
+                </div>
+              </div>
             </div>
             <div class="portfolio-content">
               <div class="portfolio-category">{project.category}</div>
@@ -66,44 +86,88 @@ const projects = [
                   <span class="tech-tag">{tech}</span>
                 ))}
               </div>
-              <span class="portfolio-link">
-                Ver proyecto <span aria-hidden="true">→</span>
-              </span>
             </div>
-          </a>
+          </div>
         ))
       }
     </div>
 
-    <div class="portfolio-cta" data-reveal>
-      <div class="cta-text">
-        <h3>¿Tienes un proyecto en mente?</h3>
-        <p>Hablemos sobre cómo podemos ayudarte a hacerlo realidad.</p>
-      </div>
-      <a href="#contacto" class="btn btn-primary">Iniciar conversación</a>
+    <div class="portfolio-cta card">
+      <h3>¿Tienes un proyecto en mente?</h3>
+      <p>Hablemos sobre cómo podemos ayudarte a hacerlo realidad</p>
+      <a href="#contacto" class="btn btn-primary">Iniciar Proyecto</a>
     </div>
   </div>
 </section>
 
 <style>
+  .portfolio {
+    position: relative;
+  }
+
+  .portfolio::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    background: radial-gradient(
+        900px 500px at 20% 55%,
+        rgba(139, 92, 246, 0.12) 0%,
+        transparent 60%
+      ),
+      radial-gradient(
+        700px 450px at 80% 30%,
+        rgba(34, 211, 238, 0.06) 0%,
+        transparent 60%
+      );
+    z-index: 0;
+  }
+
+  .portfolio-filters {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 3rem;
+    flex-wrap: wrap;
+  }
+
+  .filter-btn {
+    padding: 0.75rem 1.5rem;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.03);
+    color: rgba(255, 255, 255, 0.72);
+    border-radius: var(--r-sm);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+  }
+
+  .filter-btn:hover,
+  .filter-btn.active {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.9) 0%, rgba(109, 40, 217, 0.9) 70%, rgba(34, 211, 238, 0.35) 140%);
+    border-color: transparent;
+    color: white;
+    transform: translateY(-2px);
+  }
+
   .portfolio-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 3rem;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+    margin-bottom: 4rem;
   }
 
   .portfolio-item {
     overflow: hidden;
-    text-decoration: none;
-    display: flex;
-    flex-direction: column;
   }
 
   .portfolio-image {
-    height: 260px;
+    position: relative;
+    height: 250px;
     overflow: hidden;
-    border-bottom: 1px solid var(--stroke-1);
   }
 
   .portfolio-image img {
@@ -114,123 +178,195 @@ const projects = [
   }
 
   .portfolio-item:hover .portfolio-image img {
-    transform: scale(1.03);
+    transform: scale(1.1);
+  }
+
+  .portfolio-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.78);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .portfolio-item:hover .portfolio-overlay {
+    opacity: 1;
+  }
+
+  .portfolio-actions {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .action-btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--r-sm);
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+  }
+
+  .action-btn:not(.secondary) {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.95) 0%, rgba(109, 40, 217, 0.95) 70%, rgba(34, 211, 238, 0.35) 140%);
+    color: white;
+  }
+
+  .action-btn.secondary {
+    background: transparent;
+    color: white;
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  .action-btn:hover {
+    transform: translateY(-2px);
   }
 
   .portfolio-content {
-    padding: 1.75rem;
-    display: flex;
-    flex-direction: column;
-    flex: 1;
+    padding: 2rem;
   }
 
   .portfolio-category {
-    color: var(--brand-1);
-    font-size: 0.8rem;
+    color: rgba(167, 139, 250, 0.95);
+    font-size: 0.9rem;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.5px;
     margin-bottom: 0.5rem;
   }
 
   .portfolio-title {
-    font-family: var(--font-display);
-    font-size: 1.35rem;
-    font-weight: 600;
-    color: var(--text-1);
-    letter-spacing: -0.015em;
-    margin: 0 0 0.65rem 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 0 1rem 0;
   }
 
   .portfolio-description {
-    color: var(--text-2);
-    line-height: 1.65;
-    margin: 0 0 1.25rem 0;
+    color: rgba(255, 255, 255, 0.72);
+    line-height: 1.6;
+    margin: 0 0 1.5rem 0;
   }
 
   .portfolio-technologies {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
-    margin-bottom: 1.5rem;
   }
 
   .tech-tag {
-    background: var(--bg-1);
-    border: 1px solid var(--stroke-1);
-    color: var(--text-2);
-    padding: 0.25rem 0.7rem;
-    border-radius: var(--r-sm);
-    font-size: 0.82rem;
+    background: rgba(139, 92, 246, 0.16);
+    color: rgba(167, 139, 250, 0.95);
+    padding: 0.25rem 0.75rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
     font-weight: 500;
   }
 
-  .portfolio-link {
-    margin-top: auto;
-    color: var(--brand-1);
-    font-weight: 600;
-    font-size: 0.95rem;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-  }
-
-  .portfolio-item:hover .portfolio-link span {
-    transform: translateX(3px);
-  }
-
-  .portfolio-link span {
-    transition: transform 0.18s ease;
-  }
-
   .portfolio-cta {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 2rem;
-    padding: 2rem 2.25rem;
-    background: var(--bg-1);
-    border: 1px solid var(--stroke-1);
-    border-left: 3px solid var(--brand-1);
-    border-radius: var(--r-md);
+    text-align: center;
+    padding: 3rem;
+    border: 1px solid rgba(255, 255, 255, 0.12);
   }
 
-  .cta-text h3 {
-    font-family: var(--font-display);
-    font-size: 1.4rem;
-    font-weight: 600;
-    color: var(--text-1);
-    letter-spacing: -0.02em;
-    margin: 0 0 0.35rem 0;
+  .portfolio-cta h3 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 0 1rem 0;
   }
 
-  .cta-text p {
-    color: var(--text-2);
-    margin: 0;
+  .portfolio-cta p {
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 1.1rem;
+    margin: 0 0 2rem 0;
   }
 
-  @media (max-width: 900px) {
+  @media (max-width: 768px) {
     .portfolio-grid {
       grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+
+    .portfolio-filters {
+      gap: 0.5rem;
+    }
+
+    .filter-btn {
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
     }
 
     .portfolio-cta {
-      flex-direction: column;
-      align-items: flex-start;
+      padding: 2rem;
+    }
+
+    .portfolio-cta h3 {
+      font-size: 1.5rem;
     }
   }
 
   @media (max-width: 480px) {
     .portfolio-content {
-      padding: 1.4rem;
+      padding: 1.5rem;
     }
 
     .portfolio-image {
       height: 200px;
     }
+  }
+</style>
 
-    .portfolio-cta .btn {
-      width: 100%;
+<script>
+  // Portfolio filtering functionality
+  document.addEventListener("DOMContentLoaded", function () {
+    const filterButtons = document.querySelectorAll(
+      ".filter-btn"
+    ) as NodeListOf<HTMLButtonElement>;
+    const portfolioItems = document.querySelectorAll(
+      ".portfolio-item"
+    ) as NodeListOf<HTMLElement>;
+
+    filterButtons.forEach((button) => {
+      button.addEventListener("click", function (this: HTMLButtonElement) {
+        // Remove active class from all buttons
+        filterButtons.forEach((btn) => btn.classList.remove("active"));
+        // Add active class to clicked button
+        this.classList.add("active");
+
+        const filterValue = this.getAttribute("data-filter");
+
+        portfolioItems.forEach((item) => {
+          if (
+            filterValue === "todos" ||
+            item.getAttribute("data-category") === filterValue
+          ) {
+            item.style.display = "block";
+            item.style.animation = "fadeIn 0.5s ease-in-out";
+          } else {
+            item.style.display = "none";
+          }
+        });
+      });
+    });
+  });
+</script>
+
+<style>
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
     }
   }
 </style>
