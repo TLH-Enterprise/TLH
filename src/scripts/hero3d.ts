@@ -1,143 +1,67 @@
 import * as THREE from "three";
 
 /**
- * Hero 3D: an abstract, slowly-morphing form built from an icosphere whose
- * vertices are displaced by animated simplex noise, shaded with a soft
- * two-tone violet gradient + fresnel rim. It gently follows the cursor.
- *
- * Designed to read premium/corporate on a light background — not gamey.
- * Falls back silently to the CSS orb if WebGL is unavailable.
+ * Hero 3D: "arena morada" — a sphere formed by ~26k fine purple sand grains
+ * that slowly rotates and shimmers (each grain drifts a little), shaded so the
+ * orb reads as a volume. No tornado/vortex; just a calm, premium sand orb.
+ * Follows the cursor. Falls back to the CSS orb if WebGL is unavailable;
+ * static under prefers-reduced-motion.
  */
 
 const vertexShader = /* glsl */ `
   uniform float uTime;
-  uniform float uAmp;
+  uniform float uForm;   // 0..1 materialize (alpha + subtle scale)
+  uniform float uScale;  // point-size scale
+  uniform vec3 uColorLow;
+  uniform vec3 uColorMid;
+  uniform vec3 uColorHigh;
 
-  varying vec3 vNormal;
-  varying vec3 vViewPos;
-  varying float vDisp;
+  attribute float aSeed;
+  attribute float aSize;
 
-  // Simplex noise 3D — Ashima Arts / Stefan Gustavson (MIT / public domain)
-  vec3 mod289(vec3 x){ return x - floor(x * (1.0/289.0)) * 289.0; }
-  vec4 mod289(vec4 x){ return x - floor(x * (1.0/289.0)) * 289.0; }
-  vec4 permute(vec4 x){ return mod289(((x*34.0)+1.0)*x); }
-  vec4 taylorInvSqrt(vec4 r){ return 1.79284291400159 - 0.85373472095314 * r; }
+  varying vec3 vColor;
+  varying float vAlpha;
 
-  float snoise(vec3 v){
-    const vec2 C = vec2(1.0/6.0, 1.0/3.0);
-    const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
-    vec3 i  = floor(v + dot(v, C.yyy));
-    vec3 x0 = v - i + dot(i, C.xxx);
-    vec3 g = step(x0.yzx, x0.xyz);
-    vec3 l = 1.0 - g;
-    vec3 i1 = min(g.xyz, l.zxy);
-    vec3 i2 = max(g.xyz, l.zxy);
-    vec3 x1 = x0 - i1 + C.xxx;
-    vec3 x2 = x0 - i2 + C.yyy;
-    vec3 x3 = x0 - D.yyy;
-    i = mod289(i);
-    vec4 p = permute(permute(permute(
-              i.z + vec4(0.0, i1.z, i2.z, 1.0))
-            + i.y + vec4(0.0, i1.y, i2.y, 1.0))
-            + i.x + vec4(0.0, i1.x, i2.x, 1.0));
-    float n_ = 0.142857142857;
-    vec3 ns = n_ * D.wyz - D.xzx;
-    vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
-    vec4 x_ = floor(j * ns.z);
-    vec4 y_ = floor(j - 7.0 * x_);
-    vec4 x = x_ * ns.x + ns.yyyy;
-    vec4 y = y_ * ns.x + ns.yyyy;
-    vec4 h = 1.0 - abs(x) - abs(y);
-    vec4 b0 = vec4(x.xy, y.xy);
-    vec4 b1 = vec4(x.zw, y.zw);
-    vec4 s0 = floor(b0)*2.0 + 1.0;
-    vec4 s1 = floor(b1)*2.0 + 1.0;
-    vec4 sh = -step(h, vec4(0.0));
-    vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy;
-    vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww;
-    vec3 p0 = vec3(a0.xy, h.x);
-    vec3 p1 = vec3(a0.zw, h.y);
-    vec3 p2 = vec3(a1.xy, h.z);
-    vec3 p3 = vec3(a1.zw, h.w);
-    vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2,p2), dot(p3,p3)));
-    p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
-    vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
-    m = m * m;
-    return 42.0 * dot(m*m, vec4(dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3)));
-  }
+  void main() {
+    vec3 n = normalize(position);
+    float tw = aSeed * 6.2831853;
 
-  float fbm(vec3 p){
-    float n = snoise(p * 1.4 + vec3(0.0, 0.0, uTime * 0.20));
-    n += 0.5 * snoise(p * 2.8 - vec3(uTime * 0.16, 0.0, 0.0));
-    n += 0.25 * snoise(p * 5.6 + vec3(0.0, uTime * 0.12, 0.0));
-    return n;
-  }
+    // Per-grain shimmer along the surface normal
+    float disp = 0.05 * sin(uTime * 0.9 + tw + position.y * 3.0)
+               + 0.03 * sin(uTime * 1.7 + position.x * 4.0 + tw);
 
-  float dispAt(vec3 dir){ return fbm(dir) * uAmp; }
+    float rScale = mix(0.92, 1.0, uForm);
+    vec3 p = position * rScale + n * disp;
 
-  void main(){
-    vec3 dir = normalize(position);
+    // Shading from a view-space normal so the orb reads as a 3D volume
+    vec3 vn = normalize(normalMatrix * n);
+    vec3 lightDir = normalize(vec3(0.4, 0.7, 0.75));
+    float diff = clamp(dot(vn, lightDir), 0.0, 1.0);
+    float front = clamp(vn.z * 0.5 + 0.5, 0.0, 1.0); // 1 front, 0 back
 
-    // Build a tangent basis to sample neighbours for a perturbed normal
-    vec3 up = abs(dir.y) < 0.99 ? vec3(0.0, 1.0, 0.0) : vec3(1.0, 0.0, 0.0);
-    vec3 t1 = normalize(cross(dir, up));
-    vec3 t2 = cross(dir, t1);
-    float eps = 0.08;
+    vec3 c = mix(uColorLow, uColorMid, diff);
+    c = mix(c, uColorHigh, pow(diff, 2.0) * 0.7);
+    vColor = c;
 
-    float dC = dispAt(dir);
-    vec3 pC = position + dir * dC;
-    vec3 dirA = normalize(position + t1 * eps);
-    vec3 dirB = normalize(position + t2 * eps);
-    vec3 pA = (position + t1 * eps) + dirA * dispAt(dirA);
-    vec3 pB = (position + t2 * eps) + dirB * dispAt(dirB);
+    // Front grains brighter/opaque, back grains dimmer -> depth
+    vAlpha = (0.22 + 0.78 * front) * uForm;
 
-    vec3 nrm = normalize(cross(pA - pC, pB - pC));
-    if (dot(nrm, dir) < 0.0) nrm = -nrm;
-
-    vDisp = dC;
-    vNormal = normalize(normalMatrix * nrm);
-
-    vec4 mvPosition = modelViewMatrix * vec4(pC, 1.0);
-    vViewPos = -mvPosition.xyz;
-    gl_Position = projectionMatrix * mvPosition;
+    vec4 mv = modelViewMatrix * vec4(p, 1.0);
+    gl_PointSize = aSize * uScale / max(-mv.z, 0.1);
+    gl_Position = projectionMatrix * mv;
   }
 `;
 
 const fragmentShader = /* glsl */ `
-  precision highp float;
+  precision mediump float;
+  varying vec3 vColor;
+  varying float vAlpha;
 
-  uniform vec3 uDeep;
-  uniform vec3 uLight;
-  uniform vec3 uRim;
-  uniform float uAmp;
-
-  varying vec3 vNormal;
-  varying vec3 vViewPos;
-  varying float vDisp;
-
-  void main(){
-    vec3 nrm = normalize(vNormal);
-    vec3 keyLight = normalize(vec3(0.45, 0.85, 0.75));
-    vec3 fillLight = normalize(vec3(-0.7, -0.15, 0.4));
-
-    float diff = clamp(dot(nrm, keyLight), 0.0, 1.0);
-    float fill = clamp(dot(nrm, fillLight), 0.0, 1.0) * 0.28;
-
-    float m = clamp(vDisp / max(uAmp, 0.0001) * 0.5 + 0.5, 0.0, 1.0);
-    vec3 base = mix(uDeep, uLight, m);
-
-    vec3 lit = base * (0.42 + 0.72 * diff) + base * fill;
-
-    vec3 viewDir = normalize(vViewPos);
-    float fres = pow(1.0 - clamp(dot(viewDir, nrm), 0.0, 1.0), 3.0);
-    lit += uRim * fres * 0.9;
-
-    // subtle specular sheen
-    vec3 halfDir = normalize(keyLight + viewDir);
-    float spec = pow(clamp(dot(nrm, halfDir), 0.0, 1.0), 24.0) * 0.25;
-    lit += vec3(spec);
-
-    gl_FragColor = vec4(lit, 1.0);
+  void main() {
+    float d = length(gl_PointCoord - 0.5);
+    if (d > 0.5) discard;
+    float soft = smoothstep(0.5, 0.12, d);
+    gl_FragColor = vec4(vColor, vAlpha * soft);
   }
 `;
 
@@ -170,29 +94,53 @@ export function initHero3D(canvas: HTMLCanvasElement): Disposer | null {
   renderer.setClearColor(0x000000, 0);
 
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
-  // Pulled back enough that the displaced form + noise spikes never clip the frame.
-  camera.position.set(0, 0, 4.9);
+  const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100);
+  camera.position.set(0, 0, 3.9);
 
-  const detail = isMobile ? 20 : 48;
-  const geometry = new THREE.IcosahedronGeometry(1, detail);
+  const COUNT = isMobile ? 9000 : 26000;
+  const positions = new Float32Array(COUNT * 3);
+  const seed = new Float32Array(COUNT);
+  const size = new Float32Array(COUNT);
+
+  for (let i = 0; i < COUNT; i++) {
+    // Uniform direction on a sphere, with a thin shell of jitter
+    const u = Math.random();
+    const v = Math.random();
+    const theta = 2 * Math.PI * u;
+    const phi = Math.acos(2 * v - 1);
+    const r = 0.9 + Math.random() * 0.16;
+    positions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+    positions[i * 3 + 1] = r * Math.cos(phi);
+    positions[i * 3 + 2] = r * Math.sin(phi) * Math.sin(theta);
+    seed[i] = Math.random();
+    size[i] = 1.0 + Math.random() * 1.4;
+  }
+
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+  geometry.setAttribute("aSeed", new THREE.BufferAttribute(seed, 1));
+  geometry.setAttribute("aSize", new THREE.BufferAttribute(size, 1));
 
   const uniforms = {
     uTime: { value: 0 },
-    uAmp: { value: 0.22 },
-    uDeep: { value: new THREE.Color(0x4c1d95) },
-    uLight: { value: new THREE.Color(0xa78bfa) },
-    uRim: { value: new THREE.Color(0xd6c8ff) },
+    uForm: { value: reduced ? 1 : 0 },
+    uScale: { value: 9 * renderer.getPixelRatio() },
+    uColorLow: { value: new THREE.Color(0x4c1d95) },
+    uColorMid: { value: new THREE.Color(0x7c3aed) },
+    uColorHigh: { value: new THREE.Color(0xc4b5fd) },
   };
 
   const material = new THREE.ShaderMaterial({
     vertexShader,
     fragmentShader,
     uniforms,
+    transparent: true,
+    depthTest: false,
+    depthWrite: false,
   });
 
-  const mesh = new THREE.Mesh(geometry, material);
-  scene.add(mesh);
+  const points = new THREE.Points(geometry, material);
+  scene.add(points);
 
   function resize() {
     const rect = container!.getBoundingClientRect();
@@ -201,16 +149,16 @@ export function initHero3D(canvas: HTMLCanvasElement): Disposer | null {
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
+    uniforms.uScale.value = 9 * renderer.getPixelRatio();
   }
   resize();
 
-  // Cursor parallax (lerped)
-  const target = { x: 0, y: 0 };
-  const current = { x: 0, y: 0 };
+  const targetRot = { x: 0, y: 0 };
+  const curRot = { x: 0, y: 0 };
   function onPointer(e: PointerEvent) {
     const rect = container!.getBoundingClientRect();
-    target.x = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
-    target.y = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
+    targetRot.y = ((e.clientX - rect.left) / rect.width - 0.5) * 0.7;
+    targetRot.x = ((e.clientY - rect.top) / rect.height - 0.5) * 0.5;
   }
   if (!reduced) window.addEventListener("pointermove", onPointer, { passive: true });
 
@@ -229,6 +177,7 @@ export function initHero3D(canvas: HTMLCanvasElement): Disposer | null {
   const clock = new THREE.Clock();
   let raf = 0;
   let running = true;
+  const introDuration = 1.6;
 
   function frame() {
     if (!running) return;
@@ -236,25 +185,23 @@ export function initHero3D(canvas: HTMLCanvasElement): Disposer | null {
     if (!visible) return;
 
     const t = clock.getElapsedTime();
-    uniforms.uTime.value = reduced ? 1.6 : t;
+    uniforms.uTime.value = t;
 
-    current.x += (target.x - current.x) * 0.05;
-    current.y += (target.y - current.y) * 0.05;
+    const pr = Math.min(1, t / introDuration);
+    uniforms.uForm.value = 1 - Math.pow(1 - pr, 3);
 
-    if (reduced) {
-      mesh.rotation.set(-0.15, 0.6, 0.08);
-    } else {
-      mesh.rotation.y = t * 0.12 + current.x * 0.5;
-      mesh.rotation.x = current.y * 0.4 - 0.05;
-    }
+    curRot.x += (targetRot.x - curRot.x) * 0.05;
+    curRot.y += (targetRot.y - curRot.y) * 0.05;
+    points.rotation.y = t * 0.09 + curRot.y;
+    points.rotation.x = curRot.x;
 
     renderer.render(scene, camera);
   }
 
   if (reduced) {
-    resize();
-    uniforms.uTime.value = 1.6;
-    mesh.rotation.set(-0.15, 0.6, 0.08);
+    uniforms.uForm.value = 1;
+    uniforms.uTime.value = 2.0;
+    points.rotation.set(0, 0.4, 0);
     renderer.render(scene, camera);
   } else {
     frame();
