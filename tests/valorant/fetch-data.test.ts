@@ -63,6 +63,21 @@ describe("buildDataset", () => {
     warn.mockRestore();
   });
 
+  test("labels.json ausente (local o 404) → labels {} y el resto de datos se conserva", async () => {
+    const { mkdtemp, writeFile } = await import("node:fs/promises");
+    const { tmpdir } = await import("node:os");
+    const { join } = await import("node:path");
+    const dir = await mkdtemp(join(tmpdir(), "vd-"));
+    for (const [n, v] of Object.entries(files)) if (n !== "labels.json") await writeFile(join(dir, n), JSON.stringify(v));
+    const local = await buildDataset({ fetch: async () => { throw new Error("x"); }, roster: rosterJson, dataDir: dir });
+    expect(local.labels).toEqual({});
+    expect(local.playerMatches).toEqual([{ matchId: "1" }]);
+    const f = fakeFetch((u) => (u.endsWith("labels.json") ? new Response("404: Not Found", { status: 404 }) : undefined));
+    const remote = await buildDataset({ fetch: f.fn, roster: rosterJson });
+    expect(remote.labels).toEqual({});
+    expect(remote.teamMatches).toEqual([{ matchId: "T" }]);
+  });
+
   test("dataDir local en vez de red", async () => {
     const { mkdtemp, writeFile } = await import("node:fs/promises");
     const { tmpdir } = await import("node:os");

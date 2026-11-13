@@ -6,6 +6,8 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 const REPO = "TLH-Enterprise/TLH";
 const BRANCH = "valorant-data";
+// labels.json lo crea el equipo a mano; si no existe, se usa {}.
+const OPTIONAL = new Set(["labels.json"]);
 const FILES = {
   playerMatches: "player-matches.json",
   teamMatches: "team-matches.json",
@@ -26,7 +28,14 @@ export async function buildDataset({ fetch, roster, dataDir }) {
   try {
     let read;
     if (dataDir) {
-      read = async (name) => JSON.parse(await readFile(join(dataDir, name), "utf8"));
+      read = async (name) => {
+        try {
+          return JSON.parse(await readFile(join(dataDir, name), "utf8"));
+        } catch (e) {
+          if (OPTIONAL.has(name) && e && e.code === "ENOENT") return {};
+          throw e;
+        }
+      };
     } else {
       const res = await fetch(`https://api.github.com/repos/${REPO}/commits/${BRANCH}`, {
         headers: { Accept: "application/vnd.github+json" },
@@ -35,6 +44,7 @@ export async function buildDataset({ fetch, roster, dataDir }) {
       const { sha } = await res.json();
       read = async (name) => {
         const r = await fetch(`https://raw.githubusercontent.com/${REPO}/${sha}/data/${name}`);
+        if (r.status === 404 && OPTIONAL.has(name)) return {};
         if (!r.ok) throw new Error(`${name}: ${r.status}`);
         return JSON.parse(await r.text());
       };
