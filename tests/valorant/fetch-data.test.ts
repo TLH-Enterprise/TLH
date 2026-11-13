@@ -37,15 +37,32 @@ describe("buildDataset", () => {
     expect(ds.roster).toEqual(rosterJson);
   });
 
-  test("commit 403 → dataset vacío sin lanzar", async () => {
+  test("commit 403 y raw caído → dataset vacío sin lanzar", async () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-    const f = fakeFetch((u) => (u.includes("api.github.com") ? new Response("{}", { status: 403 }) : undefined));
+    const f = fakeFetch((u) => (u.includes("api.github.com") ? new Response("{}", { status: 403 }) : new Response("x", { status: 500 })));
     const ds = await buildDataset({ fetch: f.fn, roster: rosterJson });
     expect(ds).toEqual({
       meta: { updatedAt: null, nonTeamMatchIds: [] }, roster: rosterJson, playerMatches: [], teamMatches: [], snapshots: [], labels: {},
     });
     expect(warn).toHaveBeenCalled();
     warn.mockRestore();
+  });
+
+  test("API de commits limitada (403) → usa la rama por nombre en raw", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const f = fakeFetch((u) => (u.includes("api.github.com") ? new Response("{}", { status: 403 }) : undefined));
+    const ds = await buildDataset({ fetch: f.fn, roster: rosterJson });
+    expect(f.urls).toContain("https://raw.githubusercontent.com/TLH-Enterprise/TLH/valorant-data/data/team-matches.json");
+    expect(ds.teamMatches).toEqual([{ matchId: "T" }]);
+    warn.mockRestore();
+  });
+
+  test("cada petición lleva timeout", async () => {
+    const signals: unknown[] = [];
+    const f = fakeFetch();
+    const fn = async (u: string, init?: RequestInit) => { signals.push(init?.signal); return f.fn(u); };
+    await buildDataset({ fetch: fn, roster: rosterJson });
+    expect(signals.every((s) => s instanceof AbortSignal)).toBe(true);
   });
 
   test("JSON inválido → dataset vacío", async () => {

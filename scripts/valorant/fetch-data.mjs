@@ -5,6 +5,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 const REPO = "TLH-Enterprise/TLH";
+const TIMEOUT_MS = 15_000;
 const BRANCH = "valorant-data";
 // labels.json lo crea el equipo a mano; si no existe, se usa {}.
 const OPTIONAL = new Set(["labels.json"]);
@@ -37,13 +38,23 @@ export async function buildDataset({ fetch, roster, dataDir }) {
         }
       };
     } else {
-      const res = await fetch(`https://api.github.com/repos/${REPO}/commits/${BRANCH}`, {
-        headers: { Accept: "application/vnd.github+json" },
-      });
-      if (!res.ok) throw new Error(`GitHub respondió ${res.status} al buscar la rama ${BRANCH}`);
-      const { sha } = await res.json();
+      // Fijar el SHA evita la caché de raw (~5 min) justo después de un push.
+      // Si la API de GitHub falla (p. ej. límite de 60/h sin token), se usa la rama por nombre.
+      let ref = BRANCH;
+      try {
+        const res = await fetch(`https://api.github.com/repos/${REPO}/commits/${BRANCH}`, {
+          headers: { Accept: "application/vnd.github+json" },
+          signal: AbortSignal.timeout(TIMEOUT_MS),
+        });
+        if (!res.ok) throw new Error(`GitHub respondió ${res.status}`);
+        ref = (await res.json()).sha;
+      } catch (e) {
+        console.warn(`[valorant] No se pudo leer el último commit (${e instanceof Error ? e.message : e}); se usa la rama ${BRANCH}.`);
+      }
       read = async (name) => {
-        const r = await fetch(`https://raw.githubusercontent.com/${REPO}/${sha}/data/${name}`);
+        const r = await fetch(`https://raw.githubusercontent.com/${REPO}/${ref}/data/${name}`, {
+          signal: AbortSignal.timeout(TIMEOUT_MS),
+        });
         if (r.status === 404 && OPTIONAL.has(name)) return {};
         if (!r.ok) throw new Error(`${name}: ${r.status}`);
         return JSON.parse(await r.text());

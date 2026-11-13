@@ -79,17 +79,29 @@ export async function runCollection(opts: CollectOptions): Promise<{ newPlayerMa
 
   const allPlayerMatches = mergePlayerMatches(playerMatches, fresh);
   const haveTeam = new Set(teamMatches.map((t) => t.matchId));
-  const skip = new Set(meta.nonTeamMatchIds);
+  const forced = (id: string) => labels[id]?.include === true;
+  // include:true en labels.json vuelve a revisar una partida ya descartada.
+  const skip = new Set(meta.nonTeamMatchIds.filter((id) => !forced(id)));
   const newTeam: TeamMatch[] = [];
-  const nonTeam = [...meta.nonTeamMatchIds];
+  const nonTeam = new Set(meta.nonTeamMatchIds);
 
   const pending = [...teamCandidates(allPlayerMatches, roster, labels)].filter(([id]) => !haveTeam.has(id) && !skip.has(id));
   log(`Partidas de equipo por revisar: ${pending.length}`);
   for (const [id, kind] of pending) {
-    const full = await client.match(id);
-    const t = toTeamMatch(full, roster, kind, labels[id]?.include === true);
-    if (t) newTeam.push(t);
-    else nonTeam.push(id);
+    let full;
+    try {
+      full = await client.match(id);
+    } catch (e) {
+      if (!isNotFound(e)) throw e;
+      log(`Aviso: la partida ${id} no está en la API. Se descarta.`);
+      nonTeam.add(id);
+      continue;
+    }
+    const t = toTeamMatch(full, roster, kind, forced(id));
+    if (t) {
+      newTeam.push(t);
+      nonTeam.delete(id);
+    } else nonTeam.add(id);
   }
 
   const players: Record<string, RankSnapshot> = {};
@@ -102,7 +114,13 @@ export async function runCollection(opts: CollectOptions): Promise<{ newPlayerMa
       log(`Aviso: sin rango para ${p.name}#${p.tag}.`);
     }
   }
-  const premier = await client.premierTeam(roster.premierTeam.name, roster.premierTeam.tag);
+  let premier: Snapshot["premier"] = null;
+  try {
+    premier = await client.premierTeam(roster.premierTeam.name, roster.premierTeam.tag);
+  } catch (e) {
+    if (!isNotFound(e)) throw e;
+    log(`Aviso: el equipo Premier ${roster.premierTeam.name} no se encontró en la API.`);
+  }
   const snap: Snapshot = { date: now.toISOString().slice(0, 10), players, premier };
 
   // Solo aquí se escribe: si algo falló antes, los archivos quedan como estaban.
@@ -110,7 +128,7 @@ export async function runCollection(opts: CollectOptions): Promise<{ newPlayerMa
     ["player-matches.json", allPlayerMatches],
     ["team-matches.json", mergeTeamMatches(teamMatches, newTeam)],
     ["snapshots.json", upsertSnapshot(snapshots, snap)],
-    ["meta.json", { updatedAt: now.toISOString(), nonTeamMatchIds: nonTeam } satisfies Meta],
+    ["meta.json", { updatedAt: now.toISOString(), nonTeamMatchIds: [...nonTeam] } satisfies Meta],
   ];
   await mkdir(dataDir, { recursive: true });
   for (const [name, data] of out) await writeFile(f(name) + ".tmp", JSON.stringify(data, null, 1) + "\n");

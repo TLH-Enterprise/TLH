@@ -48,6 +48,7 @@ interface Fake {
   matches: Record<string, V4Match>;
   failMmrAt?: string; // nombre del jugador
   notFound?: string; // nombre del jugador
+  premierNotFound?: boolean;
 }
 
 const nameOf = (puuid: string) => P.find((p) => p.puuid === puuid)?.name ?? "?";
@@ -68,6 +69,7 @@ function fakeClient(f: Fake) {
     },
     async match(id) {
       calls.match.push(id);
+      if (!f.matches[id]) throw new ApiError(404, "x");
       return structuredClone(f.matches[id]);
     },
     async mmr(puuid) {
@@ -77,6 +79,7 @@ function fakeClient(f: Fake) {
       return { tier: 21, tierName: "Ascendant 1", rr: 50, elo: 1850 };
     },
     async premierTeam() {
+      if (f.premierNotFound) throw new ApiError(404, "x");
       return { points: 200, division: 21, place: 50, conference: "LATAM_NORTH", wins: 2, losses: 0 };
     },
   };
@@ -198,6 +201,41 @@ describe("runCollection", () => {
     await runCollection({ client: fakeClient(baseFake()).client, roster: renamed, dataDir: dir, now: NOW });
     const ids = (await readJson(dir, "player-matches.json")).filter((m: { puuid: string }) => m.puuid === P[0].puuid).map((m: { matchId: string }) => m.matchId);
     expect(ids).toContain("R1");
+  });
+
+  test("una partida que la API no encuentra (404) se descarta y la corrida sigue", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "val-"));
+    const fake = baseFake();
+    delete fake.matches.A;
+    const logs: string[] = [];
+    await runCollection({ client: fakeClient(fake).client, roster, dataDir: dir, now: NOW, log: (m) => logs.push(m) });
+    expect((await readJson(dir, "meta.json")).nonTeamMatchIds).toEqual(["A"]);
+    expect((await readJson(dir, "team-matches.json")).map((t: { matchId: string }) => t.matchId)).toEqual(["P"]);
+    expect(logs.some((l) => l.includes("A"))).toBe(true);
+  });
+
+  test("equipo Premier no encontrado (404) → premier null y la corrida sigue", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "val-"));
+    const fake = baseFake();
+    fake.premierNotFound = true;
+    await runCollection({ client: fakeClient(fake).client, roster, dataDir: dir, now: NOW, log: () => {} });
+    expect((await readJson(dir, "snapshots.json"))[0].premier).toBeNull();
+  });
+
+  test("labels include:true vuelve a revisar una partida ya descartada", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "val-"));
+    const fake = baseFake();
+    fake.matches.B = v4("B", red3);
+    await runCollection({ client: fakeClient(fake).client, roster, dataDir: dir, now: NOW });
+    // B (3 del roster) no fue candidato; lo marco como descartado a mano y luego lo fuerzo
+    const meta = await readJson(dir, "meta.json");
+    await writeFile(join(dir, "meta.json"), JSON.stringify({ ...meta, nonTeamMatchIds: ["B"] }));
+    await writeFile(join(dir, "labels.json"), JSON.stringify({ B: { include: true } }));
+    const second = fakeClient(fake);
+    await runCollection({ client: second.client, roster, dataDir: dir, now: NOW });
+    expect(second.calls.match).toEqual(["B"]);
+    expect((await readJson(dir, "meta.json")).nonTeamMatchIds).toEqual([]);
+    expect((await readJson(dir, "team-matches.json")).map((t: { matchId: string }) => t.matchId)).toContain("B");
   });
 
   test("un jugador con 404 se avisa y los demás se guardan", async () => {
