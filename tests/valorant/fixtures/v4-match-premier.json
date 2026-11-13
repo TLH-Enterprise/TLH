@@ -1,0 +1,340 @@
+{
+ "metadata": {
+  "match_id": "10f293f7-912b-444c-9e82-b57adc832f5f",
+  "map": {
+   "id": "92584fbe-486a-b1b2-9faa-39b0f486b498",
+   "name": "Sunset"
+  },
+  "started_at": "2026-11-08T03:15:02.356Z",
+  "is_completed": true,
+  "queue": {
+   "id": "premier",
+   "name": "Premier",
+   "mode_type": "Standard"
+  },
+  "season": {
+   "id": "d816f426-48ea-f052-117f-9697a155b319",
+   "short": "e11a6"
+  }
+ },
+ "players": [
+  {
+   "puuid": "b59ec3dc-5519-58ad-a108-57aec16b4e5a",
+   "name": "Dazzart",
+   "tag": "SCOTT",
+   "team_id": "Blue",
+   "agent": {
+    "name": "Omen"
+   },
+   "stats": {
+    "score": 3984,
+    "kills": 13,
+    "deaths": 16,
+    "assists": 4,
+    "headshots": 13,
+    "bodyshots": 11,
+    "legshots": 0,
+    "damage": {
+     "dealt": 2376,
+     "received": 3147
+    }
+   }
+  },
+  {
+   "puuid": "56afacb8-e73d-54d8-92f7-d2b1e59ce4af",
+   "name": "ddesireme",
+   "tag": "4gz1",
+   "team_id": "Blue",
+   "agent": {
+    "name": "Sage"
+   },
+   "stats": {
+    "score": 2190,
+    "kills": 7,
+    "deaths": 18,
+    "assists": 1,
+    "headshots": 8,
+    "bodyshots": 8,
+    "legshots": 1,
+    "damage": {
+     "dealt": 1434,
+     "received": 3160
+    }
+   }
+  },
+  {
+   "puuid": "73d835a4-a7c6-5f62-a2b9-85462b1ceb19",
+   "name": "Noxyfps1",
+   "tag": "ttk",
+   "team_id": "Blue",
+   "agent": {
+    "name": "Jett"
+   },
+   "stats": {
+    "score": 5676,
+    "kills": 18,
+    "deaths": 14,
+    "assists": 0,
+    "headshots": 18,
+    "bodyshots": 29,
+    "legshots": 4,
+    "damage": {
+     "dealt": 3934,
+     "received": 2768
+    }
+   }
+  },
+  {
+   "puuid": "25997071-9a45-52bb-95e0-652245a96ac6",
+   "name": "ezekiel",
+   "tag": "bored",
+   "team_id": "Red",
+   "agent": {
+    "name": "Iso"
+   },
+   "stats": {
+    "score": 4885,
+    "kills": 19,
+    "deaths": 10,
+    "assists": 5,
+    "headshots": 16,
+    "bodyshots": 11,
+    "legshots": 1,
+    "damage": {
+     "dealt": 3457,
+     "received": 2028
+    }
+   }
+  },
+  {
+   "puuid": "65ec15a9-d6b8-5ff2-8159-115b4b10564b",
+   "name": "McFly",
+   "tag": "GOAT",
+   "team_id": "Red",
+   "agent": {
+    "name": "Vyse"
+   },
+   "stats": {
+    "score": 4084,
+    "kills": 15,
+    "deaths": 7,
+    "assists": 4,
+    "headshots": 11,
+    "bodyshots": 32,
+    "legshots": 1,
+    "damage": {
+     "dealt": 2868,
+     "received": 1557
+    }
+   }
+  },
+  {
+   "puuid": "8fb8002b-9196-57d7-aca8-5dd00fbc4f81",
+   "name": "dagestan aim f",
+   "tag": "splsh",
+   "team_id": "Red",
+   "agent": {
+    "name": "Neon"
+   },
+   "stats": {
+    "score": 5742,
+    "kills": 21,
+    "deaths": 13,
+    "assists": 8,
+    "headshots": 22,
+    "bodyshots": 42,
+    "legshots": 0,
+    "damage": {
+     "dealt": 3804,
+     "received": 2657
+    }
+   }
+  },
+  {
+   "puuid": "afadc87a-e2eb-524b-a6b5-a7cec31f2aba",
+   "name": "Unknow14",
+   "tag": "hola",
+   "team_id": "Blue",
+   "agent": {
+    "name": "Sova"
+   },
+   "stats": {
+    "score": 2438,
+    "kills": 8,
+    "deaths": 16,
+    "assists": 2,
+    "headshots": 8,
+    "bodyshots": 17,
+    "legshots": 0,
+    "damage": {
+     "dealt": 1969,
+     "received": 2801
+    }
+   }
+  },
+  {
+   "puuid": "3c89076a-1769-5244-b78a-e9f1b95d1ad3",
+   "name": "Kire",
+   "tag": "frogo",
+   "team_id": "Blue",
+   "agent": {
+    "name": "Cypher"
+   },
+   "stats": {
+    "score": 1991,
+    "kills": 7,
+    "deaths": 16,
+    "assists": 1,
+    "headshots": 6,
+    "bodyshots": 15,
+    "legshots": 2,
+    "damage": {
+     "dealt": 1193,
+     "received": 3012
+    }
+   }
+  },
+  {
+   "puuid": "33061b1f-7843-528a-a83c-cdd909de674d",
+   "name": "Zeiko",
+   "tag": "BRS",
+   "team_id": "Red",
+   "agent": {
+    "name": "Sova"
+   },
+   "stats": {
+    "score": 4655,
+    "kills": 16,
+    "deaths": 12,
+    "assists": 12,
+    "headshots": 10,
+    "bodyshots": 22,
+    "legshots": 5,
+    "damage": {
+     "dealt": 3111,
+     "received": 2257
+    }
+   }
+  },
+  {
+   "puuid": "ab7191eb-25fd-5639-b895-e5cf2257621e",
+   "name": "BiggS",
+   "tag": "ING",
+   "team_id": "Red",
+   "agent": {
+    "name": "Omen"
+   },
+   "stats": {
+    "score": 2514,
+    "kills": 9,
+    "deaths": 11,
+    "assists": 7,
+    "headshots": 9,
+    "bodyshots": 10,
+    "legshots": 1,
+    "damage": {
+     "dealt": 1668,
+     "received": 2427
+    }
+   }
+  }
+ ],
+ "teams": [
+  {
+   "team_id": "Red",
+   "won": true,
+   "rounds": {
+    "won": 13,
+    "lost": 5
+   },
+   "premier_roster": {
+    "name": "T L H"
+   }
+  },
+  {
+   "team_id": "Blue",
+   "won": false,
+   "rounds": {
+    "won": 5,
+    "lost": 13
+   },
+   "premier_roster": {
+    "name": "Paw Patrolls"
+   }
+  }
+ ],
+ "rounds": [
+  {
+   "winning_team": "Red",
+   "winning_team_role": "Attacker"
+  },
+  {
+   "winning_team": "Red",
+   "winning_team_role": "Attacker"
+  },
+  {
+   "winning_team": "Blue",
+   "winning_team_role": "Defender"
+  },
+  {
+   "winning_team": "Red",
+   "winning_team_role": "Attacker"
+  },
+  {
+   "winning_team": "Red",
+   "winning_team_role": "Attacker"
+  },
+  {
+   "winning_team": "Red",
+   "winning_team_role": "Attacker"
+  },
+  {
+   "winning_team": "Blue",
+   "winning_team_role": "Defender"
+  },
+  {
+   "winning_team": "Red",
+   "winning_team_role": "Attacker"
+  },
+  {
+   "winning_team": "Red",
+   "winning_team_role": "Attacker"
+  },
+  {
+   "winning_team": "Red",
+   "winning_team_role": "Attacker"
+  },
+  {
+   "winning_team": "Red",
+   "winning_team_role": "Attacker"
+  },
+  {
+   "winning_team": "Red",
+   "winning_team_role": "Attacker"
+  },
+  {
+   "winning_team": "Red",
+   "winning_team_role": "Defender"
+  },
+  {
+   "winning_team": "Red",
+   "winning_team_role": "Defender"
+  },
+  {
+   "winning_team": "Blue",
+   "winning_team_role": "Attacker"
+  },
+  {
+   "winning_team": "Blue",
+   "winning_team_role": "Attacker"
+  },
+  {
+   "winning_team": "Blue",
+   "winning_team_role": "Attacker"
+  },
+  {
+   "winning_team": "Red",
+   "winning_team_role": "Defender"
+  }
+ ]
+}
