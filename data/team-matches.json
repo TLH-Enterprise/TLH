@@ -1,0 +1,533 @@
+[
+ {
+  "matchId": "5d60b4e2-69a3-45d6-a9c5-60b478b71a7e",
+  "kind": "custom",
+  "startedAt": "2026-11-13T01:56:16.575Z",
+  "map": "Lotus",
+  "season": "e11a6",
+  "side": "Red",
+  "roundsWon": 11,
+  "roundsLost": 13,
+  "won": false,
+  "opponentName": null,
+  "opponentPlayers": [
+   "Twicth XANDER#Jett",
+   "saint#nikes",
+   "creatine addict#zyco",
+   "Andrew#SAPO",
+   "markeloff#Oli"
+  ],
+  "lineup": [
+   {
+    "puuid": "38d7dbe7-8735-56db-8902-505bd2f771fb",
+    "riotId": "McFly#DeuS",
+    "agent": "Chamber",
+    "inRoster": false,
+    "kills": 18,
+    "deaths": 20,
+    "assists": 6,
+    "headshots": 13,
+    "bodyshots": 30,
+    "legshots": 6,
+    "damage": 3412,
+    "score": 5098
+   },
+   {
+    "puuid": "25997071-9a45-52bb-95e0-652245a96ac6",
+    "riotId": "ezekiel#bored",
+    "agent": "Yoru",
+    "inRoster": true,
+    "kills": 17,
+    "deaths": 19,
+    "assists": 5,
+    "headshots": 11,
+    "bodyshots": 28,
+    "legshots": 0,
+    "damage": 3030,
+    "score": 4737
+   },
+   {
+    "puuid": "ab7191eb-25fd-5639-b895-e5cf2257621e",
+    "riotId": "BiggS#ING",
+    "agent": "Fade",
+    "inRoster": true,
+    "kills": 21,
+    "deaths": 18,
+    "assists": 7,
+    "headshots": 20,
+    "bodyshots": 12,
+    "legshots": 2,
+    "damage": 3789,
+    "score": 5846
+   },
+   {
+    "puuid": "33061b1f-7843-528a-a83c-cdd909de674d",
+    "riotId": "Zeiko#BRS",
+    "agent": "Omen",
+    "inRoster": true,
+    "kills": 6,
+    "deaths": 18,
+    "assists": 13,
+    "headshots": 7,
+    "bodyshots": 39,
+    "legshots": 3,
+    "damage": 1404,
+    "score": 2236
+   },
+   {
+    "puuid": "1693c1eb-22d0-5aa8-a972-7d01b5e45d43",
+    "riotId": "TDiamond#COL",
+    "agent": "Raze",
+    "inRoster": true,
+    "kills": 22,
+    "deaths": 21,
+    "assists": 6,
+    "headshots": 15,
+    "bodyshots": 48,
+    "legshots": 0,
+    "damage": 4224,
+    "score": 6656
+   }
+  ],
+  "rounds": [
+   {
+    "won": true,
+    "role": "Attack"
+   },
+   {
+    "won": true,
+    "role": "Attack"
+   },
+   {
+    "won": true,
+    "role": "Attack"
+   },
+   {
+    "won": false,
+    "role": "Attack"
+   },
+   {
+    "won": true,
+    "role": "Attack"
+   },
+   {
+    "won": true,
+    "role": "Attack"
+   },
+   {
+    "won": true,
+    "role": "Attack"
+   },
+   {
+    "won": true,
+    "role": "Attack"
+   },
+   {
+    "won": false,
+    "role": "Attack"
+   },
+   {
+    "won": false,
+    "role": "Attack"
+   },
+   {
+    "won": false,
+    "role": "Attack"
+   },
+   {
+    "won": false,
+    "role": "Attack"
+   },
+   {
+    "won": false,
+    "role": "Defense"
+   },
+   {
+    "won": false,
+    "role": "Defense"
+   },
+   {
+    "won": true,
+    "role": "Defense"
+   },
+   {
+    "won": false,
+    "role": "Defense"
+   },
+   {
+    "won": false,
+    "role": "Defense"
+   },
+   {
+    "won": true,
+    "role": "Defense"
+   },
+   {
+    "won": false,
+    "role": "Defense"
+   },
+   {
+    "won": true,
+    "role": "Defense"
+   },
+   {
+    "won": true,
+    "role": "Defense"
+   },
+   {
+    "won": false,
+    "role": "Defense"
+   },
+   {
+    "won": false,
+    "role": "Defense"
+   },
+   {
+    "won": false,
+    "role": "Defense"
+   }
+  ]
+ },
+ {
+  "matchId": "10f293f7-912b-444c-9e82-b57adc832f5f",
+  "kind": "premier",
+  "startedAt": "2026-11-08T03:15:02.356Z",
+  "map": "Sunset",
+  "season": "e11a6",
+  "side": "Red",
+  "roundsWon": 13,
+  "roundsLost": 5,
+  "won": true,
+  "opponentName": "Paw Patrolls",
+  "opponentPlayers": [
+   "Dazzart#SCOTT",
+   "ddesireme#4gz1",
+   "Noxyfps1#ttk",
+   "Unknow14#hola",
+   "Kire#frogo"
+  ],
+  "lineup": [
+   {
+    "puuid": "25997071-9a45-52bb-95e0-652245a96ac6",
+    "riotId": "ezekiel#bored",
+    "agent": "Iso",
+    "inRoster": true,
+    "kills": 19,
+    "deaths": 10,
+    "assists": 5,
+    "headshots": 16,
+    "bodyshots": 11,
+    "legshots": 1,
+    "damage": 3457,
+    "score": 4885
+   },
+   {
+    "puuid": "65ec15a9-d6b8-5ff2-8159-115b4b10564b",
+    "riotId": "McFly#GOAT",
+    "agent": "Vyse",
+    "inRoster": true,
+    "kills": 15,
+    "deaths": 7,
+    "assists": 4,
+    "headshots": 11,
+    "bodyshots": 32,
+    "legshots": 1,
+    "damage": 2868,
+    "score": 4084
+   },
+   {
+    "puuid": "8fb8002b-9196-57d7-aca8-5dd00fbc4f81",
+    "riotId": "dagestan aim f#splsh",
+    "agent": "Neon",
+    "inRoster": false,
+    "kills": 21,
+    "deaths": 13,
+    "assists": 8,
+    "headshots": 22,
+    "bodyshots": 42,
+    "legshots": 0,
+    "damage": 3804,
+    "score": 5742
+   },
+   {
+    "puuid": "33061b1f-7843-528a-a83c-cdd909de674d",
+    "riotId": "Zeiko#BRS",
+    "agent": "Sova",
+    "inRoster": true,
+    "kills": 16,
+    "deaths": 12,
+    "assists": 12,
+    "headshots": 10,
+    "bodyshots": 22,
+    "legshots": 5,
+    "damage": 3111,
+    "score": 4655
+   },
+   {
+    "puuid": "ab7191eb-25fd-5639-b895-e5cf2257621e",
+    "riotId": "BiggS#ING",
+    "agent": "Omen",
+    "inRoster": true,
+    "kills": 9,
+    "deaths": 11,
+    "assists": 7,
+    "headshots": 9,
+    "bodyshots": 10,
+    "legshots": 1,
+    "damage": 1668,
+    "score": 2514
+   }
+  ],
+  "rounds": [
+   {
+    "won": true,
+    "role": "Attack"
+   },
+   {
+    "won": true,
+    "role": "Attack"
+   },
+   {
+    "won": false,
+    "role": "Attack"
+   },
+   {
+    "won": true,
+    "role": "Attack"
+   },
+   {
+    "won": true,
+    "role": "Attack"
+   },
+   {
+    "won": true,
+    "role": "Attack"
+   },
+   {
+    "won": false,
+    "role": "Attack"
+   },
+   {
+    "won": true,
+    "role": "Attack"
+   },
+   {
+    "won": true,
+    "role": "Attack"
+   },
+   {
+    "won": true,
+    "role": "Attack"
+   },
+   {
+    "won": true,
+    "role": "Attack"
+   },
+   {
+    "won": true,
+    "role": "Attack"
+   },
+   {
+    "won": true,
+    "role": "Defense"
+   },
+   {
+    "won": true,
+    "role": "Defense"
+   },
+   {
+    "won": false,
+    "role": "Defense"
+   },
+   {
+    "won": false,
+    "role": "Defense"
+   },
+   {
+    "won": false,
+    "role": "Defense"
+   },
+   {
+    "won": true,
+    "role": "Defense"
+   }
+  ]
+ },
+ {
+  "matchId": "3cbda09f-314d-471d-ae26-54df8c2ced4c",
+  "kind": "premier",
+  "startedAt": "2026-11-08T01:15:03.617Z",
+  "map": "Sunset",
+  "season": "e11a6",
+  "side": "Red",
+  "roundsWon": 13,
+  "roundsLost": 8,
+  "won": true,
+  "opponentName": "The Avengers",
+  "opponentPlayers": [
+   "VainaLoka#xxx",
+   "Thanos2003#50hs",
+   "DEMENCIA#1902",
+   "Leo#Kron",
+   "nesqui#play"
+  ],
+  "lineup": [
+   {
+    "puuid": "33061b1f-7843-528a-a83c-cdd909de674d",
+    "riotId": "Zeiko#BRS",
+    "agent": "Sova",
+    "inRoster": true,
+    "kills": 12,
+    "deaths": 14,
+    "assists": 9,
+    "headshots": 5,
+    "bodyshots": 41,
+    "legshots": 2,
+    "damage": 2753,
+    "score": 3803
+   },
+   {
+    "puuid": "ab7191eb-25fd-5639-b895-e5cf2257621e",
+    "riotId": "BiggS#ING",
+    "agent": "Omen",
+    "inRoster": true,
+    "kills": 18,
+    "deaths": 12,
+    "assists": 15,
+    "headshots": 18,
+    "bodyshots": 33,
+    "legshots": 4,
+    "damage": 3772,
+    "score": 5460
+   },
+   {
+    "puuid": "8fb8002b-9196-57d7-aca8-5dd00fbc4f81",
+    "riotId": "dagestan aim f#splsh",
+    "agent": "Neon",
+    "inRoster": false,
+    "kills": 9,
+    "deaths": 17,
+    "assists": 3,
+    "headshots": 7,
+    "bodyshots": 19,
+    "legshots": 1,
+    "damage": 1892,
+    "score": 2664
+   },
+   {
+    "puuid": "65ec15a9-d6b8-5ff2-8159-115b4b10564b",
+    "riotId": "McFly#GOAT",
+    "agent": "Vyse",
+    "inRoster": true,
+    "kills": 26,
+    "deaths": 13,
+    "assists": 3,
+    "headshots": 18,
+    "bodyshots": 56,
+    "legshots": 2,
+    "damage": 4537,
+    "score": 6820
+   },
+   {
+    "puuid": "25997071-9a45-52bb-95e0-652245a96ac6",
+    "riotId": "ezekiel#bored",
+    "agent": "Iso",
+    "inRoster": true,
+    "kills": 18,
+    "deaths": 15,
+    "assists": 7,
+    "headshots": 16,
+    "bodyshots": 29,
+    "legshots": 1,
+    "damage": 3873,
+    "score": 5186
+   }
+  ],
+  "rounds": [
+   {
+    "won": false,
+    "role": "Attack"
+   },
+   {
+    "won": false,
+    "role": "Attack"
+   },
+   {
+    "won": true,
+    "role": "Attack"
+   },
+   {
+    "won": false,
+    "role": "Attack"
+   },
+   {
+    "won": true,
+    "role": "Attack"
+   },
+   {
+    "won": false,
+    "role": "Attack"
+   },
+   {
+    "won": false,
+    "role": "Attack"
+   },
+   {
+    "won": false,
+    "role": "Attack"
+   },
+   {
+    "won": false,
+    "role": "Attack"
+   },
+   {
+    "won": true,
+    "role": "Attack"
+   },
+   {
+    "won": true,
+    "role": "Attack"
+   },
+   {
+    "won": true,
+    "role": "Attack"
+   },
+   {
+    "won": true,
+    "role": "Defense"
+   },
+   {
+    "won": true,
+    "role": "Defense"
+   },
+   {
+    "won": false,
+    "role": "Defense"
+   },
+   {
+    "won": true,
+    "role": "Defense"
+   },
+   {
+    "won": true,
+    "role": "Defense"
+   },
+   {
+    "won": true,
+    "role": "Defense"
+   },
+   {
+    "won": true,
+    "role": "Defense"
+   },
+   {
+    "won": true,
+    "role": "Defense"
+   },
+   {
+    "won": true,
+    "role": "Defense"
+   }
+  ]
+ }
+]
