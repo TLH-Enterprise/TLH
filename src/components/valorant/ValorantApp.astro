@@ -199,6 +199,37 @@
     background: var(--surface-2);
     padding: 0.75rem;
   }
+  .vsort {
+    font: inherit;
+    font-size: inherit;
+    text-transform: inherit;
+    letter-spacing: inherit;
+    color: inherit;
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+  }
+  th[aria-sort="ascending"] .vsort,
+  th[aria-sort="descending"] .vsort {
+    color: var(--brand-1);
+  }
+  .vlead {
+    display: inline-block;
+    padding: 0.05rem 0.45rem;
+    border-radius: 999px;
+    background: var(--brand-3);
+    color: var(--brand-ink);
+    font-weight: 700;
+  }
+  .vplayer {
+    color: var(--text-1);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .vplayer:hover {
+    color: var(--brand-1);
+  }
   .vgood {
     color: #15803d;
     font-weight: 600;

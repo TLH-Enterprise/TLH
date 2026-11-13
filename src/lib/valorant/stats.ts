@@ -203,3 +203,70 @@ export function highlights(all: PlayerMatch[]): string[] {
 export function rrSeries(ds: Dataset, puuid: string): Array<{ date: string; elo: number }> {
   return ds.snapshots.flatMap((s) => (s.players[puuid] ? [{ date: s.date, elo: s.players[puuid].elo }] : []));
 }
+
+export type LeaderKey = "rank" | "games" | "winRate" | "kd" | "hsPct" | "dmgPerRound" | "kda";
+
+export interface LeaderRow {
+  puuid: string;
+  riotId: string;
+  name: string;
+  tierName: string | null;
+  rr: number | null;
+  elo: number | null;
+  line: Line;
+  kda: number | null;
+}
+
+export function leaderboard(ds: Dataset, f: Filter): LeaderRow[] {
+  const last = ds.snapshots[ds.snapshots.length - 1];
+  return ds.roster.players.map((p) => {
+    const ms = playerMatchesFor(ds, p.puuid, f);
+    const rank = last?.players[p.puuid];
+    const kills = ms.reduce((a, m) => a + m.kills, 0);
+    const assists = ms.reduce((a, m) => a + m.assists, 0);
+    const deaths = ms.reduce((a, m) => a + m.deaths, 0);
+    return {
+      puuid: p.puuid,
+      riotId: `${p.name}#${p.tag}`,
+      name: p.name,
+      tierName: rank?.tierName ?? null,
+      rr: rank?.rr ?? null,
+      elo: rank?.elo ?? null,
+      line: line(ms),
+      kda: ms.length ? (kills + assists) / Math.max(deaths, 1) : null,
+    };
+  });
+}
+
+function leaderValue(r: LeaderRow, key: LeaderKey): number | null {
+  if (key === "rank") return r.elo;
+  if (key === "kda") return r.kda;
+  if (key === "games") return r.line.games;
+  return r.line[key];
+}
+
+/** Ordena por la columna; los null siempre al final, sin importar la dirección. */
+export function sortLeaderboard(rows: LeaderRow[], key: LeaderKey, dir: "asc" | "desc"): LeaderRow[] {
+  const sign = dir === "asc" ? 1 : -1;
+  return [...rows].sort((a, b) => {
+    const x = leaderValue(a, key);
+    const y = leaderValue(b, key);
+    if (x === null && y === null) return a.name.localeCompare(b.name);
+    if (x === null) return 1;
+    if (y === null) return -1;
+    return (x - y) * sign || a.name.localeCompare(b.name);
+  });
+}
+
+const LEADER_KEYS: LeaderKey[] = ["rank", "games", "winRate", "kd", "hsPct", "dmgPerRound", "kda"];
+
+/** PUUIDs con el mejor valor de cada columna (empates incluidos; null no cuenta). */
+export function leaders(rows: LeaderRow[]): Record<LeaderKey, string[]> {
+  const out = {} as Record<LeaderKey, string[]>;
+  for (const key of LEADER_KEYS) {
+    const vals = rows.map((r) => leaderValue(r, key)).filter((v): v is number => v !== null && (key !== "games" || v > 0));
+    const best = vals.length ? Math.max(...vals) : null;
+    out[key] = best === null ? [] : rows.filter((r) => leaderValue(r, key) === best).map((r) => r.puuid);
+  }
+  return out;
+}

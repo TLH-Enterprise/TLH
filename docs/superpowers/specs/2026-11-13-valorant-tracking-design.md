@@ -138,3 +138,13 @@ Una página con pestañas: **Equipo** y una por cada jugador. El boceto aprobado
 - La librería de la gráfica: preferir algo liviano o SVG a mano, sin añadir una dependencia pesada.
 - La hora del cron.
 - Cómo se ve la página si un jugador no tiene datos en el filtro elegido (Sharky hoy no tiene partidas de equipo).
+
+## Adenda 2026-11-13: pestaña "Ranking" (aprobada por el usuario)
+
+- **Ubicación:** una pestaña nueva, "Ranking", entre "Equipo" y los jugadores.
+- **Contenido:** una tabla con los 6 jugadores. Columnas: Jugador, Rango, PJ, Win%, K/D, HS%, Daño/ronda y KDA, donde KDA = (kills + asistencias) / max(muertes, 1).
+- **Orden:** al tocar un encabezado, la tabla se ordena por esa columna. Un segundo toque invierte el orden. Por defecto se ordena por Rango (elo de la última foto), de mayor a menor. Los valores `null` siempre van al final.
+- **Líderes:** se resalta al mejor de cada columna. Si hay empate, se resaltan todos. Los valores `null` no cuentan.
+- **Filtros:** los mismos de modo y periodo, con su propio estado. Por defecto: Ranked + Este acto.
+- **Win%:** "—" con menos de 3 partidas (`MIN_GAMES`).
+- **Rango:** siempre el rango actual de ranked, sin importar el filtro.

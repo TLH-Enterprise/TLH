@@ -6,6 +6,9 @@ import {
   currentSeason,
   highlights,
   includedTeamMatches,
+  leaderboard,
+  leaders,
+  sortLeaderboard,
   line,
   mapDetail,
   playerMatchesFor,
@@ -192,5 +195,67 @@ describe("jugador", () => {
     });
     expect(rrSeries(d, Z.puuid)).toEqual([{ date: "2026-11-12", elo: 1850 }]);
     expect(rrSeries(d, S.puuid)).toEqual([]);
+  });
+});
+
+
+
+describe("leaderboard", () => {
+  const snap = {
+    date: "2026-11-13",
+    players: {
+      [Z.puuid]: { tier: 21, tierName: "Ascendant 1", rr: 65, elo: 1865 },
+      [T.puuid]: { tier: 24, tierName: "Immortal 1", rr: 69, elo: 2169 },
+    },
+    premier: null,
+  };
+  const d = () =>
+    ds({
+      snapshots: [snap],
+      playerMatches: [
+        ...Array.from({ length: 3 }, () => pm({ puuid: Z.puuid, kills: 20, deaths: 10, assists: 10 })),
+        ...Array.from({ length: 3 }, () => pm({ puuid: T.puuid, kills: 30, deaths: 10, assists: 0, won: false })),
+        pm({ puuid: B.puuid, kills: 5, deaths: 0, assists: 1 }),
+      ],
+    });
+  const f = { modes: ["competitive" as const], period: "all" as const };
+
+  test("una fila por jugador del roster, con rango de la última foto y KDA", () => {
+    const rows = leaderboard(d(), f);
+    expect(rows).toHaveLength(6);
+    const z = rows.find((r) => r.puuid === Z.puuid)!;
+    expect(z).toMatchObject({ riotId: "Zeiko#BRS", name: "Zeiko", tierName: "Ascendant 1", rr: 65, elo: 1865, kda: 3 });
+    expect(z.line.games).toBe(3);
+    const s = rows.find((r) => r.puuid === S.puuid)!;
+    expect(s).toMatchObject({ elo: null, kda: null });
+    expect(s.line.games).toBe(0);
+    expect(rows.find((r) => r.puuid === B.puuid)!.kda).toBe(6); // 0 muertes → divide por 1
+  });
+
+  test("ordenar por rango desc y nulls al final", () => {
+    const sorted = sortLeaderboard(leaderboard(d(), f), "rank", "desc");
+    expect(sorted.slice(0, 2).map((r) => r.name)).toEqual(["TDiamond", "Zeiko"]);
+    expect(sorted.slice(2).every((r) => r.elo === null)).toBe(true);
+  });
+
+  test("ordenar por winRate asc: nulls (menos de MIN_GAMES) siguen al final", () => {
+    const sorted = sortLeaderboard(leaderboard(d(), f), "winRate", "asc");
+    expect(sorted.map((r) => r.name).slice(0, 2)).toEqual(["TDiamond", "Zeiko"]);
+    expect(sorted.at(-1)!.line.winRate).toBeNull();
+  });
+
+  test("líderes por columna, ignorando nulls", () => {
+    const l = leaders(leaderboard(d(), f));
+    expect(l.rank).toEqual([T.puuid]);
+    expect(l.winRate).toEqual([Z.puuid]);
+    expect(l.kd).toEqual([B.puuid]); // 5/max(0,1)=5
+    expect(l.games).toEqual([Z.puuid, T.puuid]); // empate en 3
+  });
+
+  test("dataset vacío → filas sin NaN y sin líderes", () => {
+    const rows = leaderboard(ds(), f);
+    expect(rows).toHaveLength(6);
+    expect(JSON.stringify(rows)).not.toMatch(/NaN|Infinity/);
+    expect(leaders(rows).kd).toEqual([]);
   });
 });
