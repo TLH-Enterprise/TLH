@@ -49,9 +49,9 @@ export async function runCollection(opts: CollectOptions): Promise<{ newPlayerMa
     const before = fresh.length;
     try {
       for (const mode of MODES) {
-        await client.recentMatches(p.name, p.tag, mode);
+        await client.recentMatches(p.puuid, mode);
         for (let page = 1; page <= MAX_PAGES; page++) {
-          const { rows } = await client.storedMatches(p.name, p.tag, mode, page, PAGE_SIZE);
+          const { rows } = await client.storedMatches(p.puuid, mode, page, PAGE_SIZE);
           let anyNew = false;
           let anyInRange = false;
           for (const row of rows) {
@@ -73,7 +73,7 @@ export async function runCollection(opts: CollectOptions): Promise<{ newPlayerMa
     } catch (e) {
       if (!isNotFound(e)) throw e;
       missing.add(p.puuid);
-      log(`Aviso: ${p.name}#${p.tag} no se encontró en la API (¿cambió su Riot ID?). Se salta.`);
+      log(`Aviso: ${p.name}#${p.tag} no se encontró en la API (¿cuenta borrada o PUUID mal copiado?). Se salta.`);
     }
   }
 
@@ -96,7 +96,7 @@ export async function runCollection(opts: CollectOptions): Promise<{ newPlayerMa
   for (const p of roster.players) {
     if (missing.has(p.puuid)) continue;
     try {
-      players[p.puuid] = await client.mmr(p.name, p.tag);
+      players[p.puuid] = await client.mmr(p.puuid);
     } catch (e) {
       if (!isNotFound(e)) throw e;
       log(`Aviso: sin rango para ${p.name}#${p.tag}.`);

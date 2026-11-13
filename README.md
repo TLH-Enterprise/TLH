@@ -71,7 +71,7 @@ La página `/valorant` muestra las estadísticas de la división de Valorant. Lo
   }
   ```
   - `include: true` fuerza a contar como partida del equipo un custom que la regla automática no detectó (la regla pide al menos 4 jugadores del roster en el mismo lado).
-- **Cambiar el roster:** edita `src/data/valorant/roster.json` con un PR.
+- **Cambiar el roster:** edita `src/data/valorant/roster.json` con un PR. Cada jugador se identifica por su `puuid`, que no cambia aunque cambie su Riot ID; `name` y `tag` solo se usan para mostrarlo en la página. Para sacar el PUUID de alguien nuevo: `curl -H "Authorization: $HENRIKDEV_API_KEY" "https://api.henrikdev.xyz/valorant/v1/account/<nombre>/<tag>"`.
 - **Probar en local:** crea un `.env` con `HENRIKDEV_API_KEY=...` y corre:
   ```sh
   set -a; . ./.env; set +a

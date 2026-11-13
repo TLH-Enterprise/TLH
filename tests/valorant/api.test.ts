@@ -74,7 +74,7 @@ describe("createClient", () => {
     const f = fakeFetch(Array.from({ length: 3 }, () => ({ status: 503 })));
     const c = fakeClock();
     const client = createClient({ key: KEY, fetch: f.fn, sleep: c.sleep, now: c.now });
-    await expect(client.mmr("a", "b")).rejects.toMatchObject({ status: 503 });
+    await expect(client.mmr("pu-1")).rejects.toMatchObject({ status: 503 });
     expect(f.calls).toHaveLength(3);
   });
 
@@ -118,7 +118,7 @@ describe("createClient", () => {
     const f = fakeFetch([{ status: 404 }]);
     const c = fakeClock();
     const client = createClient({ key: KEY, fetch: f.fn, sleep: c.sleep, now: c.now });
-    const err = await client.mmr("a", "b").catch((e) => e);
+    const err = await client.mmr("pu-1").catch((e) => e);
     expect(err).toBeInstanceOf(ApiError);
     expect(err.status).toBe(404);
     expect(String(err.message)).not.toContain(KEY);
@@ -131,18 +131,23 @@ describe("createClient", () => {
     ]);
     const c = fakeClock();
     const client = createClient({ key: KEY, fetch: f.fn, sleep: c.sleep, now: c.now });
-    expect(await client.mmr("Zeiko", "BRS")).toEqual({ tier: 21, tierName: "Ascendant 1", rr: 65, elo: 1865 });
-    expect(f.calls[0].url).toBe("https://api.henrikdev.xyz/valorant/v3/mmr/na/pc/Zeiko/BRS");
+    expect(await client.mmr("33061b1f-7843-528a-a83c-cdd909de674d")).toEqual({ tier: 21, tierName: "Ascendant 1", rr: 65, elo: 1865 });
+    expect(f.calls[0].url).toBe("https://api.henrikdev.xyz/valorant/v3/by-puuid/mmr/na/pc/33061b1f-7843-528a-a83c-cdd909de674d");
+  });
+
+  test("recentMatches consulta por PUUID", async () => {
+    const f = fakeFetch([{ status: 200, body: { data: [] } }]);
+    const c = fakeClock();
+    await createClient({ key: KEY, fetch: f.fn, sleep: c.sleep, now: c.now }).recentMatches("pu-1", "premier");
+    expect(f.calls[0].url).toBe("https://api.henrikdev.xyz/valorant/v4/by-puuid/matches/na/pc/pu-1?mode=premier&size=10");
   });
 
   test("storedMatches arma la URL y devuelve filas y total", async () => {
     const f = fakeFetch([{ status: 200, body: { data: [{ meta: { id: "x" } }], results: { total: 385 } } }]);
     const c = fakeClock();
     const client = createClient({ key: KEY, fetch: f.fn, sleep: c.sleep, now: c.now });
-    const r = await client.storedMatches("dagestan aim f", "splsh", "custom", 2, 100);
-    expect(f.calls[0].url).toBe(
-      "https://api.henrikdev.xyz/valorant/v1/stored-matches/na/dagestan%20aim%20f/splsh?mode=custom&page=2&size=100",
-    );
+    const r = await client.storedMatches("pu-1", "custom", 2, 100);
+    expect(f.calls[0].url).toBe("https://api.henrikdev.xyz/valorant/v1/by-puuid/stored-matches/na/pu-1?mode=custom&page=2&size=100");
     expect(r.total).toBe(385);
     expect(r.rows).toHaveLength(1);
   });

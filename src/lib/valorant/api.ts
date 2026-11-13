@@ -16,10 +16,11 @@ export class ApiError extends Error {
 
 export interface HenrikClient {
   /** Pide las últimas partidas para que HenrikDev las registre; descarta el cuerpo. */
-  recentMatches(name: string, tag: string, mode: Mode): Promise<void>;
-  storedMatches(name: string, tag: string, mode: Mode, page: number, size: number): Promise<{ rows: StoredMatchRow[]; total: number }>;
+  // Los jugadores se consultan por PUUID: no cambia aunque cambien su Riot ID.
+  recentMatches(puuid: string, mode: Mode): Promise<void>;
+  storedMatches(puuid: string, mode: Mode, page: number, size: number): Promise<{ rows: StoredMatchRow[]; total: number }>;
   match(id: string): Promise<V4Match>;
-  mmr(name: string, tag: string): Promise<RankSnapshot>;
+  mmr(puuid: string): Promise<RankSnapshot>;
   premierTeam(name: string, tag: string): Promise<PremierStatus | null>;
 }
 
@@ -91,12 +92,12 @@ export function createClient(opts: ClientOptions): HenrikClient {
   const who = (name: string, tag: string) => `${e(name)}/${e(tag)}`;
 
   return {
-    async recentMatches(name, tag, mode) {
-      await get(`/v4/matches/${REGION}/${PLATFORM}/${who(name, tag)}?mode=${mode}&size=10`);
+    async recentMatches(puuid, mode) {
+      await get(`/v4/by-puuid/matches/${REGION}/${PLATFORM}/${e(puuid)}?mode=${mode}&size=10`);
     },
-    async storedMatches(name, tag, mode, page, size) {
+    async storedMatches(puuid, mode, page, size) {
       const r = await get<{ data?: StoredMatchRow[]; results?: { total?: number } }>(
-        `/v1/stored-matches/${REGION}/${who(name, tag)}?mode=${mode}&page=${page}&size=${size}`,
+        `/v1/by-puuid/stored-matches/${REGION}/${e(puuid)}?mode=${mode}&page=${page}&size=${size}`,
       );
       return { rows: r.data ?? [], total: r.results?.total ?? 0 };
     },
@@ -104,9 +105,9 @@ export function createClient(opts: ClientOptions): HenrikClient {
       const r = await get<{ data: V4Match }>(`/v4/match/${REGION}/${e(id)}`);
       return r.data;
     },
-    async mmr(name, tag) {
+    async mmr(puuid) {
       const r = await get<{ data: { current: { tier: { id: number; name: string }; rr: number; elo: number } } }>(
-        `/v3/mmr/${REGION}/${PLATFORM}/${who(name, tag)}`,
+        `/v3/by-puuid/mmr/${REGION}/${PLATFORM}/${e(puuid)}`,
       );
       const c = r.data.current;
       return { tier: c.tier.id, tierName: c.tier.name, rr: c.rr, elo: c.elo };

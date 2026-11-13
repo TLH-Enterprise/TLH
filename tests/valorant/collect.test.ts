@@ -50,14 +50,18 @@ interface Fake {
   notFound?: string; // nombre del jugador
 }
 
+const nameOf = (puuid: string) => P.find((p) => p.puuid === puuid)?.name ?? "?";
+
 function fakeClient(f: Fake) {
   const calls = { match: [] as string[], recent: 0 };
   const client: HenrikClient = {
-    async recentMatches(name) {
+    async recentMatches(puuid) {
+      const name = nameOf(puuid);
       if (name === f.notFound) throw new ApiError(404, "x");
       calls.recent++;
     },
-    async storedMatches(name, _tag, mode: Mode, page, size) {
+    async storedMatches(puuid, mode: Mode, page, size) {
+      const name = nameOf(puuid);
       if (name === f.notFound) throw new ApiError(404, "x");
       const all = f.stored[`${name}:${mode}`] ?? [];
       return { rows: all.slice((page - 1) * size, page * size), total: all.length };
@@ -66,7 +70,8 @@ function fakeClient(f: Fake) {
       calls.match.push(id);
       return structuredClone(f.matches[id]);
     },
-    async mmr(name) {
+    async mmr(puuid) {
+      const name = nameOf(puuid);
       if (name === f.failMmrAt) throw new ApiError(500, "x");
       if (name === f.notFound) throw new ApiError(404, "x");
       return { tier: 21, tierName: "Ascendant 1", rr: 50, elo: 1850 };
@@ -185,6 +190,14 @@ describe("runCollection", () => {
     expect(ids).not.toContain("OLD-C");
     expect(ids).toContain("OLD-R");
     expect(calls.match.sort()).toEqual(["A", "P"]);
+  });
+
+  test("un jugador que cambió su Riot ID en la API se sigue encontrando (se consulta por PUUID)", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "val-"));
+    const renamed: Roster = { ...roster, players: roster.players.map((p, i) => (i === 0 ? { ...p, name: "NombreViejo" } : p)) };
+    await runCollection({ client: fakeClient(baseFake()).client, roster: renamed, dataDir: dir, now: NOW });
+    const ids = (await readJson(dir, "player-matches.json")).filter((m: { puuid: string }) => m.puuid === P[0].puuid).map((m: { matchId: string }) => m.matchId);
+    expect(ids).toContain("R1");
   });
 
   test("un jugador con 404 se avisa y los demás se guardan", async () => {
