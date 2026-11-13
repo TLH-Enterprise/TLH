@@ -8,7 +8,7 @@ const PLATFORM = "pc";
 export class ApiError extends Error {
   status: number;
   constructor(status: number, path: string) {
-    super(`HenrikDev ${status} en ${path}`);
+    super(status === 0 ? `HenrikDev sin respuesta (red o timeout) en ${path}` : `HenrikDev ${status} en ${path}`);
     this.name = "ApiError";
     this.status = status;
   }
@@ -34,6 +34,7 @@ export interface ClientOptions {
 const MAX_429_RETRIES = 3;
 const MAX_5XX_RETRIES = 2;
 const RETRY_5XX_MS = 5000;
+const REQUEST_TIMEOUT_MS = 30_000;
 
 export function createClient(opts: ClientOptions): HenrikClient {
   const doFetch = opts.fetch ?? fetch;
@@ -55,7 +56,21 @@ export function createClient(opts: ClientOptions): HenrikClient {
     let tries5xx = 0;
     for (;;) {
       await throttle();
-      const res = await doFetch(BASE + path, { headers: { Authorization: opts.key, Accept: "application/json" } });
+      let res: Response;
+      try {
+        res = await doFetch(BASE + path, {
+          headers: { Authorization: opts.key, Accept: "application/json" },
+          signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+        });
+      } catch {
+        // error de red o timeout: se trata como un 5xx
+        if (tries5xx < MAX_5XX_RETRIES) {
+          tries5xx++;
+          await sleep(RETRY_5XX_MS);
+          continue;
+        }
+        throw new ApiError(0, path);
+      }
       if (res.ok) return (await res.json()) as T;
       if (res.status === 429 && tries429 < MAX_429_RETRIES) {
         tries429++;

@@ -1,6 +1,7 @@
 {
   "region": "na",
   "premierTeam": { "name": "T L H", "tag": "T L H" },
+  "teamSince": "2026-11-08",
   "players": [
     { "name": "Zeiko", "tag": "BRS", "puuid": "33061b1f-7843-528a-a83c-cdd909de674d" },
     { "name": "BiggS", "tag": "ING", "puuid": "ab7191eb-25fd-5639-b895-e5cf2257621e" },

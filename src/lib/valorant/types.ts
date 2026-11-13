@@ -10,6 +10,8 @@ export interface RosterPlayer {
 export interface Roster {
   region: "na";
   premierTeam: { name: string; tag: string };
+  /** YYYY-MM-DD: Premier y customs anteriores a esta fecha se ignoran. El ranked no se recorta. */
+  teamSince?: string;
   players: RosterPlayer[];
 }
 

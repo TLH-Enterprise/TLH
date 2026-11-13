@@ -78,6 +78,42 @@ describe("createClient", () => {
     expect(f.calls).toHaveLength(3);
   });
 
+  test("error de red (fetch lanza) reintenta como un 5xx", async () => {
+    let n = 0;
+    const fn = (async () => {
+      n++;
+      if (n === 1) throw new TypeError("fetch failed");
+      return new Response(JSON.stringify(premierBody), { status: 200 });
+    }) as unknown as typeof fetch;
+    const c = fakeClock();
+    const client = createClient({ key: KEY, fetch: fn, sleep: c.sleep, now: c.now });
+    expect((await client.premierTeam("a", "b"))?.division).toBe(21);
+    expect(n).toBe(2);
+  });
+
+  test("error de red persistente → ApiError status 0 tras 3 intentos", async () => {
+    let n = 0;
+    const fn = (async () => {
+      n++;
+      throw new TypeError("fetch failed");
+    }) as unknown as typeof fetch;
+    const c = fakeClock();
+    const client = createClient({ key: KEY, fetch: fn, sleep: c.sleep, now: c.now });
+    await expect(client.premierTeam("a", "b")).rejects.toMatchObject({ status: 0 });
+    expect(n).toBe(3);
+  });
+
+  test("cada petición lleva un timeout (signal)", async () => {
+    let signal: AbortSignal | undefined;
+    const fn = (async (_u: string, init?: RequestInit) => {
+      signal = init?.signal ?? undefined;
+      return new Response(JSON.stringify(premierBody), { status: 200 });
+    }) as unknown as typeof fetch;
+    const c = fakeClock();
+    await createClient({ key: KEY, fetch: fn, sleep: c.sleep, now: c.now }).premierTeam("a", "b");
+    expect(signal).toBeInstanceOf(AbortSignal);
+  });
+
   test("404 → ApiError sin reintentar, sin la clave en el mensaje", async () => {
     const f = fakeFetch([{ status: 404 }]);
     const c = fakeClock();
