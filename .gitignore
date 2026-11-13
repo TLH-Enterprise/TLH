@@ -27,3 +27,6 @@ pnpm-debug.log*
 
 # Brainstorming mockups
 .superpowers/
+
+# Datos de Valorant descargados antes del build
+public/valorant-data.json

@@ -3,7 +3,9 @@
   "type": "module",
   "version": "0.0.1",
   "scripts": {
+    "predev": "node scripts/valorant/fetch-data.mjs",
     "dev": "astro dev",
+    "prebuild": "node scripts/valorant/fetch-data.mjs",
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
@@ -14,7 +16,9 @@
     "three": "^0.185.1"
   },
   "devDependencies": {
+    "@astrojs/check": "^0.9.12",
     "@types/three": "^0.185.1",
+    "typescript": "^5.9.3",
     "vitest": "^5.1.0"
   },
   "engines": {
