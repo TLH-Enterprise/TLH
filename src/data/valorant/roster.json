@@ -1,0 +1,12 @@
+{
+  "region": "na",
+  "premierTeam": { "name": "T L H", "tag": "T L H" },
+  "players": [
+    { "name": "Zeiko", "tag": "BRS", "puuid": "33061b1f-7843-528a-a83c-cdd909de674d" },
+    { "name": "BiggS", "tag": "ING", "puuid": "ab7191eb-25fd-5639-b895-e5cf2257621e" },
+    { "name": "McFly", "tag": "GOAT", "puuid": "65ec15a9-d6b8-5ff2-8159-115b4b10564b" },
+    { "name": "ezekiel", "tag": "bored", "puuid": "25997071-9a45-52bb-95e0-652245a96ac6" },
+    { "name": "TDiamond", "tag": "COL", "puuid": "1693c1eb-22d0-5aa8-a972-7d01b5e45d43" },
+    { "name": "Sharky", "tag": "kztro", "puuid": "e1f792dc-f201-58fc-8bed-17fc55e01080" }
+  ]
+}
