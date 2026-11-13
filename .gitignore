@@ -30,3 +30,4 @@ pnpm-debug.log*
 
 # Datos de Valorant descargados antes del build
 public/valorant-data.json
+.playwright-mcp/

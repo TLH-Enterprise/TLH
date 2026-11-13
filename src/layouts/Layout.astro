@@ -4,9 +4,11 @@ import "../styles/theme.css";
 export interface Props {
   title?: string;
   description?: string;
+  robots?: string;
 }
 
 const {
+  robots = "index, follow",
   title = "TLH — Consultoría, desarrollo de software y marketing",
   description = "Firma de consultoría y desarrollo de software. Construimos productos digitales, integramos IA y ejecutamos estrategias de marketing y contenido para empresas.",
 } = Astro.props;
@@ -43,7 +45,7 @@ const {
     <meta name="twitter:image" content="/tlh.ico" />
 
     <!-- Additional Meta Tags -->
-    <meta name="robots" content="index, follow" />
+    <meta name="robots" content={robots} />
     <meta name="theme-color" content="#6d28d9" />
 
     <!-- Preconnect to external domains -->

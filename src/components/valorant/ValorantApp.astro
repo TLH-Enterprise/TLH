@@ -1,0 +1,252 @@
+---
+---
+
+<header class="vh">
+  <div class="vw vh__row">
+    <a href="/" class="vh__brand">TLH</a>
+    <span class="vh__title">Valorant</span>
+  </div>
+</header>
+
+<main class="vw vmain">
+  <h1 class="vtitle">División de Valorant</h1>
+  <p class="vsub" id="v-updated">Cargando datos…</p>
+
+  <nav class="vtabs" id="v-tabs" role="tablist" aria-label="Equipo y jugadores"></nav>
+
+  <div class="vfilters" id="v-filters">
+    <div class="vchips" role="group" aria-label="Modo">
+      <button type="button" class="vchip" data-mode="premier">Premier</button>
+      <button type="button" class="vchip" data-mode="custom">Scrims/Torneos</button>
+      <button type="button" class="vchip" data-mode="competitive">Ranked</button>
+    </div>
+    <div class="vchips" role="group" aria-label="Periodo">
+      <button type="button" class="vchip" data-period="act">Este acto</button>
+      <button type="button" class="vchip" data-period="all">Todo</button>
+    </div>
+  </div>
+
+  <section id="v-content" aria-live="polite"></section>
+</main>
+
+<script src="../../scripts/valorant.ts"></script>
+
+<style is:global>
+  .vw {
+    width: min(100% - 2 * var(--gutter), var(--container));
+    margin-inline: auto;
+  }
+  .vh {
+    border-bottom: 1px solid var(--stroke-1);
+    background: var(--surface-1);
+  }
+  .vh__row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding-block: 1rem;
+  }
+  .vh__brand {
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: var(--brand-1);
+    text-decoration: none;
+    font-size: 1.25rem;
+  }
+  .vh__title {
+    color: var(--text-3);
+    font-weight: 500;
+  }
+  .vmain {
+    padding-block: 2rem 4rem;
+    color: var(--text-1);
+    font-family: var(--font-sans);
+  }
+  .vtitle {
+    font-family: var(--font-display);
+    letter-spacing: var(--title-tracking);
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    margin: 0;
+  }
+  .vsub {
+    color: var(--text-3);
+    margin: 0.25rem 0 1.5rem;
+    font-size: 0.9rem;
+  }
+  .vtabs {
+    display: flex;
+    gap: 0.25rem;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--stroke-1);
+    margin-bottom: 1rem;
+  }
+  .vtab {
+    background: none;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    padding: 0.6rem 0.9rem;
+    font: inherit;
+    color: var(--text-2);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .vtab[aria-selected="true"] {
+    color: var(--text-1);
+    border-color: var(--brand-1);
+    font-weight: 600;
+  }
+  .vfilters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .vchips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .vchip {
+    font: inherit;
+    font-size: 0.85rem;
+    padding: 0.3rem 0.8rem;
+    border-radius: 999px;
+    border: 1px solid var(--stroke-2);
+    background: var(--surface-1);
+    color: var(--text-2);
+    cursor: pointer;
+  }
+  .vchip[aria-pressed="true"] {
+    background: var(--brand-1);
+    border-color: var(--brand-1);
+    color: #fff;
+  }
+  .vchip:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  .vkpis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+  .vkpi {
+    border: 1px solid var(--stroke-1);
+    border-radius: var(--r-md);
+    background: var(--surface-1);
+    padding: 0.8rem 1rem;
+  }
+  .vkpi__label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-3);
+  }
+  .vkpi__value {
+    font-family: var(--font-display);
+    font-size: clamp(1.05rem, 1.8vw, 1.35rem);
+    font-weight: 600;
+    color: var(--brand-1);
+    line-height: 1.3;
+  }
+  .vsec {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-3);
+    margin: 1.75rem 0 0.5rem;
+  }
+  .vtable-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--stroke-1);
+    border-radius: var(--r-md);
+    background: var(--surface-1);
+  }
+  .vtable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+  .vtable th,
+  .vtable td {
+    text-align: left;
+    padding: 0.55rem 0.8rem;
+    border-bottom: 1px solid var(--stroke-1);
+    white-space: nowrap;
+  }
+  .vtable tr:last-child td {
+    border-bottom: 0;
+  }
+  .vtable th {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-3);
+    font-weight: 600;
+  }
+  .vtable .num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  .vrow-btn {
+    cursor: pointer;
+  }
+  .vrow-btn:hover td {
+    background: var(--brand-3);
+  }
+  .vdetail td {
+    background: var(--surface-2);
+    padding: 0.75rem;
+  }
+  .vgood {
+    color: #15803d;
+    font-weight: 600;
+  }
+  .vbad {
+    color: #b91c1c;
+    font-weight: 600;
+  }
+  .vbadge {
+    display: inline-block;
+    font-size: 0.72rem;
+    padding: 0.1rem 0.5rem;
+    border-radius: 999px;
+    background: var(--brand-3);
+    color: var(--brand-ink);
+    margin-left: 0.35rem;
+  }
+  .vtips {
+    border-left: 3px solid var(--brand-1);
+    background: var(--bg-1);
+    border-radius: var(--r-sm);
+    padding: 0.6rem 0.9rem;
+    margin: 0 0 1rem;
+    list-style: none;
+  }
+  .vtips li + li {
+    margin-top: 0.25rem;
+  }
+  .vempty {
+    color: var(--text-3);
+    padding: 1rem;
+    margin: 0;
+  }
+  .vchart {
+    width: 100%;
+    height: 160px;
+    display: block;
+  }
+  .vchart-wrap {
+    border: 1px solid var(--stroke-1);
+    border-radius: var(--r-md);
+    background: var(--surface-1);
+    padding: 0.75rem;
+  }
+  .vchart__label {
+    font-size: 0.75rem;
+    color: var(--text-3);
+    display: flex;
+    justify-content: space-between;
+  }
+</style>
