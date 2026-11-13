@@ -1,0 +1,63 @@
+name: Valorant collect
+
+on:
+  schedule:
+    - cron: "0 10 * * *" # 5:00 hora de Colombia
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency: valorant-collect
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/checkout@v4
+        with:
+          ref: valorant-data
+          path: data-branch
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Recolectar datos de HenrikDev
+        run: node scripts/valorant/collect.ts data-branch/data
+        env:
+          HENRIKDEV_API_KEY: ${{ secrets.HENRIKDEV_API_KEY }}
+
+      - name: Guardar en la rama valorant-data
+        id: commit
+        working-directory: data-branch
+        run: |
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "Sin cambios."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data
+          git commit -m "data: actualización $(date -u +%Y-%m-%d)"
+          git push origin HEAD:valorant-data
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Reconstruir el sitio en Vercel
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$HOOK" ]; then
+            echo "::warning::Falta el secreto VERCEL_DEPLOY_HOOK_URL; no se reconstruye el sitio."
+            exit 0
+          fi
+          curl -fsS -X POST "$HOOK" > /dev/null
+          echo "Deploy solicitado."
