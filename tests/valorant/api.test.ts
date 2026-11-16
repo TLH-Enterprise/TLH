@@ -91,6 +91,27 @@ describe("createClient", () => {
     expect(n).toBe(2);
   });
 
+  test("conexión cortada al leer el cuerpo (\"terminated\") reintenta", async () => {
+    let n = 0;
+    const fn = (async () => {
+      n++;
+      if (n === 1) {
+        const body = new ReadableStream({
+          start(ctrl) {
+            ctrl.enqueue(new TextEncoder().encode('{"data":'));
+            ctrl.error(new TypeError("terminated"));
+          },
+        });
+        return new Response(body, { status: 200 });
+      }
+      return new Response(JSON.stringify(premierBody), { status: 200 });
+    }) as unknown as typeof fetch;
+    const c = fakeClock();
+    const client = createClient({ key: KEY, fetch: fn, sleep: c.sleep, now: c.now });
+    expect((await client.premierTeam("a", "b"))?.division).toBe(21);
+    expect(n).toBe(2);
+  });
+
   test("error de red persistente → ApiError status 0 tras 3 intentos", async () => {
     let n = 0;
     const fn = (async () => {

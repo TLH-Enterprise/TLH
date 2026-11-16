@@ -58,13 +58,17 @@ export function createClient(opts: ClientOptions): HenrikClient {
     for (;;) {
       await throttle();
       let res: Response;
+      let body: unknown;
       try {
         res = await doFetch(BASE + path, {
           headers: { Authorization: opts.key, Accept: "application/json" },
           signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
         });
+        // El cuerpo se lee aquí dentro: si la conexión se corta a mitad de la
+        // respuesta (undici lanza "TypeError: terminated") también se reintenta.
+        if (res.ok) body = await res.json();
       } catch {
-        // error de red o timeout: se trata como un 5xx
+        // error de red, timeout o cuerpo cortado: se trata como un 5xx
         if (tries5xx < MAX_5XX_RETRIES) {
           tries5xx++;
           await sleep(RETRY_5XX_MS);
@@ -72,7 +76,7 @@ export function createClient(opts: ClientOptions): HenrikClient {
         }
         throw new ApiError(0, path);
       }
-      if (res.ok) return (await res.json()) as T;
+      if (res.ok) return body as T;
       if (res.status === 429 && tries429 < MAX_429_RETRIES) {
         tries429++;
         const reset = Number(res.headers.get("x-ratelimit-reset"));
