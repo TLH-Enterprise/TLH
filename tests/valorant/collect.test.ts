@@ -125,6 +125,35 @@ describe("runCollection", () => {
     expect(pms.find((m: { matchId: string }) => m.matchId === "R1").mode).toBe("competitive");
   });
 
+  test("fase fast no pide match() y deja las partidas de equipo para después", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "val-"));
+    const fake = baseFake();
+    const fast = fakeClient(fake);
+    const r = await runCollection({ client: fast.client, roster, dataDir: dir, now: NOW, phase: "fast", log: () => {} });
+    expect(fast.calls.match).toEqual([]);
+    expect(r.newTeamMatches).toBe(0);
+    expect(r.newPlayerMatches).toBeGreaterThan(0);
+    expect((await readJson(dir, "meta.json")).nonTeamMatchIds).toEqual([]);
+    const full = fakeClient(fake);
+    await runCollection({ client: full.client, roster, dataDir: dir, now: NOW, log: () => {} });
+    expect(full.calls.match.sort()).toEqual(["A", "P"]);
+  });
+
+  test("maxV4Requests corta la corrida y la siguiente retoma lo pendiente", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "val-"));
+    const fake = baseFake();
+    const logs: string[] = [];
+    const first = fakeClient(fake);
+    const r1 = await runCollection({ client: first.client, roster, dataDir: dir, now: NOW, maxV4Requests: 1, log: (m) => logs.push(m) });
+    expect(first.calls.match).toHaveLength(1);
+    expect(r1.newTeamMatches).toBe(1);
+    expect(logs.some((m) => m.includes("Límite de 1"))).toBe(true);
+    const second = fakeClient(fake);
+    await runCollection({ client: second.client, roster, dataDir: dir, now: NOW, maxV4Requests: 1, log: () => {} });
+    expect([...first.calls.match, ...second.calls.match].sort()).toEqual(["A", "P"]);
+    expect(await readJson(dir, "team-matches.json")).toHaveLength(2);
+  });
+
   test("segunda corrida no repite partidas ni pide match()", async () => {
     const dir = await mkdtemp(join(tmpdir(), "val-"));
     const fake = baseFake();

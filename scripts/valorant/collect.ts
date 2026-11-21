@@ -16,7 +16,14 @@ export interface CollectOptions {
   dataDir: string;
   now: Date;
   log?: (m: string) => void;
+  /** "fast": solo partidas de jugador + rango; "v4": además revisa partidas de equipo (por defecto). */
+  phase?: Phase;
+  /** Máximo de peticiones de partida (V4) por corrida; el resto queda para la siguiente. Sin límite por defecto. */
+  maxV4Requests?: number;
 }
+
+export type Phase = "fast" | "v4";
+const PHASES: Phase[] = ["fast", "v4"];
 
 async function readJson<T>(path: string, fallback: T): Promise<T> {
   try {
@@ -30,7 +37,7 @@ async function readJson<T>(path: string, fallback: T): Promise<T> {
 const isNotFound = (e: unknown) => e instanceof ApiError && e.status === 404;
 
 export async function runCollection(opts: CollectOptions): Promise<{ newPlayerMatches: number; newTeamMatches: number }> {
-  const { client, roster, dataDir, now } = opts;
+  const { client, roster, dataDir, now, phase = "v4", maxV4Requests = Infinity } = opts;
   const log = opts.log ?? console.log;
   const f = (name: string) => join(dataDir, name);
 
@@ -85,9 +92,16 @@ export async function runCollection(opts: CollectOptions): Promise<{ newPlayerMa
   const newTeam: TeamMatch[] = [];
   const nonTeam = new Set(meta.nonTeamMatchIds);
 
-  const pending = [...teamCandidates(allPlayerMatches, roster, labels)].filter(([id]) => !haveTeam.has(id) && !skip.has(id));
-  log(`Partidas de equipo por revisar: ${pending.length}`);
+  const pending = phase === "fast" ? [] : [...teamCandidates(allPlayerMatches, roster, labels)].filter(([id]) => !haveTeam.has(id) && !skip.has(id));
+  if (phase === "fast") log("Fase fast: no se revisan partidas de equipo.");
+  else log(`Partidas de equipo por revisar: ${pending.length}`);
+  let requests = 0;
   for (const [id, kind] of pending) {
+    if (requests >= maxV4Requests) {
+      log(`Límite de ${maxV4Requests} partidas por corrida alcanzado; quedan ${pending.length - requests} para la próxima.`);
+      break;
+    }
+    requests++;
     let full;
     try {
       full = await client.match(id);
@@ -138,15 +152,23 @@ export async function runCollection(opts: CollectOptions): Promise<{ newPlayerMa
 }
 
 async function main() {
-  const dataDir = process.argv[2];
+  const args = process.argv.slice(2);
+  const flag = (name: string) => args.find((a) => a.startsWith(`--${name}=`))?.split("=")[1];
+  const dataDir = args.find((a) => !a.startsWith("--"));
+  const phase = (flag("phase") ?? "v4") as Phase;
+  const maxRaw = flag("max-v4");
+  const maxV4Requests = maxRaw === undefined ? Infinity : Number(maxRaw);
   const key = process.env.HENRIKDEV_API_KEY;
-  if (!dataDir || !key) {
-    console.error("Uso: HENRIKDEV_API_KEY=… node scripts/valorant/collect.ts <dataDir>");
+  if (!dataDir || !key || !PHASES.includes(phase) || !(maxV4Requests >= 0)) {
+    console.error("Uso: HENRIKDEV_API_KEY=… node scripts/valorant/collect.ts <dataDir> [--phase=fast|v4] [--max-v4=N]");
+    console.error("  --phase=fast  solo partidas de jugador y rango (sin pedir partidas de equipo)");
+    console.error("  --phase=v4    además revisa partidas de equipo (por defecto)");
+    console.error("  --max-v4=N    máximo de partidas de equipo a pedir en esta corrida (sin límite por defecto)");
     process.exit(1);
   }
   const here = dirname(fileURLToPath(import.meta.url));
   const roster = JSON.parse(await readFile(join(here, "../../src/data/valorant/roster.json"), "utf8")) as Roster;
-  const r = await runCollection({ client: createClient({ key }), roster, dataDir, now: new Date() });
+  const r = await runCollection({ client: createClient({ key }), roster, dataDir, now: new Date(), phase, maxV4Requests });
   console.log(`Listo: ${r.newPlayerMatches} partidas de jugador nuevas, ${r.newTeamMatches} de equipo nuevas.`);
 }
 
