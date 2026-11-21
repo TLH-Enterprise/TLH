@@ -73,6 +73,8 @@ export interface TeamMatch {
   opponentName: string | null;
   opponentPlayers: string[];
   lineup: LineupEntry[];
+  /** Los 5 del equipo rival (inRoster siempre false). Falta en partidas guardadas antes de que existiera. */
+  opponentLineup?: LineupEntry[];
   rounds: TeamRound[];
 }
 

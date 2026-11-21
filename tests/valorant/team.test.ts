@@ -26,6 +26,8 @@ describe("toTeamMatch", () => {
     expect(t.lineup).toHaveLength(5);
     expect(t.lineup.filter((l) => !l.inRoster).map((l) => l.riotId)).toEqual(["dagestan aim f#splsh"]);
     expect(t.opponentPlayers).toHaveLength(5);
+    expect(t.opponentLineup!.map((l) => l.riotId)).toEqual(t.opponentPlayers);
+    expect(t.opponentLineup!.every((l) => !l.inRoster && l.agent.length > 0)).toBe(true);
     const z = t.lineup.find((l) => l.puuid === zeiko)!;
     expect(z).toMatchObject({ riotId: "Zeiko#BRS", agent: "Sova", inRoster: true, kills: 16, deaths: 12, assists: 12 });
   });
