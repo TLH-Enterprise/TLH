@@ -653,7 +653,8 @@
   .tac-scoreboard tr.tac-side--dire td { background: var(--tac-dire-dim); }
 
   /* Round dots */
-  .tac-rounds { display: inline-flex; gap: 2px; font-family: var(--tac-font-mono); font-size: 0.7rem; }
+  .tac-rounds { display: inline-flex; gap: 3px; align-items: center; font-family: var(--tac-font-mono); font-size: 0.7rem; }
+  .tac-rounds__total { margin-left: var(--tac-space-2); white-space: nowrap; }
   .tac-round { width: 8px; height: 8px; border-radius: 50%; background: var(--tac-stroke); flex-shrink: 0; }
   .tac-round--win { background: var(--tac-clutch); }
   .tac-round--loss { background: var(--tac-threat); }
@@ -836,10 +837,13 @@
      ========================================================================== */
   .tac-match-section { margin-top: var(--tac-space-6); }
   .tac-match-filters { display: flex; gap: var(--tac-space-2); flex-wrap: wrap; margin-bottom: var(--tac-space-4); padding-bottom: var(--tac-space-3); border-bottom: 1px solid var(--tac-stroke); }
-  .tac-match-filter-btn { display: inline-flex; align-items: center; gap: var(--tac-space-2); padding: var(--tac-space-1) var(--tac-space-2); border: 1px solid var(--tac-stroke); border-radius: var(--tac-r-full); background: var(--tac-bg); color: var(--tac-text-dim); font-size: 0.6875rem; font-family: var(--tac-font-mono); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; transition: all var(--tac-base); }
-  .tac-match-filter-btn:hover { border-color: var(--tac-radiant); color: var(--tac-text); }
-  .tac-match-filter-btn--active { border-color: var(--tac-radiant); color: var(--tac-text); background: rgba(255,255,255,0.03); }
-  .tac-match-filter-btn .tac-match-filter__count { font-size: 0.625rem; opacity: 0.7; }
+  .tac-match-filter { padding: var(--tac-space-1) var(--tac-space-3); border: 1px solid var(--tac-stroke); border-radius: var(--tac-r-full); background: var(--tac-bg); color: var(--tac-text-dim); font-size: 0.6875rem; font-family: var(--tac-font-mono); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; transition: all var(--tac-base); max-width: 100%; }
+  .tac-match-filter:hover, .tac-match-filter:focus-visible { border-color: var(--tac-radiant); color: var(--tac-text); outline: none; }
+  .tac-match-filter:disabled { opacity: 0.5; cursor: default; }
+  .tac-match-filter option { background: var(--tac-bg-elevated); color: var(--tac-text); text-transform: none; }
+  .tac-match-filter__count { font-size: 0.625rem; opacity: 0.7; }
+  .tac-match-more { display: flex; align-items: center; justify-content: center; gap: var(--tac-space-2); width: 100%; margin-top: var(--tac-space-4); padding: var(--tac-space-3); border: 1px dashed var(--tac-stroke); border-radius: var(--tac-r-md); background: transparent; color: var(--tac-text-dim); font-family: var(--tac-font-mono); font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; transition: all var(--tac-base); }
+  .tac-match-more:hover { border-color: var(--tac-radiant); color: var(--tac-radiant); }
 
   .tac-match-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: var(--tac-space-3); }
   .tac-match-card { background: var(--tac-surface); border: 1px solid var(--tac-stroke); border-radius: var(--tac-r-md); padding: var(--tac-space-3); transition: all var(--tac-base); display: flex; flex-direction: column; }
@@ -959,6 +963,7 @@
   .tac-match-detail__player { display: inline-flex; align-items: center; gap: var(--tac-space-2); padding: var(--tac-space-1) var(--tac-space-2); background: var(--tac-surface); border: 1px solid var(--tac-stroke); border-radius: var(--tac-r-sm); font-size: 0.75rem; }
   .tac-match-detail__player-agent { flex-shrink: 0; }
   .tac-match-detail__player-name { font-family: var(--tac-font-ui); font-weight: 500; color: var(--tac-text); white-space: nowrap; }
+  .tac-match-detail__player-kda { font-family: var(--tac-font-mono); font-size: 0.6875rem; color: var(--tac-text-muted); white-space: nowrap; }
 
   .tac-match-detail__rounds-legend { display: flex; flex-wrap: wrap; gap: var(--tac-space-3); margin-top: var(--tac-space-3); padding-top: var(--tac-space-3); border-top: 1px solid var(--tac-stroke); font-family: var(--tac-font-mono); font-size: 0.5625rem; color: var(--tac-text-muted); }
   .tac-match-detail__legend-item { display: inline-flex; align-items: center; gap: var(--tac-space-1); }

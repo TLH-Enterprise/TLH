@@ -108,6 +108,10 @@ export function teamByMap(tms: TeamMatch[]) {
         winRate: winRateOf(g.length, wins),
         atkPct: pct(atk.filter((r) => r.won).length, atk.length),
         defPct: pct(def.filter((r) => r.won).length, def.length),
+        roundsWon: g.reduce((a, t) => a + t.roundsWon, 0),
+        roundsLost: g.reduce((a, t) => a + t.roundsLost, 0),
+        /** Una entrada por partida, en el mismo orden que `tms`. */
+        results: g.map((t) => ({ won: t.won, roundsWon: t.roundsWon, roundsLost: t.roundsLost })),
       };
     })
     .sort((a, b) => b.games - a.games || a.map.localeCompare(b.map));
@@ -269,4 +273,15 @@ export function leaders(rows: LeaderRow[]): Record<LeaderKey, string[]> {
     out[key] = best === null ? [] : rows.filter((r) => leaderValue(r, key) === best).map((r) => r.puuid);
   }
   return out;
+}
+
+/** Filtro del historial de partidas de un jugador; un campo vacío no filtra. */
+export interface HistoryFilter {
+  agent: string;
+  map: string;
+  mode: string;
+}
+
+export function filterHistory(ms: PlayerMatch[], h: HistoryFilter): PlayerMatch[] {
+  return ms.filter((m) => (!h.agent || m.agent === h.agent) && (!h.map || m.map === h.map) && (!h.mode || m.mode === h.mode));
 }

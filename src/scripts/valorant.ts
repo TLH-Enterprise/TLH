@@ -3,6 +3,8 @@ import {
   compositions,
   currentSeason,
   highlights,
+  filterHistory,
+  type HistoryFilter,
   includedTeamMatches,
   leaderboard,
   leaders,
@@ -514,10 +516,15 @@ function renderTeam(ds: Dataset, f: Filter): string {
   // Map scoreboard
   const mapHeaders = ["Mapa", "PJ", "WR", "Ataque", "Defensa", "Rondas"];
   const mapRows = maps.map((m) => {
-    const roundDots = Array.from({ length: m.games }, (_, i) => {
-      // Simplified - would need round data per map
-      return `<span class="tac-round" style="background:var(--tac-stroke)"></span>`;
-    }).join("");
+    // Un punto por partida (la más reciente primero) y el total de rondas del mapa.
+    const resultDots = m.results
+      .map((r) => {
+        const cls = r.won === true ? "tac-round--win" : r.won === false ? "tac-round--loss" : "";
+        const label = `${r.won === true ? "Victoria" : r.won === false ? "Derrota" : "Empate"} ${r.roundsWon}–${r.roundsLost}`;
+        return `<span class="tac-round ${cls}" title="${label}" aria-label="${label}"></span>`;
+      })
+      .join("");
+    const diff = m.roundsWon - m.roundsLost;
     return {
       cells: [
         `<strong>${esc(m.map)}</strong>`,
@@ -525,7 +532,7 @@ function renderTeam(ds: Dataset, f: Filter): string {
         `<span class="${wrClass(m.winRate)}">${fmtPct(m.winRate)}</span>`,
         fmtPct(m.atkPct),
         fmtPct(m.defPct),
-        `<div class="tac-rounds" aria-label="Historial de rondas">${roundDots}</div>`,
+        `<div class="tac-rounds" role="img" aria-label="Partidas en ${esc(m.map)}">${resultDots}<span class="tac-rounds__total ${diff > 0 ? "tac-win" : diff < 0 ? "tac-loss" : ""}">${m.roundsWon}–${m.roundsLost}</span></div>`,
       ],
       rowClass: "",
       expandable: true,
@@ -605,44 +612,66 @@ function renderPlayer(ds: Dataset, p: RosterPlayer, f: Filter): string {
     ${sectionHeader("Evolución del rango")}
     ${renderEloTimeline(rankSeries(ds, p.puuid, f))}
     ${sectionHeader("Tus ultimas partidas")}
-    ${renderLastMatches(ms, ds)}
+    ${renderLastMatches(ms)}
   `;
 }
 
 /** Last Matches - match cards similar to in-game match history */
-function renderLastMatches(ms: PlayerMatch[], ds: Dataset): string {
+const MATCH_PAGE = 35;
+const MODE_LABELS: Record<Mode, string> = {
+  competitive: "Ranked",
+  premier: "Premier",
+  custom: "Scrim/Torneo",
+};
+
+/** Last Matches - match cards similar to in-game match history */
+function renderLastMatches(ms: PlayerMatch[]): string {
+  const options = (values: string[], all: string, label: (v: string) => string = (v) => v) =>
+    `<option value="">${all} (${values.length})</option>` +
+    values.map((v) => `<option value="${esc(v)}">${esc(label(v))}</option>`).join("");
+  const sorted = (xs: string[]) => [...new Set(xs)].sort((a, b) => a.localeCompare(b, "es"));
+  const agents = sorted(ms.map((m) => m.agent));
+  const maps = sorted(ms.map((m) => m.map));
+  const modes = sorted(ms.map((m) => m.mode));
+
+  return `
+    <section class="tac-match-section" data-history>
+      <div class="tac-match-filters" role="group" aria-label="Filtros de historial de partidos">
+        <select class="tac-match-filter" data-history-filter="agent" aria-label="Filtrar por agente">${options(agents, "Todos los agentes")}</select>
+        <select class="tac-match-filter" data-history-filter="map" aria-label="Filtrar por mapa">${options(maps, "Todos los mapas")}</select>
+        <select class="tac-match-filter" data-history-filter="mode" aria-label="Filtrar por modo"${modes.length < 2 ? " disabled" : ""}>${options(modes, "Todos los modos", (v) => MODE_LABELS[v as Mode] ?? v)}</select>
+      </div>
+      <div data-history-body>${renderHistoryBody(ms, MATCH_PAGE)}</div>
+    </section>
+  `;
+}
+
+function renderHistoryBody(ms: PlayerMatch[], shown: number): string {
+  if (ms.length === 0) {
+    return `<div class="tac-empty" style="padding:24px 0;"><p class="tac-empty__desc">Ninguna partida coincide con los filtros.</p></div>`;
+  }
   const wins = ms.filter((m) => m.won === true).length;
   const losses = ms.filter((m) => m.won === false).length;
   const draws = ms.filter((m) => m.won === null).length;
-  const kd = ms.length ? ms.reduce((a, m) => a + m.kills, 0) / Math.max(ms.reduce((a, m) => a + m.deaths, 0), 1) : null;
-  const hsPct = ms.length ? (ms.reduce((a, m) => a + m.headshots, 0) / Math.max(ms.reduce((a, m) => a + m.bodyshots + m.headshots + m.legshots, 0), 1)) * 100 : null;
-  const totalDamage = ms.reduce((a, m) => a + m.damageMade, 0);
+  const kd = ms.reduce((a, m) => a + m.kills, 0) / Math.max(ms.reduce((a, m) => a + m.deaths, 0), 1);
+  const hsPct = (ms.reduce((a, m) => a + m.headshots, 0) / Math.max(ms.reduce((a, m) => a + m.bodyshots + m.headshots + m.legshots, 0), 1)) * 100;
   const totalRounds = ms.reduce((a, m) => a + m.roundsWon + m.roundsLost, 0);
-  const dmgPerRound = totalRounds > 0 ? totalDamage / totalRounds : null;
+  const dmgPerRound = totalRounds > 0 ? ms.reduce((a, m) => a + m.damageMade, 0) / totalRounds : null;
+  const kda = ms.reduce((a, m) => a + m.kills + m.assists, 0) / Math.max(ms.reduce((a, m) => a + m.deaths, 0), 1);
 
-  const modeLabels: Record<Mode, string> = {
-    competitive: "Ranked",
-    premier: "Premier",
-    custom: "Scrim/Torneo",
-  };
-
-  const statCards: Array<{ label: string; value: string; trend?: "up" | "down" | "neutral"; trendText?: string }> = [
+  const statCards: Array<{ label: string; value: string; trend?: "up" | "down" | "neutral" }> = [
     { label: "Partidas", value: String(ms.length) },
     { label: "Victorias", value: String(wins), trend: wins > losses ? "up" : wins < losses ? "down" : "neutral" },
     { label: "Derrotas", value: String(losses) },
-    { label: "Empates", value: String(draws), trend: draws > 0 ? "neutral" : undefined },
+    { label: "Empates", value: String(draws) },
     { label: "K/D", value: fmtKd(kd) },
     { label: "HS%", value: fmtPct(hsPct) },
     { label: "Daño/R", value: fmtNum(dmgPerRound) },
-    { label: "KDA", value: fmtKd((ms.reduce((a, m) => a + m.kills + m.assists, 0)) / Math.max(ms.reduce((a, m) => a + m.deaths, 0), 1)) },
+    { label: "KDA", value: fmtKd(kda) },
   ];
 
-  const agents = [...new Set(ms.map((m) => m.agent))];
-  const maps = [...new Set(ms.map((m) => m.map))];
-  const modes = [...new Set(ms.map((m) => m.mode))];
-
   const matchCards = ms
-    .slice(0, 35)
+    .slice(0, shown)
     .map((m) => {
       const agentIconHtml = agentIcon(m.agent, 24);
       const totalHsBodyLegs = m.headshots + m.bodyshots + m.legshots;
@@ -653,9 +682,10 @@ function renderLastMatches(ms: PlayerMatch[], ds: Dataset): string {
       const wonClass = m.won === true ? "won" : m.won === false ? "lost" : "neutral";
       const resultText = m.won === true ? "Victoria" : m.won === false ? "Derrota" : "Empate";
       const resultClass = m.won === true ? "won" : m.won === false ? "lost" : "";
+      const modeLabels = MODE_LABELS;
 
       return `
-        <article class="tac-match-card tac-match-card--${wonClass}" role="listitem" aria-label="${esc(m.map)} - ${resultText}" data-match-id="${esc(m.matchId)}" tabindex="0">
+        <article class="tac-match-card tac-match-card--${wonClass}" role="listitem" aria-label="${esc(m.map)} - ${resultText}" data-match-id="${esc(m.matchId)}" data-puuid="${esc(m.puuid)}" tabindex="0">
           <div class="tac-match-card__header">
             <span class="tac-match-card__map">${esc(m.map)}</span>
             <span class="tac-match-card__result tac-match-card__result--${resultClass}">${esc(resultText)}</span>
@@ -686,41 +716,25 @@ function renderLastMatches(ms: PlayerMatch[], ds: Dataset): string {
     })
     .join("");
 
+  const remaining = ms.length - shown;
   return `
-    <section class="tac-match-section">
-      <div class="tac-match-filters" role="group" aria-label="Filtros de historial de partidos">
-        <button type="button" class="tac-match-filter-btn tac-match-filter-btn--active" aria-pressed="true">
-          Todos los agentes <span class="tac-match-filter__count">${agents.length}</span>
-        </button>
-        <button type="button" class="tac-match-filter-btn" aria-pressed="false">
-          Todos los mapas <span class="tac-match-filter__count">${maps.length}</span>
-        </button>
-        <button type="button" class="tac-match-filter-btn" aria-pressed="false">
-          Todos los modos <span class="tac-match-filter__count">${modes.length}</span>
-        </button>
-        <button type="button" class="tac-match-filter-btn" aria-pressed="false">
-          +4 más
-        </button>
-      </div>
+    <div class="tac-kpi-strip" role="list" aria-label="Resumen de partidos">
+      ${statCards
+        .map(
+          (k) => `
+        <div class="tac-kpi tac-kpi--${k.trend ? `tac-kpi__trend--${k.trend}` : "radiant"}" role="listitem">
+          <div class="tac-kpi__label">${esc(k.label)}</div>
+          <div class="tac-kpi__value">${esc(k.value)}</div>
+        </div>
+      `
+        )
+        .join("")}
+    </div>
 
-      <div class="tac-kpi-strip" role="list" aria-label="Resumen de partidos">
-        ${statCards
-          .map(
-            (k) => `
-          <div class="tac-kpi tac-kpi--${k.trend ? `tac-kpi__trend--${k.trend}` : "radiant"}" role="listitem">
-            <div class="tac-kpi__label">${esc(k.label)}</div>
-            <div class="tac-kpi__value">${esc(k.value)}</div>
-            ${k.trend ? `<div class="tac-kpi__trend tac-kpi__trend--${k.trend}">${k.trendText || ""}</div>` : ""}
-          </div>
-        `
-          )
-          .join("")}
-      </div>
-
-      <div class="tac-match-cards" role="list" aria-label="Historial de partidos">
-        ${matchCards}
-      </div>
-    </section>
+    <div class="tac-match-cards" role="list" aria-label="Historial de partidos">
+      ${matchCards}
+    </div>
+    ${remaining > 0 ? `<button type="button" class="tac-match-more" data-history-more>Ver ${Math.min(remaining, MATCH_PAGE)} más <span class="tac-match-filter__count">${remaining} restantes</span></button>` : ""}
   `;
 }
 
@@ -1081,7 +1095,7 @@ async function main() {
     if (teamMatch.lineup.length === 0) return;
 
     const ourLineup = teamMatch.lineup;
-    const opponentLineup = teamMatch.opponentPlayers;
+    const opponentLineup = teamMatch.opponentLineup;
 
     // Update rounds with ATK/DEF roles
     const roundsContainer = document.querySelector('.tac-match-detail__rounds');
@@ -1090,19 +1104,21 @@ async function main() {
       const existingLegend = roundsContainer.parentElement?.querySelector('.tac-match-detail__rounds-legend');
       existingLegend?.remove();
 
-      // Build rounds with side-switch separator after round 12
+      // Rondas con separador en cada cambio de lado
       const roundsHtml = teamMatch.rounds
         .map((r: TeamRound, i: number) => {
           const roleLabel = r.role === 'Attack' ? 'ATK' : 'DEF';
           const roleClass = r.role === 'Attack' ? 'tac-round--atk' : 'tac-round--def';
-          const isSideSwitch = i === 12 ? ' tac-round--side-switch' : '';
+          // Separador donde cambia el rol (medio tiempo y cada ronda de la prórroga).
+          const next = teamMatch.rounds[i + 1];
+          const isSideSwitch = next && next.role !== r.role ? ' tac-round--side-switch' : '';
           return `<span class="tac-match-detail__round tac-match-detail__round--${r.won ? 'win' : 'loss'} ${roleClass}${isSideSwitch}" aria-label="Ronda ${i + 1}: ${roleLabel} ${r.won ? 'Ganada' : 'Perdida'}" title="Ronda ${i + 1}: ${roleLabel} ${r.won ? 'Ganada' : 'Perdida'}"></span>`;
         })
         .join('');
       roundsContainer.innerHTML = roundsHtml;
 
       // Dynamic legend based on starting side (first 12 rounds = starting side)
-      const startingSide = teamMatch.side === 'Red' ? 'Attack' : 'Defense';
+      const startingSide = teamMatch.rounds[0].role;
       const firstHalfRole = startingSide === 'Attack' ? 'ATK' : 'DEF';
       const secondHalfRole = startingSide === 'Attack' ? 'DEF' : 'ATK';
 
@@ -1129,35 +1145,30 @@ async function main() {
       opponentStat.textContent = teamMatch.opponentName ?? dash;
     }
 
-    // Our team lineup
+    // Alineaciones: la nuestra siempre trae agente y K/D/A; la rival solo si el recolector guardó opponentLineup.
+    const playerChip = (p: LineupEntry, sub: boolean) => `
+      <div class="tac-match-detail__player">
+        <span class="tac-match-detail__player-agent">${agentIcon(p.agent, 24)}</span>
+        <span class="tac-match-detail__player-name">${esc(p.riotId)}</span>
+        <span class="tac-match-detail__player-kda" title="Kills / Muertes / Asistencias">${p.kills}/${p.deaths}/${p.assists}</span>
+        ${sub ? '<span class="tac-badge tac-badge--sub">Suplente</span>' : ''}
+      </div>`;
+    const nameChip = (riotId: string) => `
+      <div class="tac-match-detail__player">
+        <span class="tac-match-detail__player-name">${esc(riotId)}</span>
+      </div>`;
+
     const ourLineupContainer = document.getElementById('tac-our-lineup-inner');
     if (ourLineupContainer && ourLineup.length > 0) {
-      ourLineupContainer.innerHTML = ourLineup
-        .map(
-          (p: LineupEntry) => `
-            <div class="tac-match-detail__player">
-              <span class="tac-match-detail__player-agent">${agentIcon(p.agent, 24)}</span>
-              <span class="tac-match-detail__player-name">${esc(p.riotId)}</span>
-              ${p.inRoster ? '' : '<span class="tac-badge tac-badge--sub">Suplente</span>'}
-            </div>
-          `
-        )
-        .join('');
+      ourLineupContainer.innerHTML = ourLineup.map((p) => playerChip(p, !p.inRoster)).join('');
       document.getElementById('tac-our-lineup')!.hidden = false;
     }
 
-    // Opponent lineup
     const oppLineupContainer = document.getElementById('tac-opp-lineup-inner');
-    if (oppLineupContainer && opponentLineup.length > 0) {
-      oppLineupContainer.innerHTML = opponentLineup
-        .map(
-          (riotId: string) => `
-            <div class="tac-match-detail__player">
-              <span class="tac-match-detail__player-name">${esc(riotId)}</span>
-            </div>
-          `
-        )
-        .join('');
+    if (oppLineupContainer && (opponentLineup?.length || teamMatch.opponentPlayers.length)) {
+      oppLineupContainer.innerHTML = opponentLineup?.length
+        ? opponentLineup.map((p) => playerChip(p, false)).join('')
+        : teamMatch.opponentPlayers.map(nameChip).join('');
       document.getElementById('tac-opp-lineup')!.hidden = false;
     }
   }
@@ -1274,6 +1285,9 @@ async function main() {
     if (player) {
       canvasTitle.textContent = player.name;
       canvasSubtitle.textContent = `${ds.roster.players.indexOf(player) + 1} de ${ds.roster.players.length} · ${fmtTimeAgo(ds.meta.updatedAt || new Date().toISOString())}`;
+      historyAll = playerMatchesFor(ds, player.puuid, f);
+      historyFilter.agent = historyFilter.map = historyFilter.mode = "";
+      historyShown = MATCH_PAGE;
       contentEl.innerHTML = renderPlayer(ds, player, f);
       liveContentEl.innerHTML = renderLivePlayer(ds, player, f);
     } else if (kind === "ranking") {
@@ -1292,7 +1306,6 @@ async function main() {
     attachDetailListeners();
     attachSortListeners();
     attachEloTooltipListeners();
-    attachMatchModalListeners();
   }
 
   function attachDetailListeners() {
@@ -1376,21 +1389,47 @@ async function main() {
     });
   }
 
-  function attachMatchModalListeners() {
-    contentEl.querySelectorAll<HTMLElement>(".tac-match-card").forEach((card) => {
-      const matchId = card.dataset.matchId;
-      if (!matchId) return;
-      const match = ds.playerMatches.find((m) => m.matchId === matchId);
-      if (!match) return;
-      card.addEventListener("click", () => openModal(match));
-      card.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          openModal(match);
-        }
-      });
-    });
+  // Historial del jugador: filtros por agente/mapa/modo y "ver más" (se re-renderiza solo el cuerpo).
+  let historyAll: PlayerMatch[] = [];
+  const historyFilter: HistoryFilter = { agent: "", map: "", mode: "" };
+  let historyShown = MATCH_PAGE;
+
+  function renderHistory() {
+    const body = contentEl.querySelector<HTMLElement>("[data-history-body]");
+    if (body) body.innerHTML = renderHistoryBody(filterHistory(historyAll, historyFilter), historyShown);
   }
+
+  contentEl.addEventListener("change", (e) => {
+    const sel = (e.target as HTMLElement).closest<HTMLSelectElement>("[data-history-filter]");
+    if (!sel) return;
+    historyFilter[sel.dataset.historyFilter as keyof HistoryFilter] = sel.value;
+    historyShown = MATCH_PAGE;
+    renderHistory();
+  });
+
+  // Delegado: sirve para las tarjetas que se pintan después (filtros, "ver más").
+  function cardMatch(target: EventTarget | null): PlayerMatch | undefined {
+    const card = (target as HTMLElement | null)?.closest<HTMLElement>(".tac-match-card");
+    if (!card) return undefined;
+    const { matchId, puuid } = card.dataset;
+    return ds.playerMatches.find((m) => m.matchId === matchId && m.puuid === puuid);
+  }
+  contentEl.addEventListener("click", (e) => {
+    if ((e.target as HTMLElement).closest("[data-history-more]")) {
+      historyShown += MATCH_PAGE;
+      renderHistory();
+      return;
+    }
+    const match = cardMatch(e.target);
+    if (match) openModal(match);
+  });
+  contentEl.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    const match = cardMatch(e.target);
+    if (!match) return;
+    e.preventDefault();
+    openModal(match);
+  });
 
   // Tab click
   tabsEl.addEventListener("click", (e) => {
