@@ -9,6 +9,7 @@ import {
   leaderboard,
   leaders,
   sortLeaderboard,
+  timeSince,
   line,
   mapDetail,
   playerMatchesFor,
@@ -270,10 +271,47 @@ describe("leaderboard", () => {
     expect(l.games).toEqual([Z.puuid, T.puuid]); // empate en 3
   });
 
+  test("última ranked: la competitiva más reciente; customs y Premier no cuentan; no depende del filtro", () => {
+    const data = ds({
+      playerMatches: [
+        pm({ puuid: Z.puuid, mode: "competitive", startedAt: "2026-11-10T20:00:00Z", season: "e10a1" }),
+        pm({ puuid: Z.puuid, mode: "custom", startedAt: "2026-11-12T01:30:00Z" }),
+        pm({ puuid: T.puuid, mode: "competitive", startedAt: "2026-11-05T15:00:00Z" }),
+        pm({ puuid: S.puuid, mode: "premier", startedAt: "2026-11-14T15:00:00Z" }),
+      ],
+    });
+    const rows = leaderboard(data, { modes: ["premier"], period: "act" });
+    expect(rows.find((r) => r.puuid === Z.puuid)!.lastPlayedAt).toBe("2026-11-10T20:00:00Z");
+    expect(rows.find((r) => r.puuid === S.puuid)!.lastPlayedAt).toBeNull();
+    const sorted = sortLeaderboard(rows, "lastPlayed", "desc");
+    expect(sorted.slice(0, 2).map((r) => r.name)).toEqual(["Zeiko", "TDiamond"]);
+    expect(sorted.at(-1)!.lastPlayedAt).toBeNull();
+    expect(leaders(rows)).not.toHaveProperty("lastPlayed");
+  });
+
   test("dataset vacío → filas sin NaN y sin líderes", () => {
     const rows = leaderboard(ds(), f);
     expect(rows).toHaveLength(6);
     expect(JSON.stringify(rows)).not.toMatch(/NaN|Infinity/);
     expect(leaders(rows).kd).toEqual([]);
+  });
+});
+
+describe("timeSince", () => {
+  const now = new Date("2026-11-20T12:00:00Z");
+  test.each([
+    ["2026-11-20T11:59:30Z", "hace un momento"],
+    ["2026-11-20T11:35:00Z", "hace 25 min"],
+    ["2026-11-20T09:00:00Z", "hace 3 h"],
+    ["2026-11-19T10:00:00Z", "hace 1 día"],
+    ["2026-11-15T12:00:00Z", "hace 5 días"],
+    ["2026-10-30T12:00:00Z", "hace 3 sem"],
+    ["2026-08-20T12:00:00Z", "hace 3 meses"],
+    ["2026-11-20T12:05:00Z", "hace un momento"], // reloj adelantado: nunca negativo
+  ])("%s → %s", (iso, expected) => {
+    expect(timeSince(iso, now).label).toBe(expected);
+  });
+  test("días completos para colorear la inactividad", () => {
+    expect(timeSince("2026-11-12T13:00:00Z", now).days).toBe(7);
   });
 });

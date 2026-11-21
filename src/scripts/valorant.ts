@@ -4,6 +4,7 @@ import {
   currentSeason,
   highlights,
   filterHistory,
+  timeSince,
   type HistoryFilter,
   includedTeamMatches,
   leaderboard,
@@ -154,9 +155,19 @@ function renderScoreboard(
     mapKey?: string;
     detailHtml?: string;
   }>,
-  options: { numCols?: number[]; centerCols?: number[]; sortableCols?: number[] } = {}
+  options: {
+    numCols?: number[];
+    centerCols?: number[];
+    sortableCols?: number[];
+    /** Clave de orden por columna (índice → clave); sin ella se usa el texto del encabezado. */
+    sortKeys?: Record<number, string>;
+    /** Orden activo, para marcar aria-sort en el encabezado correspondiente. */
+    sorted?: { key: string; dir: "asc" | "desc" };
+  } = {}
 ): string {
-  const { numCols = [], centerCols = [], sortableCols = [] } = options;
+  const { numCols = [], centerCols = [], sortableCols = [], sortKeys = {}, sorted } = options;
+  const sortKey = (i: number) => sortKeys[i] ?? headers[i].toLowerCase().replace(/\s+/g, "-");
+  const ariaSort = (i: number) => (sorted && sorted.key === sortKey(i) ? (sorted.dir === "asc" ? "ascending" : "descending") : "none");
   if (rows.length === 0) {
     return `
       <div class="tac-empty" role="status">
@@ -175,7 +186,7 @@ function renderScoreboard(
       (h, i) => `
     <th
       class="${numCols.includes(i) ? "num" : ""} ${centerCols.includes(i) ? "center" : ""} ${sortableCols.includes(i) ? "sortable" : ""}"
-      ${sortableCols.includes(i) ? `data-sort="${headers[i].toLowerCase().replace(/\s+/g, "-")}" aria-sort="none"` : ""}
+      ${sortableCols.includes(i) ? `data-sort="${esc(sortKey(i))}" aria-sort="${ariaSort(i)}"` : ""}
     >${esc(h)}</th>
   `
     )
@@ -839,32 +850,53 @@ function renderMatchDetail(m: PlayerMatch, ds: Dataset): string {
   `;
 }
 
+const IDLE_WARN_DAYS = 7;
+const IDLE_ALERT_DAYS = 14;
+const fmtDateTime = (iso: string) =>
+  new Date(iso).toLocaleString("es-CO", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" });
+
+/** Celda "Última ranked": tiempo sin jugar ranked y, debajo, fecha y hora locales. */
+function renderLastPlayed(iso: string | null, now: Date): string {
+  if (!iso) return `<span class="tac-idle tac-idle--none">Sin ranked</span>`;
+  const { label, days } = timeSince(iso, now);
+  const level = days >= IDLE_ALERT_DAYS ? "alert" : days >= IDLE_WARN_DAYS ? "warn" : "ok";
+  const when = fmtDateTime(iso);
+  return `<span class="tac-idle tac-idle--${level}" title="${esc(when)}">
+      <span class="tac-idle__ago">${esc(label)}</span>
+      <time class="tac-idle__when" datetime="${esc(iso)}">${esc(when)}</time>
+    </span>`;
+}
+
 function renderRanking(ds: Dataset, f: Filter, sort: { key: LeaderKey; dir: "asc" | "desc" }): string {
   const base = leaderboard(ds, f);
   const lead = leaders(base);
   const rows = sortLeaderboard(base, sort.key, sort.dir);
 
-  const rankHeaders = ["Jugador", "Rango", "PJ", "WR", "K/D", "HS%", "Daño/R", "KDA"];
+  const rankHeaders = ["Jugador", "Rango", "PJ", "WR", "K/D", "HS%", "Daño/R", "KDA", "Última ranked"];
+  const rankSortKeys: Record<number, LeaderKey> = { 1: "rank", 2: "games", 3: "winRate", 4: "kd", 5: "hsPct", 6: "dmgPerRound", 7: "kda", 8: "lastPlayed" };
+  const now = new Date();
   const rankRows = rows.map((r) => {
     const rankStr = r.tierName ? `${esc(r.tierName)} · ${esc(String(r.rr ?? 0))} RR` : dash;
-    const isLeader = (key: LeaderKey) => lead[key].includes(r.puuid);
+    const isLeader = (key: keyof typeof lead) => lead[key].includes(r.puuid);
     return {
       cells: [
         `<a class="tac-player" href="#${slug({ name: r.name, tag: "", puuid: r.puuid })}">${esc(r.name)}</a>`,
-        isLeader("rank") ? `<span class="tac-leader">${esc(rankStr)}</span>` : rankStr,
+        `<span class="tac-nowrap${isLeader("rank") ? " tac-leader" : ""}">${isLeader("rank") ? esc(rankStr) : rankStr}</span>`,
         isLeader("games") ? `<span class="tac-leader">${esc(String(r.line.games))}</span>` : String(r.line.games),
         isLeader("winRate") ? `<span class="tac-leader ${wrClass(r.line.winRate)}">${esc(fmtPct(r.line.winRate))}</span>` : `<span class="${wrClass(r.line.winRate)}">${esc(fmtPct(r.line.winRate))}</span>`,
         isLeader("kd") ? `<span class="tac-leader">${esc(fmtKd(r.line.kd))}</span>` : fmtKd(r.line.kd),
         isLeader("hsPct") ? `<span class="tac-leader">${esc(fmtPct(r.line.hsPct))}</span>` : fmtPct(r.line.hsPct),
         isLeader("dmgPerRound") ? `<span class="tac-leader">${esc(fmtNum(r.line.dmgPerRound))}</span>` : fmtNum(r.line.dmgPerRound),
         isLeader("kda") ? `<span class="tac-leader">${esc(fmtKd(r.kda))}</span>` : fmtKd(r.kda),
+        renderLastPlayed(r.lastPlayedAt, now),
       ],
     };
   });
 
   return `
     <p class="tac-canvas__subtitle" style="margin-bottom:16px;">Click en encabezado para ordenar. <span class="tac-leader" style="background:var(--tac-radiant);color:#fff;padding:0 6px;border-radius:3px;font-size:0.625rem;">Líder</span> = mejor valor de la columna.</p>
-    ${renderScoreboard(rankHeaders, rankRows, { numCols: [2, 3, 4, 5, 6, 7], sortableCols: [1, 2, 3, 4, 5, 6, 7] })}
+    ${renderScoreboard(rankHeaders, rankRows, { numCols: [2, 3, 4, 5, 6, 7], sortableCols: [1, 2, 3, 4, 5, 6, 7, 8], sortKeys: rankSortKeys, sorted: sort })}
+    <p class="tac-canvas__subtitle" style="margin-top:12px;">"Última ranked" es la partida competitiva más reciente de cada jugador, sin importar el filtro. Se actualiza con cada recolección de datos.</p>
   `;
 }
 
@@ -1005,7 +1037,7 @@ function renderLiveRanking(ds: Dataset, f: Filter): string {
           .filter(([, v]) => v.length > 0)
           .slice(0, 5)
           .map(([key, puuids]) => {
-            const labels: Record<LeaderKey, string> = {
+            const labels: Record<Exclude<LeaderKey, "lastPlayed">, string> = {
               rank: "Rango",
               games: "Partidas",
               winRate: "Win%",
@@ -1017,7 +1049,7 @@ function renderLiveRanking(ds: Dataset, f: Filter): string {
             const players = ds.roster.players.filter((p) => puuids.includes(p.puuid));
             return `
               <div style="padding:12px;background:var(--tac-bg-elevated);border-radius:var(--tac-r-sm);border:1px solid var(--tac-stroke);">
-                <div style="font-family:var(--tac-font-mono);font-size:0.5625rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--tac-radiant);margin-bottom:4px;">${labels[key as LeaderKey]}</div>
+                <div style="font-family:var(--tac-font-mono);font-size:0.5625rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--tac-radiant);margin-bottom:4px;">${labels[key as keyof typeof labels]}</div>
                 <div style="display:flex;flex-wrap:wrap;gap:6px;">
                   ${players.map((p) => `<span class="tac-badge tac-badge--premier" style="font-size:0.625rem;">${esc(p.name)}</span>`).join("")}
                 </div>
@@ -1338,9 +1370,6 @@ async function main() {
         const key = th.dataset.sort as LeaderKey;
         if (rankSort.key === key) rankSort.dir = rankSort.dir === "desc" ? "asc" : "desc";
         else Object.assign(rankSort, { key, dir: "desc" });
-        // Update aria-sort
-        contentEl.querySelectorAll("th.sortable").forEach((t) => t.setAttribute("aria-sort", "none"));
-        th.setAttribute("aria-sort", rankSort.dir === "asc" ? "ascending" : "descending");
         render();
       };
     });
