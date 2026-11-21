@@ -866,7 +866,7 @@ function renderLiveTeam(ds: Dataset, f: Filter): string {
   if (!tms.length) {
     return `
       <div class="tac-live-card">
-        <div class="tac-live-card__header"><span class="tac-live-card__title">Próximo rival</span></div>
+        <div class="tac-live-card__header"><span class="tac-live-card__title">Última partida</span></div>
         <div class="tac-live-next">
           <div class="tac-empty" style="padding:16px 0;"><p class="tac-empty__desc">Sin partidas en filtro actual</p></div>
         </div>
@@ -880,7 +880,7 @@ function renderLiveTeam(ds: Dataset, f: Filter): string {
 
   return `
     <div class="tac-live-card">
-      <div class="tac-live-card__header"><span class="tac-live-card__title">Próximo rival</span></div>
+      <div class="tac-live-card__header"><span class="tac-live-card__title">Última partida</span></div>
       <div class="tac-live-next">
         <div class="tac-live-next__item">
           <span class="tac-live-next__label">Mapa</span>
@@ -1265,7 +1265,7 @@ async function main() {
     // Update live panel visibility
     const showLive = kind !== "ranking" || ds.roster.players.length > 0;
     liveEl.hidden = !showLive;
-    overlay.hidden = true;
+    closeDrawers();
 
     // Find player if player tab
     const player = ds.roster.players.find((p) => slug(p) === tab);
@@ -1415,8 +1415,42 @@ async function main() {
     render();
   });
 
-  // Mobile panel toggles (could add hamburger buttons in header if needed)
-  // For now, panels are always visible on desktop, hidden on mobile until needed
+  // Cajones en pantallas angostas: menú (izquierda, ≤880px) e intel en vivo (derecha, ≤1200px).
+  // En escritorio .is-open no tiene efecto porque ambos paneles están en el grid.
+  const menuBtn = document.getElementById("tac-menu-btn")!;
+  const liveBtn = document.getElementById("tac-live-btn")!;
+  const liveCloseBtn = liveEl.querySelector<HTMLButtonElement>(".tac-live__close")!;
+  liveCloseBtn.hidden = false;
+
+  function setDrawer(el: HTMLElement, btn: HTMLElement, open: boolean) {
+    el.classList.toggle("is-open", open);
+    btn.setAttribute("aria-expanded", String(open));
+  }
+  function syncOverlay() {
+    overlay.toggleAttribute("visible", intelEl.classList.contains("is-open") || liveEl.classList.contains("is-open"));
+  }
+  function closeDrawers() {
+    setDrawer(intelEl, menuBtn, false);
+    setDrawer(liveEl, liveBtn, false);
+    syncOverlay();
+  }
+  menuBtn.addEventListener("click", () => {
+    const open = !intelEl.classList.contains("is-open");
+    closeDrawers();
+    setDrawer(intelEl, menuBtn, open);
+    syncOverlay();
+  });
+  liveBtn.addEventListener("click", () => {
+    const open = !liveEl.classList.contains("is-open");
+    closeDrawers();
+    setDrawer(liveEl, liveBtn, open);
+    syncOverlay();
+  });
+  liveCloseBtn.addEventListener("click", closeDrawers);
+  overlay.addEventListener("click", closeDrawers);
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !modalEl.hasAttribute("open")) closeDrawers();
+  });
 
   // Initial render
   renderTabs();

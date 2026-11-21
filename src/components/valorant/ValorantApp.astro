@@ -9,6 +9,12 @@
       <span class="tac-brand__section">VALORANT</span>
     </a>
     <div class="tac-header__meta">
+      <button type="button" class="tac-header-btn tac-header-btn--menu" id="tac-menu-btn" aria-label="Abrir menú" aria-controls="tac-intel" aria-expanded="false">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+      <button type="button" class="tac-header-btn tac-header-btn--live" id="tac-live-btn" aria-label="Abrir intel en vivo" aria-controls="tac-live" aria-expanded="false">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </button>
       <time id="tac-updated" class="tac-timestamp" datetime="">Cargando datos…</time>
       <button type="button" class="tac-theme-toggle" aria-label="Alternar tema" aria-pressed="false" title="Tema oscuro forzado (contexto táctico)">
         <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
@@ -244,6 +250,19 @@
     border-color: var(--tac-radiant);
     color: var(--tac-radiant);
   }
+  .tac-header-btn {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 36px; height: 36px;
+    border-radius: var(--tac-r-md);
+    background: var(--tac-surface);
+    border: 1px solid var(--tac-stroke);
+    color: var(--tac-text-dim);
+    cursor: pointer;
+    transition: all var(--tac-fast);
+  }
+  .tac-header-btn:hover, .tac-header-btn[aria-expanded="true"] { border-color: var(--tac-radiant); color: var(--tac-radiant); }
   .tac-theme-toggle .icon-sun { display: none; }
   .tac-theme-toggle .icon-moon { display: block; }
 
@@ -257,7 +276,7 @@
 
   .tac-layout {
     display: grid;
-    grid-template-columns: var(--tac-intel-w) 1fr var(--tac-live-w);
+    grid-template-columns: var(--tac-intel-w) minmax(0, 1fr) var(--tac-live-w);
     grid-template-rows: 1fr;
     min-height: calc(100vh - var(--tac-header-h));
     max-width: calc(var(--tac-intel-w) + var(--tac-canvas-max) + var(--tac-live-w) + 80px);
@@ -282,7 +301,8 @@
 
   .tac-tabs {
     flex: 1;
-    overflow-y: hidden;
+    min-height: 0;
+    overflow-y: auto;
     padding: var(--tac-space-4) var(--tac-space-3);
     padding-bottom: var(--tac-space-6);
     border-bottom: 1px solid var(--tac-stroke);
@@ -449,6 +469,7 @@
     max-width: var(--tac-canvas-max);
     margin: 0 auto;
     width: 100%;
+    box-sizing: border-box;
   }
 
   .tac-canvas__header { margin-bottom: var(--tac-space-6); padding-bottom: var(--tac-space-4); border-bottom: 1px solid var(--tac-stroke); }
@@ -990,20 +1011,22 @@
      RESPONSIVE
      ========================================================================== */
   @media (max-width: 1200px) {
-    .tac-layout { grid-template-columns: var(--tac-intel-w) 1fr; }
-    .tac-live { position: fixed; top: var(--tac-header-h); right: -100%; width: var(--tac-live-w); height: calc(100vh - var(--tac-header-h)); z-index: 200; border-left: 1px solid var(--tac-stroke); box-shadow: -16px 0 48px rgba(0,0,0,0.4); transition: right var(--tac-base); }
-    .tac-live:not([hidden]) { right: 0; }
+    .tac-layout { grid-template-columns: var(--tac-intel-w) minmax(0, 1fr); }
+    .tac-live { position: fixed; top: var(--tac-header-h); right: -100%; width: min(var(--tac-live-w), 100vw); height: calc(100vh - var(--tac-header-h)); z-index: 200; border-left: 1px solid var(--tac-stroke); box-shadow: -16px 0 48px rgba(0,0,0,0.4); transition: right var(--tac-base); }
+    .tac-live.is-open { right: 0; }
+    .tac-header-btn--live { display: inline-flex; }
     .tac-live__close { display: flex; }
     .tac-live-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 150; }
     .tac-live-overlay[visible] { display: block; }
   }
 
   @media (max-width: 880px) {
-    .tac-layout { grid-template-columns: 1fr; }
+    .tac-layout { grid-template-columns: minmax(0, 1fr); }
     .tac-intel {
-      position: fixed; top: var(--tac-header-h); left: -100%; width: var(--tac-intel-w); height: calc(100vh - var(--tac-header-h)); z-index: 200; border-right: 1px solid var(--tac-stroke); box-shadow: 16px 0 48px rgba(0,0,0,0.4); transition: left var(--tac-base);
+      position: fixed; top: var(--tac-header-h); left: -100%; width: min(var(--tac-intel-w), 100vw); height: calc(100vh - var(--tac-header-h)); z-index: 200; border-right: 1px solid var(--tac-stroke); box-shadow: 16px 0 48px rgba(0,0,0,0.4); transition: left var(--tac-base);
     }
-    .tac-intel:not([hidden]) { left: 0; }
+    .tac-intel.is-open { left: 0; }
+    .tac-header-btn--menu { display: inline-flex; }
     .tac-main { padding-top: 0; }
     .tac-canvas { padding: var(--tac-space-4); }
     .tac-header__inner { padding: 0 var(--tac-space-4); }
@@ -1015,6 +1038,7 @@
     .tac-scoreboard { font-size: 0.75rem; }
     .tac-scoreboard th, .tac-scoreboard td { padding: var(--tac-space-2) var(--tac-space-3); }
     .tac-compositions { grid-template-columns: 1fr; }
+    .tac-timestamp { display: none; }
   }
 
   /* ==========================================================================
