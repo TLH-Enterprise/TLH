@@ -415,8 +415,8 @@
    "25997071-9a45-52bb-95e0-652245a96ac6": {
     "tier": 22,
     "tierName": "Ascendant 2",
-    "rr": 1,
-    "elo": 1901
+    "rr": 0,
+    "elo": 1900
    },
    "1693c1eb-22d0-5aa8-a972-7d01b5e45d43": {
     "tier": 25,
@@ -427,8 +427,8 @@
    "e1f792dc-f201-58fc-8bed-17fc55e01080": {
     "tier": 23,
     "tierName": "Ascendant 3",
-    "rr": 76,
-    "elo": 2076
+    "rr": 36,
+    "elo": 2036
    }
   },
   "premier": {
