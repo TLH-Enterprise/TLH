@@ -855,14 +855,13 @@ const IDLE_ALERT_DAYS = 14;
 const fmtDateTime = (iso: string) =>
   new Date(iso).toLocaleString("es-CO", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" });
 
-/** Celda "Última partida": tiempo sin jugar y, debajo, fecha y hora locales (el modo va en el tooltip). */
-function renderLastPlayed(iso: string | null, mode: Mode | null, now: Date): string {
-  if (!iso) return `<span class="tac-idle tac-idle--none">Sin partidas</span>`;
+/** Celda "Última ranked": tiempo sin jugar ranked y, debajo, fecha y hora locales. */
+function renderLastPlayed(iso: string | null, now: Date): string {
+  if (!iso) return `<span class="tac-idle tac-idle--none">Sin ranked</span>`;
   const { label, days } = timeSince(iso, now);
   const level = days >= IDLE_ALERT_DAYS ? "alert" : days >= IDLE_WARN_DAYS ? "warn" : "ok";
   const when = fmtDateTime(iso);
-  const modeLabel = mode ? MODE_LABELS[mode] : "";
-  return `<span class="tac-idle tac-idle--${level}" title="${esc(`${when}${modeLabel ? ` · ${modeLabel}` : ""}`)}">
+  return `<span class="tac-idle tac-idle--${level}" title="${esc(when)}">
       <span class="tac-idle__ago">${esc(label)}</span>
       <time class="tac-idle__when" datetime="${esc(iso)}">${esc(when)}</time>
     </span>`;
@@ -873,7 +872,7 @@ function renderRanking(ds: Dataset, f: Filter, sort: { key: LeaderKey; dir: "asc
   const lead = leaders(base);
   const rows = sortLeaderboard(base, sort.key, sort.dir);
 
-  const rankHeaders = ["Jugador", "Rango", "PJ", "WR", "K/D", "HS%", "Daño/R", "KDA", "Última partida"];
+  const rankHeaders = ["Jugador", "Rango", "PJ", "WR", "K/D", "HS%", "Daño/R", "KDA", "Última ranked"];
   const rankSortKeys: Record<number, LeaderKey> = { 1: "rank", 2: "games", 3: "winRate", 4: "kd", 5: "hsPct", 6: "dmgPerRound", 7: "kda", 8: "lastPlayed" };
   const now = new Date();
   const rankRows = rows.map((r) => {
@@ -889,7 +888,7 @@ function renderRanking(ds: Dataset, f: Filter, sort: { key: LeaderKey; dir: "asc
         isLeader("hsPct") ? `<span class="tac-leader">${esc(fmtPct(r.line.hsPct))}</span>` : fmtPct(r.line.hsPct),
         isLeader("dmgPerRound") ? `<span class="tac-leader">${esc(fmtNum(r.line.dmgPerRound))}</span>` : fmtNum(r.line.dmgPerRound),
         isLeader("kda") ? `<span class="tac-leader">${esc(fmtKd(r.kda))}</span>` : fmtKd(r.kda),
-        renderLastPlayed(r.lastPlayedAt, r.lastPlayedMode, now),
+        renderLastPlayed(r.lastPlayedAt, now),
       ],
     };
   });
@@ -897,7 +896,7 @@ function renderRanking(ds: Dataset, f: Filter, sort: { key: LeaderKey; dir: "asc
   return `
     <p class="tac-canvas__subtitle" style="margin-bottom:16px;">Click en encabezado para ordenar. <span class="tac-leader" style="background:var(--tac-radiant);color:#fff;padding:0 6px;border-radius:3px;font-size:0.625rem;">Líder</span> = mejor valor de la columna.</p>
     ${renderScoreboard(rankHeaders, rankRows, { numCols: [2, 3, 4, 5, 6, 7], sortableCols: [1, 2, 3, 4, 5, 6, 7, 8], sortKeys: rankSortKeys, sorted: sort })}
-    <p class="tac-canvas__subtitle" style="margin-top:12px;">"Última partida" cuenta cualquier modo (ranked, Premier o scrims), sin importar el filtro. Se actualiza con cada recolección de datos.</p>
+    <p class="tac-canvas__subtitle" style="margin-top:12px;">"Última ranked" es la partida competitiva más reciente de cada jugador, sin importar el filtro. Se actualiza con cada recolección de datos.</p>
   `;
 }
 

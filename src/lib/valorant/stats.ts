@@ -219,9 +219,8 @@ export interface LeaderRow {
   elo: number | null;
   line: Line;
   kda: number | null;
-  /** Inicio de la partida más reciente en cualquier modo (no depende del filtro). */
+  /** Inicio de la partida ranked más reciente (no depende del filtro). */
   lastPlayedAt: string | null;
-  lastPlayedMode: Mode | null;
 }
 
 export function leaderboard(ds: Dataset, f: Filter): LeaderRow[] {
@@ -233,7 +232,7 @@ export function leaderboard(ds: Dataset, f: Filter): LeaderRow[] {
     const assists = ms.reduce((a, m) => a + m.assists, 0);
     const deaths = ms.reduce((a, m) => a + m.deaths, 0);
     const latest = ds.playerMatches
-      .filter((m) => m.puuid === p.puuid)
+      .filter((m) => m.puuid === p.puuid && m.mode === "competitive")
       .reduce<PlayerMatch | null>((a, m) => (a === null || m.startedAt > a.startedAt ? m : a), null);
     return {
       puuid: p.puuid,
@@ -245,7 +244,6 @@ export function leaderboard(ds: Dataset, f: Filter): LeaderRow[] {
       line: line(ms),
       kda: ms.length ? (kills + assists) / Math.max(deaths, 1) : null,
       lastPlayedAt: latest?.startedAt ?? null,
-      lastPlayedMode: latest?.mode ?? null,
     };
   });
 }

@@ -271,17 +271,18 @@ describe("leaderboard", () => {
     expect(l.games).toEqual([Z.puuid, T.puuid]); // empate en 3
   });
 
-  test("última partida: la más reciente de cualquier modo, sin importar el filtro", () => {
+  test("última ranked: la competitiva más reciente; customs y Premier no cuentan; no depende del filtro", () => {
     const data = ds({
       playerMatches: [
-        pm({ puuid: Z.puuid, mode: "competitive", startedAt: "2026-11-10T20:00:00Z" }),
+        pm({ puuid: Z.puuid, mode: "competitive", startedAt: "2026-11-10T20:00:00Z", season: "e10a1" }),
         pm({ puuid: Z.puuid, mode: "custom", startedAt: "2026-11-12T01:30:00Z" }),
         pm({ puuid: T.puuid, mode: "competitive", startedAt: "2026-11-05T15:00:00Z" }),
+        pm({ puuid: S.puuid, mode: "premier", startedAt: "2026-11-14T15:00:00Z" }),
       ],
     });
-    const rows = leaderboard(data, f);
-    expect(rows.find((r) => r.puuid === Z.puuid)).toMatchObject({ lastPlayedAt: "2026-11-12T01:30:00Z", lastPlayedMode: "custom" });
-    expect(rows.find((r) => r.puuid === S.puuid)).toMatchObject({ lastPlayedAt: null, lastPlayedMode: null });
+    const rows = leaderboard(data, { modes: ["premier"], period: "act" });
+    expect(rows.find((r) => r.puuid === Z.puuid)!.lastPlayedAt).toBe("2026-11-10T20:00:00Z");
+    expect(rows.find((r) => r.puuid === S.puuid)!.lastPlayedAt).toBeNull();
     const sorted = sortLeaderboard(rows, "lastPlayed", "desc");
     expect(sorted.slice(0, 2).map((r) => r.name)).toEqual(["Zeiko", "TDiamond"]);
     expect(sorted.at(-1)!.lastPlayedAt).toBeNull();
