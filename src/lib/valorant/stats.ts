@@ -208,7 +208,7 @@ export function rrSeries(ds: Dataset, puuid: string): Array<{ date: string; elo:
   return ds.snapshots.flatMap((s) => (s.players[puuid] ? [{ date: s.date, elo: s.players[puuid].elo }] : []));
 }
 
-export type LeaderKey = "rank" | "games" | "winRate" | "kd" | "hsPct" | "dmgPerRound" | "kda";
+export type LeaderKey = "rank" | "games" | "winRate" | "kd" | "hsPct" | "dmgPerRound" | "kda" | "lastPlayed";
 
 export interface LeaderRow {
   puuid: string;
@@ -219,6 +219,9 @@ export interface LeaderRow {
   elo: number | null;
   line: Line;
   kda: number | null;
+  /** Inicio de la partida más reciente en cualquier modo (no depende del filtro). */
+  lastPlayedAt: string | null;
+  lastPlayedMode: Mode | null;
 }
 
 export function leaderboard(ds: Dataset, f: Filter): LeaderRow[] {
@@ -229,6 +232,9 @@ export function leaderboard(ds: Dataset, f: Filter): LeaderRow[] {
     const kills = ms.reduce((a, m) => a + m.kills, 0);
     const assists = ms.reduce((a, m) => a + m.assists, 0);
     const deaths = ms.reduce((a, m) => a + m.deaths, 0);
+    const latest = ds.playerMatches
+      .filter((m) => m.puuid === p.puuid)
+      .reduce<PlayerMatch | null>((a, m) => (a === null || m.startedAt > a.startedAt ? m : a), null);
     return {
       puuid: p.puuid,
       riotId: `${p.name}#${p.tag}`,
@@ -238,6 +244,8 @@ export function leaderboard(ds: Dataset, f: Filter): LeaderRow[] {
       elo: rank?.elo ?? null,
       line: line(ms),
       kda: ms.length ? (kills + assists) / Math.max(deaths, 1) : null,
+      lastPlayedAt: latest?.startedAt ?? null,
+      lastPlayedMode: latest?.mode ?? null,
     };
   });
 }
@@ -246,6 +254,7 @@ function leaderValue(r: LeaderRow, key: LeaderKey): number | null {
   if (key === "rank") return r.elo;
   if (key === "kda") return r.kda;
   if (key === "games") return r.line.games;
+  if (key === "lastPlayed") return r.lastPlayedAt === null ? null : Date.parse(r.lastPlayedAt);
   return r.line[key];
 }
 
@@ -262,11 +271,12 @@ export function sortLeaderboard(rows: LeaderRow[], key: LeaderKey, dir: "asc" | 
   });
 }
 
-const LEADER_KEYS: LeaderKey[] = ["rank", "games", "winRate", "kd", "hsPct", "dmgPerRound", "kda"];
+const LEADER_KEYS = ["rank", "games", "winRate", "kd", "hsPct", "dmgPerRound", "kda"] as const;
+type StatKey = (typeof LEADER_KEYS)[number];
 
-/** PUUIDs con el mejor valor de cada columna (empates incluidos; null no cuenta). */
-export function leaders(rows: LeaderRow[]): Record<LeaderKey, string[]> {
-  const out = {} as Record<LeaderKey, string[]>;
+/** PUUIDs con el mejor valor de cada columna de estadística (empates incluidos; null no cuenta). */
+export function leaders(rows: LeaderRow[]): Record<StatKey, string[]> {
+  const out = {} as Record<StatKey, string[]>;
   for (const key of LEADER_KEYS) {
     const vals = rows.map((r) => leaderValue(r, key)).filter((v): v is number => v !== null && (key !== "games" || v > 0));
     const best = vals.length ? Math.max(...vals) : null;
@@ -284,4 +294,19 @@ export interface HistoryFilter {
 
 export function filterHistory(ms: PlayerMatch[], h: HistoryFilter): PlayerMatch[] {
   return ms.filter((m) => (!h.agent || m.agent === h.agent) && (!h.map || m.map === h.map) && (!h.mode || m.mode === h.mode));
+}
+
+/** Tiempo transcurrido en español corto ("hace 3 h") y días completos, para medir inactividad. */
+export function timeSince(iso: string, now: Date = new Date()): { label: string; days: number } {
+  const mins = Math.max(0, Math.floor((now.getTime() - Date.parse(iso)) / 60000));
+  const hours = Math.floor(mins / 60);
+  const days = Math.floor(hours / 24);
+  let label: string;
+  if (mins < 1) label = "hace un momento";
+  else if (mins < 60) label = `hace ${mins} min`;
+  else if (hours < 24) label = `hace ${hours} h`;
+  else if (days < 14) label = `hace ${days} ${days === 1 ? "día" : "días"}`;
+  else if (days < 60) label = `hace ${Math.floor(days / 7)} sem`;
+  else label = `hace ${Math.floor(days / 30)} meses`;
+  return { label, days };
 }
