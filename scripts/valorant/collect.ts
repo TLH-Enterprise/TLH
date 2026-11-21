@@ -92,9 +92,18 @@ export async function runCollection(opts: CollectOptions): Promise<{ newPlayerMa
   const newTeam: TeamMatch[] = [];
   const nonTeam = new Set(meta.nonTeamMatchIds);
 
-  const pending = phase === "fast" ? [] : [...teamCandidates(allPlayerMatches, roster, labels)].filter(([id]) => !haveTeam.has(id) && !skip.has(id));
+  const candidates = phase === "fast" ? [] : [...teamCandidates(allPlayerMatches, roster, labels)].filter(([id]) => !haveTeam.has(id) && !skip.has(id));
+  // Partidas guardadas antes de que existiera opponentLineup: se vuelven a pedir una vez para completarlas.
+  const backfill: Array<[string, TeamMatch["kind"]]> =
+    phase === "fast" ? [] : teamMatches.filter((t) => !t.opponentLineup).map((t) => [t.matchId, t.kind]);
+  const isBackfill = new Set(backfill.map(([id]) => id));
+  const pending = [...candidates, ...backfill];
   if (phase === "fast") log("Fase fast: no se revisan partidas de equipo.");
-  else log(`Partidas de equipo por revisar: ${pending.length}`);
+  else {
+    log(`Partidas de equipo por revisar: ${candidates.length}`);
+    if (backfill.length) log(`Partidas de equipo sin alineación rival: ${backfill.length}`);
+  }
+  const refreshed: TeamMatch[] = [];
   let requests = 0;
   for (const [id, kind] of pending) {
     if (requests >= maxV4Requests) {
@@ -107,11 +116,22 @@ export async function runCollection(opts: CollectOptions): Promise<{ newPlayerMa
       full = await client.match(id);
     } catch (e) {
       if (!isNotFound(e)) throw e;
+      if (isBackfill.has(id)) {
+        // Se conserva la partida; opponentLineup vacío evita volver a pedirla en cada corrida.
+        log(`Aviso: la partida ${id} ya no está en la API; se queda sin alineación rival.`);
+        refreshed.push({ ...teamMatches.find((t) => t.matchId === id)!, opponentLineup: [] });
+        continue;
+      }
       log(`Aviso: la partida ${id} no está en la API. Se descarta.`);
       nonTeam.add(id);
       continue;
     }
-    const t = toTeamMatch(full, roster, kind, forced(id));
+    const t = toTeamMatch(full, roster, kind, forced(id) || isBackfill.has(id));
+    if (isBackfill.has(id)) {
+      // Ya era partida de equipo: se reemplaza si se pudo volver a procesar; si no, se marca para no reintentar.
+      refreshed.push(t ?? { ...teamMatches.find((x) => x.matchId === id)!, opponentLineup: [] });
+      continue;
+    }
     if (t) {
       newTeam.push(t);
       nonTeam.delete(id);
@@ -140,7 +160,7 @@ export async function runCollection(opts: CollectOptions): Promise<{ newPlayerMa
   // Solo aquí se escribe: si algo falló antes, los archivos quedan como estaban.
   const out: Array<[string, unknown]> = [
     ["player-matches.json", allPlayerMatches],
-    ["team-matches.json", mergeTeamMatches(teamMatches, newTeam)],
+    ["team-matches.json", mergeTeamMatches(mergeTeamMatches(teamMatches, refreshed), newTeam)],
     ["snapshots.json", upsertSnapshot(snapshots, snap)],
     ["meta.json", { updatedAt: now.toISOString(), nonTeamMatchIds: [...nonTeam] } satisfies Meta],
   ];

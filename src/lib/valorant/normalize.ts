@@ -146,22 +146,22 @@ export function toTeamMatch(match: V4Match, roster: Roster, kind: "premier" | "c
   if (!ours) return null;
   const riotId = (p: { name: string; tag: string }) => `${p.name}#${p.tag}`;
 
-  const lineup: LineupEntry[] = players
-    .filter((p) => toSide(p.team_id) === side)
-    .map((p) => ({
-      puuid: p.puuid,
-      riotId: riotId(p),
-      agent: p.agent.name,
-      inRoster: inRoster.has(p.puuid),
-      kills: p.stats.kills,
-      deaths: p.stats.deaths,
-      assists: p.stats.assists,
-      headshots: p.stats.headshots,
-      bodyshots: p.stats.bodyshots,
-      legshots: p.stats.legshots,
-      damage: p.stats.damage.dealt,
-      score: p.stats.score,
-    }));
+  const entry = (p: V4Match["players"][number], ours: boolean): LineupEntry => ({
+    puuid: p.puuid,
+    riotId: riotId(p),
+    agent: p.agent.name,
+    inRoster: ours && inRoster.has(p.puuid),
+    kills: p.stats.kills,
+    deaths: p.stats.deaths,
+    assists: p.stats.assists,
+    headshots: p.stats.headshots,
+    bodyshots: p.stats.bodyshots,
+    legshots: p.stats.legshots,
+    damage: p.stats.damage.dealt,
+    score: p.stats.score,
+  });
+  const lineup = players.filter((p) => toSide(p.team_id) === side).map((p) => entry(p, true));
+  const opponentLineup = players.filter((p) => toSide(p.team_id) !== side).map((p) => entry(p, false));
 
   const teamRounds: TeamRound[] = rounds.map((r) => {
     const won = toSide(r.winning_team) === side;
@@ -182,6 +182,7 @@ export function toTeamMatch(match: V4Match, roster: Roster, kind: "premier" | "c
     opponentName: kind === "premier" ? (theirs?.premier_roster?.name ?? null) : null,
     opponentPlayers: players.filter((p) => toSide(p.team_id) !== side).map(riotId),
     lineup,
+    opponentLineup,
     rounds: teamRounds,
   };
 }

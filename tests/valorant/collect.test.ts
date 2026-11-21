@@ -154,6 +154,58 @@ describe("runCollection", () => {
     expect(await readJson(dir, "team-matches.json")).toHaveLength(2);
   });
 
+  test("partidas de equipo guardadas sin opponentLineup se vuelven a pedir una vez", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "val-"));
+    const fake = baseFake();
+    await runCollection({ client: fakeClient(fake).client, roster, dataDir: dir, now: NOW, log: () => {} });
+    // Simula datos guardados antes de que existiera opponentLineup.
+    const old = (await readJson(dir, "team-matches.json")).map((t: Record<string, unknown>) => ({ ...t, opponentLineup: undefined }));
+    await writeFile(join(dir, "team-matches.json"), JSON.stringify(old));
+    const logs: string[] = [];
+    const second = fakeClient(fake);
+    const r = await runCollection({ client: second.client, roster, dataDir: dir, now: NOW, log: (m) => logs.push(m) });
+    expect(second.calls.match.sort()).toEqual(["A", "P"]);
+    expect(r.newTeamMatches).toBe(0);
+    expect(logs.some((m) => m.includes("sin alineación rival: 2"))).toBe(true);
+    const tms = await readJson(dir, "team-matches.json");
+    expect(tms).toHaveLength(2);
+    expect(tms.every((t: { opponentLineup?: unknown[] }) => t.opponentLineup?.length === 5)).toBe(true);
+    const third = fakeClient(fake);
+    await runCollection({ client: third.client, roster, dataDir: dir, now: NOW, log: () => {} });
+    expect(third.calls.match).toEqual([]);
+  });
+
+  test("relleno: si la partida ya no está en la API se conserva y no se reintenta", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "val-"));
+    const fake = baseFake();
+    await runCollection({ client: fakeClient(fake).client, roster, dataDir: dir, now: NOW, log: () => {} });
+    const old = (await readJson(dir, "team-matches.json")).map((t: Record<string, unknown>) => ({ ...t, opponentLineup: undefined }));
+    await writeFile(join(dir, "team-matches.json"), JSON.stringify(old));
+    delete fake.matches.A;
+    await runCollection({ client: fakeClient(fake).client, roster, dataDir: dir, now: NOW, log: () => {} });
+    const a = (await readJson(dir, "team-matches.json")).find((t: { matchId: string }) => t.matchId === "A");
+    expect(a.opponentLineup).toEqual([]);
+    expect(a.lineup).toHaveLength(5);
+    expect((await readJson(dir, "meta.json")).nonTeamMatchIds).not.toContain("A");
+    const third = fakeClient(fake);
+    await runCollection({ client: third.client, roster, dataDir: dir, now: NOW, log: () => {} });
+    expect(third.calls.match).toEqual([]);
+  });
+
+  test("el relleno de opponentLineup respeta maxV4Requests y no corre en fase fast", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "val-"));
+    const fake = baseFake();
+    await runCollection({ client: fakeClient(fake).client, roster, dataDir: dir, now: NOW, log: () => {} });
+    const old = (await readJson(dir, "team-matches.json")).map((t: Record<string, unknown>) => ({ ...t, opponentLineup: undefined }));
+    await writeFile(join(dir, "team-matches.json"), JSON.stringify(old));
+    const fast = fakeClient(fake);
+    await runCollection({ client: fast.client, roster, dataDir: dir, now: NOW, phase: "fast", log: () => {} });
+    expect(fast.calls.match).toEqual([]);
+    const limited = fakeClient(fake);
+    await runCollection({ client: limited.client, roster, dataDir: dir, now: NOW, maxV4Requests: 1, log: () => {} });
+    expect(limited.calls.match).toHaveLength(1);
+  });
+
   test("segunda corrida no repite partidas ni pide match()", async () => {
     const dir = await mkdtemp(join(tmpdir(), "val-"));
     const fake = baseFake();
