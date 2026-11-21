@@ -1,7 +1,9 @@
 import {
   byKey,
   compositions,
+  currentSeason,
   highlights,
+  includedTeamMatches,
   leaderboard,
   leaders,
   line,
@@ -16,51 +18,479 @@ import {
   type LeaderKey,
   type Period,
 } from "../lib/valorant/stats.ts";
-import type { Dataset, Mode, RosterPlayer } from "../lib/valorant/types.ts";
+import type { Dataset, Mode, RosterPlayer, TeamMatch, PlayerMatch, LineupEntry, TeamRound } from "../lib/valorant/types.ts";
 
-const TEAM = "equipo";
-const RANKING = "ranking";
-const esc = (s: string) =>
-  s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
+/* ==========================================================================
+   UTILITIES
+   ========================================================================== */
+const esc = (s: string) => {
+  const map: Record<string, string> = { "&": "&", "<": "<", ">": ">", '"': "\"", "'": "'" };
+  return s.replace(/[&<>"']/g, (c) => map[c]);
+};
 const slug = (p: RosterPlayer) => p.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 const dash = "—";
 const fmtPct = (v: number | null) => (v === null ? dash : `${Math.round(v)}%`);
 const fmtKd = (v: number | null) => (v === null ? dash : v.toFixed(2));
 const fmtNum = (v: number | null) => (v === null ? dash : String(Math.round(v)));
-const wrClass = (v: number | null) => (v === null ? "" : v >= 55 ? "vgood" : v < 45 ? "vbad" : "");
-const fmtDate = (iso: string) => new Date(iso).toLocaleDateString("es-CO", { day: "2-digit", month: "short" });
-const EMPTY = `<p class="vempty">Sin partidas en este filtro</p>`;
+const fmtElo = (v: number | null) => (v === null ? dash : String(Math.round(v)));
+const fmtDate = (iso: string) => new Date(iso).toLocaleDateString("es-CO", { day: "2-digit", month: "short", year: "2-digit" });
+const fmtTimeAgo = (iso: string) => {
+  const diff = Date.now() - new Date(iso).getTime();
+  const days = Math.floor(diff / 86400000);
+  if (days === 0) return "Hoy";
+  if (days === 1) return "Ayer";
+  if (days < 7) return `Hace ${days}d`;
+  return fmtDate(iso);
+};
 
-function table(head: string[], rows: string[][], numCols: number[] = [], rowAttrs: string[] = []): string {
-  if (rows.length === 0) return `<div class="vtable-wrap">${EMPTY}</div>`;
-  const th = head.map((h, i) => `<th${numCols.includes(i) ? ' class="num"' : ""}>${h}</th>`).join("");
-  const body = rows
-    .map((r, ri) => `<tr${rowAttrs[ri] ?? ""}>${r.map((c, i) => `<td${numCols.includes(i) ? ' class="num"' : ""}>${c}</td>`).join("")}</tr>`)
-    .join("");
-  return `<div class="vtable-wrap"><table class="vtable"><thead><tr>${th}</tr></thead><tbody>${body}</tbody></table></div>`;
+/** Parse ISO date string (YYYY-MM-DD) as UTC */
+const parseUTC = (iso: string) => new Date(iso + "T00:00:00Z");
+
+/** Format date with month name (e.g., "13 nov") using UTC */
+const fmtDateMonth = (iso: string) => {
+  const d = parseUTC(iso);
+  const day = String(d.getUTCDate()).padStart(2, "0");
+  const month = d.toLocaleDateString("es-CO", { month: "short", timeZone: "UTC" });
+  return `${day} ${month}`;
+};
+
+/** Format date for tooltip (e.g., "13 nov 2026, 00:00") using UTC */
+const fmtTooltipDate = (iso: string) => {
+  const d = parseUTC(iso);
+  const day = String(d.getUTCDate()).padStart(2, "0");
+  const month = d.toLocaleDateString("es-CO", { month: "short", timeZone: "UTC" });
+  const year = d.getUTCFullYear().toString().slice(-2);
+  const hour = String(d.getUTCHours()).padStart(2, "0");
+  const minute = String(d.getUTCMinutes()).padStart(2, "0");
+  return `${day} ${month} ${year}, ${hour}:${minute}`;
+};
+
+/** Abbreviate tier name to 3 letters */
+const abbrevTier = (tierName: string): string => {
+  const short: Record<string, string> = {
+    Iron: "Iro",
+    Bronze: "Bro",
+    Silver: "Sil",
+    Gold: "Gol",
+    Platinum: "Pla",
+    Diamond: "Dia",
+    Ascendant: "Asc",
+    Immortal: "Imm",
+    Radiant: "Rad",
+  };
+  // Extract base tier (e.g., "Ascendant 1" -> "Ascendant")
+  const base = tierName.split(" ")[0];
+  return short[base] ?? base.slice(0, 3);
+};
+
+const wrClass = (v: number | null) => (v === null ? "" : v >= 55 ? "tac-win" : v < 45 ? "tac-loss" : "");
+const sideClass = (side: "Red" | "Blue") => (side === "Red" ? "tac-side--radiant" : "tac-side--dire");
+const roundDot = (won: boolean, role: "Attack" | "Defense") =>
+  `<span class="tac-round tac-round--${won ? "win" : "loss"}${won ? ` tac-round--${role.toLowerCase()}` : ""}" aria-hidden="true"></span>`;
+
+/* Agent icon system - color-coded fallbacks */
+const agentColors: Record<string, string> = {
+  jett: "#00d4ff", reyna: "#ff4d6a", sage: "#8bffb0", sova: "#ff6b35", cypher: "#ffffff",
+  killjoy: "#ffcc00", breach: "#ff6b00", omen: "#6b4dff", brimstone: "#cc4400", phoenix: "#ffcc00",
+  viper: "#00ff88", skye: "#88ff88", yoru: "#aa44ff", astra: "#aa88ff", kayo: "#88aaff",
+  chamber: "#ffaa44", neon: "#ff44aa", fade: "#cc66ff", harbor: "#44aaff", gryphon: "#ff8844",
+  vyse: "#8866ff", clove: "#ff66aa", iso: "#6644ff", deadlock: "#88cc44", tejo: "#ffaa00",
+};
+
+function agentIcon(agent: string, size = 18): string {
+  const key = agent.toLowerCase().replace(/\s+/g, "");
+  const bg = agentColors[key] || "#6d28d9";
+  const initial = agent.slice(0, 2).toUpperCase();
+  return `<span class="tac-agent--fallback" style="width:${size}px;height:${size}px;background:${bg};font-size:${Math.max(0.45, 0.5625 * (size/18))}rem;">${esc(initial)}</span>`;
 }
 
-const kpi = (label: string, value: string) =>
-  `<div class="vkpi"><div class="vkpi__label">${label}</div><div class="vkpi__value">${value}</div></div>`;
-const wrCell = (v: number | null) => `<span class="${wrClass(v)}">${fmtPct(v)}</span>`;
+function initials(name: string, tag: string): string {
+  const n = name.trim().split(/\s+/)[0] || name;
+  return (n[0] + tag[0]).toUpperCase();
+}
 
-function chart(points: Array<{ date: string; elo: number }>): string {
-  if (points.length < 2) return `<p class="vempty">La gráfica aparece cuando haya al menos 2 días de datos</p>`;
-  const W = 600;
-  const H = 160;
-  const pad = 8;
-  const min = Math.min(...points.map((p) => p.elo));
-  const max = Math.max(...points.map((p) => p.elo));
-  const span = Math.max(max - min, 1);
-  const xy = points.map((p, i) => {
-    const x = pad + (i / (points.length - 1)) * (W - 2 * pad);
-    const y = H - pad - ((p.elo - min) / span) * (H - 2 * pad);
-    return `${x.toFixed(1)},${y.toFixed(1)}`;
-  });
-  return `<svg class="vchart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Evolución del rango">
-    <polyline points="${xy.join(" ")}" fill="none" stroke="var(--brand-1)" stroke-width="2.5" vector-effect="non-scaling-stroke" />
-  </svg>
-  <div class="vchart__label"><span>${esc(points[0].date)}</span><span>${esc(points[points.length - 1].date)}</span></div>`;
+/* ==========================================================================
+   COMPONENT RENDERERS
+   ========================================================================== */
+
+/** KPI Strip */
+function renderKpiStrip(items: Array<{ label: string; value: string; trend?: "up" | "down" | "neutral"; trendText?: string; variant?: "radiant" | "dire" | "spike" | "clutch" | "threat" }>): string {
+  return `
+    <div class="tac-kpi-strip" role="list" aria-label="Indicadores clave">
+      ${items
+        .map(
+          (k) => `
+        <div class="tac-kpi tac-kpi--${k.variant || "radiant"}" role="listitem">
+          <div class="tac-kpi__label">${esc(k.label)}</div>
+          <div class="tac-kpi__value">${esc(k.value)}</div>
+          ${k.trend ? `<div class="tac-kpi__trend tac-kpi__trend--${k.trend}">${esc(k.trendText || "")}</div>` : ""}
+        </div>
+      `
+        )
+        .join("")}
+    </div>
+  `;
+}
+
+/** Section header */
+function sectionHeader(title: string, count?: number, countLabel?: string): string {
+  return `
+    <div class="tac-section__header">
+      <h2 class="tac-section__title">${esc(title)}</h2>
+      ${count !== undefined ? `<span class="tac-section__count">${count} ${esc(countLabel || "partidas")}</span>` : ""}
+    </div>
+  `;
+}
+
+/** Scoreboard table */
+function renderScoreboard(
+  headers: string[],
+  rows: Array<{
+    cells: string[];
+    rowClass?: string;
+    expandable?: boolean;
+    mapKey?: string;
+    detailHtml?: string;
+  }>,
+  options: { numCols?: number[]; centerCols?: number[]; sortableCols?: number[] } = {}
+): string {
+  const { numCols = [], centerCols = [], sortableCols = [] } = options;
+  if (rows.length === 0) {
+    return `
+      <div class="tac-empty" role="status">
+        <svg class="tac-empty__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+          <path d="M9 12h6M12 9v6"/>
+        </svg>
+        <p class="tac-empty__title">Sin datos</p>
+        <p class="tac-empty__desc">No hay partidas que coincidan con los filtros actuales.</p>
+      </div>
+    `;
+  }
+
+  const th = headers
+    .map(
+      (h, i) => `
+    <th
+      class="${numCols.includes(i) ? "num" : ""} ${centerCols.includes(i) ? "center" : ""} ${sortableCols.includes(i) ? "sortable" : ""}"
+      ${sortableCols.includes(i) ? `data-sort="${headers[i].toLowerCase().replace(/\s+/g, "-")}" aria-sort="none"` : ""}
+    >${esc(h)}</th>
+  `
+    )
+    .join("");
+
+  const body = rows
+    .map(
+      (r, ri) => `
+    <tr class="${r.rowClass || ""} ${r.expandable ? "tac-row--expandable" : ""}" ${r.mapKey ? `data-map="${esc(r.mapKey)}"` : ""} ${r.expandable ? 'tabindex="0" aria-expanded="false"' : ""}>
+      ${r.cells.map((c, i) => `<td class="${numCols.includes(i) ? "num" : ""} ${centerCols.includes(i) ? "center" : ""}">${c}</td>`).join("")}
+    </tr>
+    ${r.detailHtml ? `<tr class="tac-detail-row"><td colspan="${headers.length}"><div class="tac-detail-panel">${r.detailHtml}</div></td></tr>` : ""}
+  `
+    )
+    .join("");
+
+  return `
+    <div class="tac-table-wrap" style="overflow-x:auto;">
+      <table class="tac-scoreboard" role="grid">
+        <thead><tr>${th}</tr></thead>
+        <tbody>${body}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+/** Composition cards */
+function renderCompositions(comps: ReturnType<typeof compositions>): string {
+  if (comps.length === 0) return "";
+  return `
+    ${sectionHeader("Composiciones", comps.length)}
+    <div class="tac-compositions" role="list">
+      ${comps
+        .slice(0, 8)
+        .map(
+          (c) => `
+        <article class="tac-comp-card" role="listitem">
+          <div class="tac-comp-card__map">${esc(c.map)}</div>
+          <div class="tac-comp-card__agents" aria-label="Agentes: ${c.agents.join(", ")}">
+            ${c.agents.map((a) => agentIcon(a, 36)).join("")}
+          </div>
+          <div class="tac-comp-card__stats">
+            <span class="tac-comp-card__record">${c.games} ${c.games === 1 ? "partida" : "partidas"}</span>
+            <span class="tac-comp-card__wr ${c.winRate === null ? "tac-comp-card__wr--neu" : c.winRate && c.winRate >= 50 ? "tac-comp-card__wr--pos" : "tac-comp-card__wr--neg"}">${fmtPct(c.winRate)}</span>
+          </div>
+        </article>
+      `
+        )
+        .join("")}
+    </div>
+  `;
+}
+
+/** Callouts / Highlights */
+function renderCallouts(items: string[]): string {
+  if (items.length === 0) return "";
+  return `
+    <div class="tac-callouts" role="region" aria-label="Aspectos destacados">
+      ${items
+        .map((t) => {
+          let variant: "map" | "trend" | "agent" = "map";
+          if (t.includes("HS%") || t.includes("K/D")) variant = "trend";
+          else if (t.includes("agente") || t.includes("Agente")) variant = "agent";
+          const icons = {
+            map: '<svg class="tac-callout__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/><path d="M12 22V12M22 15.5L12 12M2 8.5L12 12"/></svg>',
+            trend: '<svg class="tac-callout__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>',
+            agent: '<svg class="tac-callout__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+          };
+          return `<div class="tac-callout tac-callout--${variant}">${icons[variant]}<span>${esc(t)}</span></div>`;
+        })
+        .join("")}
+    </div>
+  `;
+}
+
+/** Rank evolution series: snapshots filtered by period for the tooltip */
+function rankSeries(ds: Dataset, puuid: string, f: Filter): Array<{ date: string; tierName: string; rr: number; elo: number }> {
+  const allSnapshots = ds.snapshots
+    .flatMap((s) => (s.players[puuid] ? [{ date: s.date, ...s.players[puuid] }] : []))
+    .sort((a, b) => a.date.localeCompare(b.date));
+
+  if (f.period === "all") return allSnapshots;
+
+  const season = currentSeason(ds);
+  if (!season) return allSnapshots;
+
+  const seasonMatches = [...ds.playerMatches, ...ds.teamMatches].filter((m) => m.season === season);
+  if (seasonMatches.length === 0) return allSnapshots;
+
+  const seasonStart = Math.min(...seasonMatches.map((m) => new Date(m.startedAt).getTime()));
+
+  return allSnapshots.filter((s) => new Date(s.date).getTime() >= seasonStart);
+}
+
+/** ELO Timeline (straight line segments with tier bands derived from data) */
+function renderEloTimeline(points: Array<{ date: string; tierName: string; rr: number; elo: number }>): string {
+  if (points.length < 2) {
+    return `
+      <div class="tac-elo-timeline" role="img" aria-label="Sin datos suficientes para la gráfica">
+        <div class="tac-empty" style="height:100%;border:0;background:transparent;">
+          <svg class="tac-empty__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 3v18h18"/><path d="M19 9l-7 7-7-7"/></svg>
+          <p class="tac-empty__title">Historial de rango</p>
+          <p class="tac-empty__desc">Se necesitan al menos dos capturas de rango para mostrar la evolución.</p>
+        </div>
+      </div>
+    `;
+  }
+
+  // Fallback tier definitions (used only if data-derived tiers fail)
+  const fallbackTiers = [
+    { name: "Iron", min: 0, max: 800, color: "var(--tac-text-muted)" },
+    { name: "Bronze", min: 800, max: 1050, color: "#c77c4d" },
+    { name: "Silver", min: 1050, max: 1300, color: "var(--tac-text)" },
+    { name: "Gold", min: 1300, max: 1550, color: "var(--tac-spike)" },
+    { name: "Platinum", min: 1550, max: 1800, color: "var(--tac-dire-dim)" },
+    { name: "Diamond", min: 1800, max: 2050, color: "var(--tac-dire)" },
+    { name: "Ascendant", min: 2050, max: 2300, color: "var(--tac-radiant)" },
+    { name: "Immortal", min: 2300, max: 2550, color: "var(--tac-threat)" },
+    { name: "Radiant", min: 2550, max: 3000, color: "var(--tac-text)" },
+  ];
+
+  const fallbackTierOf = (elo: number) => fallbackTiers.find((t) => elo >= t.min && elo < t.max) ?? fallbackTiers[fallbackTiers.length - 1];
+
+  // Derive tiers from actual data: group points by base tier name (e.g., "Ascendant" from "Ascendant 1")
+  // and compute ELO range for each base tier present in the data
+  const baseTierOf = (tierName: string) => tierName.split(" ")[0]; // "Ascendant 1" -> "Ascendant"
+  const tierGroups = new Map<string, { minElo: number; maxElo: number; points: typeof points }>();
+
+  for (const p of points) {
+    const baseTier = baseTierOf(p.tierName);
+    const group = tierGroups.get(baseTier) ?? { minElo: Infinity, maxElo: -Infinity, points: [] };
+    group.minElo = Math.min(group.minElo, p.elo);
+    group.maxElo = Math.max(group.maxElo, p.elo);
+    group.points.push(p);
+    tierGroups.set(baseTier, group);
+  }
+
+  // Build data-derived tiers sorted by ELO
+  const derivedTiers = Array.from(tierGroups.entries())
+    .map(([name, g]) => ({
+      name,
+      min: g.minElo,
+      max: g.maxElo,
+      color: fallbackTierOf(g.minElo).color, // use fallback color for the base tier
+      points: g.points,
+    }))
+    .sort((a, b) => a.min - b.min);
+
+  // If no derived tiers (shouldn't happen), fall back to hardcoded
+  const tiers = derivedTiers.length > 0 ? derivedTiers : fallbackTiers;
+
+  // Helper to find tier by ELO using derived tiers (with fallback)
+  const tierOf = (elo: number) => tiers.find((t) => elo >= t.min && elo <= t.max) ?? fallbackTierOf(elo);
+
+  const W = 560;
+  const H = 180;
+  const pad = { top: 16, right: 12, bottom: 28, left: 90 };
+  const plotW = W - pad.left - pad.right;
+  const plotH = H - pad.top - pad.bottom;
+
+  // Dynamic y-scale based on data range, with padding
+  const dataMin = Math.min(...points.map((p) => p.elo));
+  const dataMax = Math.max(...points.map((p) => p.elo));
+  const eloSpan = dataMax - dataMin || 1;
+  const padding = eloSpan * 0.15;
+  const minElo = Math.max(0, dataMin - padding);
+  const maxElo = dataMax + padding;
+
+  const xScale = (i: number) => pad.left + (i / (points.length - 1)) * plotW;
+  const yScale = (elo: number) => pad.top + plotH - ((elo - minElo) / (maxElo - minElo)) * plotH;
+
+  // Colored line segments — green if ELO gained, red if lost between consecutive points
+  const lineSegments = points
+    .slice(1)
+    .map((p, i) => {
+      const xPrev = xScale(i);
+      const xCurr = xScale(i + 1);
+      const yPrev = yScale(points[i].elo);
+      const yCurr = yScale(points[i + 1].elo);
+      const gained = points[i + 1].elo >= points[i].elo;
+      const color = gained ? "var(--tac-clutch)" : "var(--tac-threat)";
+      return `<path d="M${xPrev},${yPrev}L${xCurr},${yCurr}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
+    })
+    .join("");
+
+  // Tier bands — only for tiers derived from data
+  const tierBands = tiers
+    .map((t) => {
+      const y1 = yScale(Math.min(t.max, maxElo));
+      const y2 = yScale(Math.max(t.min, minElo));
+      const h = Math.abs(y2 - y1);
+      if (h < 1) return "";
+      return `<rect class="tier-band" x="${pad.left}" y="${Math.min(y1, y2)}" width="${plotW}" height="${h}" fill="${t.color}" opacity="0.08"/><text class="tier-label" x="${pad.left - 8}" y="${(y1 + y2) / 2}">${t.name}</text>`;
+    })
+    .join("");
+
+  // Division markers within tiers (3 per tier, except Radiant)
+  const divisionLines = tiers
+    .filter((t) => t.name !== "Radiant")
+    .flatMap((t) => {
+    const tierHeight = t.max - t.min;
+    if (tierHeight <= 0) return [];
+    const y1 = yScale(t.min + tierHeight / 3);
+    const y2 = yScale(t.min + (2 * tierHeight) / 3);
+    return [
+      `<line x1="${pad.left}" x2="${pad.left + plotW}" y1="${y1}" y2="${y1}" stroke="var(--tac-stroke)" stroke-width="0.5" stroke-dasharray="2,2" opacity="0.4"/>`,
+      `<line x1="${pad.left}" x2="${pad.left + plotW}" y1="${y2}" y2="${y2}" stroke="var(--tac-stroke)" stroke-width="0.5" stroke-dasharray="2,2" opacity="0.4"/>`,
+    ];
+  }).join("");
+
+  // Points color-coded by derived tier; latest point highlighted
+  const pointEls = points
+    .map((p, i) => {
+      const x = xScale(i);
+      const y = yScale(p.elo);
+      const tier = tierOf(p.elo);
+      const isLast = i === points.length - 1;
+      const r = isLast ? 4.5 : 3.5;
+      return `<circle class="elo-point" style="fill:${tier.color};stroke:var(--tac-bg);stroke-width:${isLast ? 3 : 2};" cx="${x}" cy="${y}" r="${r}" data-date="${esc(p.date)}" data-tier="${esc(p.tierName)}" data-rr="${p.rr}" data-elo="${p.elo}" tabindex="0" role="button" aria-label="${esc(p.date)}: ${esc(p.tierName)} ${p.rr} RR (${p.elo} ELO)"/>`;
+    })
+    .join("");
+
+  // RR deltas between consecutive snapshots
+  const rrDeltas = points
+    .slice(1)
+    .map((p, i) => {
+      const delta = p.elo - points[i].elo;
+      if (Math.abs(delta) < 1) return "";
+      const x = xScale(i + 1);
+      const y = Math.min(yScale(points[i].elo), yScale(p.elo)) - 10;
+      const color = delta > 0 ? "var(--tac-clutch)" : "var(--tac-threat)";
+      const sign = delta > 0 ? "+" : "";
+      return `<text class="rr-delta" x="${x}" y="${y}" text-anchor="middle" font-family="var(--tac-font-mono)" font-size="0.5rem" fill="${color}">${sign}${Math.round(delta)}</text>`;
+    })
+    .join("");
+
+  // Current tier anchor line at latest ELO
+  const lastPoint = points[points.length - 1];
+  const lastTier = tierOf(lastPoint.elo);
+  const anchorY = yScale(lastPoint.elo);
+  const anchorLine = `<line x1="${pad.left}" x2="${pad.left + plotW}" y1="${anchorY}" y2="${anchorY}" stroke="${lastTier.color}" stroke-width="1.5" stroke-dasharray="4,4" opacity="0.6"/>`;
+  const anchorLabel = `<text class="anchor-label" x="${pad.left - 8}" y="${anchorY - 4}" text-anchor="end" font-family="var(--tac-font-mono)" font-size="0.5625rem" fill="${lastTier.color}" font-weight="600">${esc(lastTier.name)} ${lastPoint.rr} RR</text>`;
+
+  // Date axis
+  const dateLabels = [0, Math.floor(points.length / 2), points.length - 1]
+    .map((i) => {
+      const x = xScale(i);
+      const date = points[i].date;
+      return `<text class="date-axis" x="${x}" y="${H - pad.bottom + 18}" text-anchor="middle">${esc(fmtDateMonth(date))}</text>`;
+    })
+    .join("");
+
+  return `
+    <div class="tac-elo-timeline" role="img" aria-label="Evolución del ELO en el tiempo">
+      <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+        ${tierBands}
+        ${divisionLines}
+        ${anchorLine}
+        ${lineSegments}
+        ${pointEls}
+        ${rrDeltas}
+        ${anchorLabel}
+        ${dateLabels}
+      </svg>
+      <div class="tac-elo-tooltip" id="tac-elo-tooltip" hidden>
+        <div class="tac-elo-tooltip__date"></div>
+        <div class="tac-elo-tooltip__rank"></div>
+        <div class="tac-elo-tooltip__rr"></div>
+      </div>
+    </div>
+  `;
+}
+
+
+
+/** Map detail grid for drill-down */
+function renderMapDetailGrid(rows: ReturnType<typeof mapDetail>): string {
+  return `
+    <div class="tac-map-detail" role="list">
+      ${rows
+        .map(
+          (r) => `
+        <article class="tac-map-player" role="listitem">
+          <div class="tac-map-player__name">${esc(r.riotId)}</div>
+          <div class="tac-map-player__agent">${r.topAgent ? agentIcon(r.topAgent, 16) + " " + esc(r.topAgent) : "—"}</div>
+          <div class="tac-map-player__stats">
+            <div class="tac-map-player__stat">
+              <span class="tac-map-player__stat-label">PJ</span>
+              <span class="tac-map-player__stat-value">${r.games}</span>
+            </div>
+            <div class="tac-map-player__stat">
+              <span class="tac-map-player__stat-label">WR</span>
+              <span class="tac-map-player__stat-value ${wrClass(r.winRate).replace("tac-", "")}">${fmtPct(r.winRate)}</span>
+            </div>
+            <div class="tac-map-player__stat">
+              <span class="tac-map-player__stat-label">K/D</span>
+              <span class="tac-map-player__stat-value">${fmtKd(r.kd)}</span>
+            </div>
+          </div>
+        </article>
+      `
+        )
+        .join("")}
+    </div>
+  `;
+}
+
+/* ==========================================================================
+   VIEW RENDERERS
+   ========================================================================== */
+
+/** Highlights del equipo: una entrada por partida (la del primer jugador del roster que la jugó). */
+function teamHighlights(ds: Dataset, tms: TeamMatch[]): string[] {
+  const ids = new Set(tms.map((t) => t.matchId));
+  const seen = new Set<string>();
+  const ms = ds.playerMatches.filter((m) => ids.has(m.matchId) && !seen.has(m.matchId) && seen.add(m.matchId));
+  return highlights(ms);
 }
 
 function renderTeam(ds: Dataset, f: Filter): string {
@@ -69,49 +499,62 @@ function renderTeam(ds: Dataset, f: Filter): string {
   const pr = last?.premier;
   const wins = tms.filter((t) => t.won === true).length;
   const losses = tms.filter((t) => t.won === false).length;
+  const draws = tms.filter((t) => t.won === null).length;
   const maps = teamByMap(tms);
-  const comps = compositions(tms).slice(0, 5);
+  const comps = compositions(tms);
   const rec = recent(ds, tms, 10);
 
-  return `
-    <div class="vkpis">
-      ${kpi("Premier", pr ? `Div ${pr.division} · #${pr.place}` : dash)}
-      ${kpi("Puntos Premier", pr ? String(pr.points) : dash)}
-      ${kpi("Récord (filtro)", tms.length ? `${wins}–${losses}` : dash)}
-    </div>
-    <h2 class="vsec">Mapas</h2>
-    ${table(
-      ["Mapa", "PJ", "Win%", "Ataque", "Defensa"],
-      maps.map((m) => [`${esc(m.map)} ▸`, String(m.games), wrCell(m.winRate), fmtPct(m.atkPct), fmtPct(m.defPct)]),
-      [1, 2, 3, 4],
-      maps.map((m) => ` class="vrow-btn" data-map="${esc(m.map)}" tabindex="0" aria-expanded="false"`),
-    )}
-    <h2 class="vsec">Composiciones</h2>
-    ${table(
-      ["Composición", "Mapa", "PJ", "Win%"],
-      comps.map((c) => [esc(c.agents.join(" · ")), esc(c.map), String(c.games), wrCell(c.winRate)]),
-      [2, 3],
-    )}
-    <h2 class="vsec">Últimas partidas</h2>
-    ${table(
-      ["Fecha", "Tipo", "Mapa", "Marcador", "Rival"],
-      rec.map((r) => [
-        fmtDate(r.date),
-        r.kindLabel,
-        esc(r.map),
-        `<span class="${r.won === true ? "vgood" : r.won === false ? "vbad" : ""}">${r.score}</span>`,
-        esc(r.rival) + (r.subs.length ? `<span class="vbadge">con suplente: ${esc(r.subs.join(", "))}</span>` : ""),
-      ]),
-    )}`;
-}
+  // KPI Strip
+  const kpis = [
+    { label: "Premier", value: pr ? `Div ${pr.division} · #${pr.place}` : dash, variant: "radiant" as const },
+    { label: "Puntos", value: pr ? String(pr.points) : dash, variant: "spike" as const },
+    { label: "Récord", value: tms.length ? `${wins}–${losses}${draws ? `–${draws}` : ""}` : dash, variant: "clutch" as const, trend: (wins > losses ? "up" : losses > wins ? "down" : "neutral") as "up" | "down" | "neutral", trendText: wins > losses ? `+${wins - losses}` : losses > wins ? `${wins - losses}` : "Empate" },
+  ];
 
-function renderMapDetail(ds: Dataset, f: Filter, map: string): string {
-  const rows = mapDetail(teamMatchesFor(ds, f), map, ds.roster);
-  return table(
-    ["Jugador", "Agente", "PJ", "Win%", "K/D"],
-    rows.map((r) => [esc(r.riotId), r.topAgent ? esc(r.topAgent) : dash, String(r.games), wrCell(r.winRate), fmtKd(r.kd)]),
-    [2, 3, 4],
-  );
+  // Map scoreboard
+  const mapHeaders = ["Mapa", "PJ", "WR", "Ataque", "Defensa", "Rondas"];
+  const mapRows = maps.map((m) => {
+    const roundDots = Array.from({ length: m.games }, (_, i) => {
+      // Simplified - would need round data per map
+      return `<span class="tac-round" style="background:var(--tac-stroke)"></span>`;
+    }).join("");
+    return {
+      cells: [
+        `<strong>${esc(m.map)}</strong>`,
+        String(m.games),
+        `<span class="${wrClass(m.winRate)}">${fmtPct(m.winRate)}</span>`,
+        fmtPct(m.atkPct),
+        fmtPct(m.defPct),
+        `<div class="tac-rounds" aria-label="Historial de rondas">${roundDots}</div>`,
+      ],
+      rowClass: "",
+      expandable: true,
+      mapKey: m.map,
+      detailHtml: renderMapDetailGrid(mapDetail(tms, m.map, ds.roster)),
+    };
+  });
+
+  // Recent matches
+  const recHeaders = ["Fecha", "Modo", "Mapa", "Marcador", "Rival"];
+  const recRows = rec.map((r) => ({
+    cells: [
+      fmtDate(r.date),
+      `<span class="tac-badge tac-badge--${r.kindLabel.toLowerCase() === "premier" ? "premier" : r.kindLabel.toLowerCase() === "torneo" ? "torneo" : "scrim"}">${esc(r.kindLabel)}</span>`,
+      esc(r.map),
+      `<span class="${r.won === true ? "tac-win" : r.won === false ? "tac-loss" : "tac-draw"}">${esc(r.score)}</span>`,
+      esc(r.rival) + (r.subs.length ? `<span class="tac-badge tac-badge--sub" style="margin-left:8px;">Suplente: ${esc(r.subs.join(", "))}</span>` : ""),
+    ],
+  }));
+
+  return `
+    ${renderKpiStrip(kpis)}
+    ${renderCallouts(teamHighlights(ds, tms))}
+    ${sectionHeader("Mapas", maps.length, "mapas")}
+    ${renderScoreboard(mapHeaders, mapRows, { numCols: [1, 2, 3, 4], centerCols: [5], sortableCols: [0, 1, 2, 3, 4] })}
+    ${renderCompositions(comps)}
+    ${sectionHeader("Últimas partidas", rec.length)}
+    ${renderScoreboard(recHeaders, recRows, { centerCols: [1, 3] })}
+  `;
 }
 
 function renderPlayer(ds: Dataset, p: RosterPlayer, f: Filter): string {
@@ -121,87 +564,629 @@ function renderPlayer(ds: Dataset, p: RosterPlayer, f: Filter): string {
   const tips = highlights(ms);
   const agents = byKey(ms, "agent");
   const maps = byKey(ms, "map");
+
+  const kpis = [
+    { label: "Rango", value: last ? `${esc(last.tierName)} · ${last.rr} RR` : dash, variant: "radiant" as const },
+    { label: "K/D", value: fmtKd(l.kd), variant: "clutch" as const },
+    { label: "HS%", value: fmtPct(l.hsPct), variant: "spike" as const },
+    { label: "Daño/R", value: fmtNum(l.dmgPerRound), variant: "dire" as const },
+    { label: "Partidas", value: String(l.games), variant: "threat" as const },
+  ];
+
+  const agentHeaders = ["Agente", "PJ", "WR", "K/D", "HS%"];
+  const agentRows = agents.map((a) => ({
+    cells: [
+      `<span class="tac-agent">${agentIcon(a.key, 18)} ${esc(a.key)}</span>`,
+      String(a.line.games),
+      `<span class="${wrClass(a.line.winRate)}">${fmtPct(a.line.winRate)}</span>`,
+      fmtKd(a.line.kd),
+      fmtPct(a.line.hsPct),
+    ],
+  }));
+
+  const mapHeaders = ["Mapa", "PJ", "WR", "K/D", "Agente top"];
+  const mapRows = maps.map((m) => ({
+    cells: [
+      esc(m.key),
+      String(m.line.games),
+      `<span class="${wrClass(m.line.winRate)}">${fmtPct(m.line.winRate)}</span>`,
+      fmtKd(m.line.kd),
+      m.topAgent ? `<span class="tac-agent">${esc(m.topAgent)}</span>` : dash,
+    ],
+  }));
+
   return `
-    <div class="vkpis">
-      ${kpi("Rango", last ? `${esc(last.tierName)} · ${last.rr} RR` : dash)}
-      ${kpi("K/D", fmtKd(l.kd))}
-      ${kpi("HS%", fmtPct(l.hsPct))}
-      ${kpi("Daño/ronda", fmtNum(l.dmgPerRound))}
-      ${kpi("Partidas", String(l.games))}
-    </div>
-    ${tips.length ? `<ul class="vtips">${tips.map((t) => `<li>${esc(t)}</li>`).join("")}</ul>` : ""}
-    <h2 class="vsec">Agentes</h2>
-    ${table(
-      ["Agente", "PJ", "Win%", "K/D", "HS%"],
-      agents.map((a) => [esc(a.key), String(a.line.games), wrCell(a.line.winRate), fmtKd(a.line.kd), fmtPct(a.line.hsPct)]),
-      [1, 2, 3, 4],
-    )}
-    <h2 class="vsec">Mapas</h2>
-    ${table(
-      ["Mapa", "PJ", "Win%", "K/D", "Agente top"],
-      maps.map((m) => [esc(m.key), String(m.line.games), wrCell(m.line.winRate), fmtKd(m.line.kd), m.topAgent ? esc(m.topAgent) : dash]),
-      [1, 2, 3],
-    )}
-    <h2 class="vsec">Evolución del rango</h2>
-    <div class="vchart-wrap">${chart(rrSeries(ds, p.puuid))}</div>`;
+    ${renderKpiStrip(kpis)}
+    ${renderCallouts(tips)}
+    ${sectionHeader("Agentes", agents.length, "agentes")}
+    ${renderScoreboard(agentHeaders, agentRows, { numCols: [1, 2, 3, 4], sortableCols: [0, 1, 2, 3, 4] })}
+    ${sectionHeader("Mapas", maps.length, "mapas")}
+    ${renderScoreboard(mapHeaders, mapRows, { numCols: [1, 2, 3], sortableCols: [0, 1, 2, 3, 4] })}
+    ${sectionHeader("Evolución del rango")}
+    ${renderEloTimeline(rankSeries(ds, p.puuid, f))}
+    ${sectionHeader("Tus ultimas partidas")}
+    ${renderLastMatches(ms, ds)}
+  `;
 }
 
-const RANK_COLS: Array<{ key: LeaderKey; label: string }> = [
-  { key: "rank", label: "Rango" },
-  { key: "games", label: "PJ" },
-  { key: "winRate", label: "Win%" },
-  { key: "kd", label: "K/D" },
-  { key: "hsPct", label: "HS%" },
-  { key: "dmgPerRound", label: "Daño/ronda" },
-  { key: "kda", label: "KDA" },
-];
+/** Last Matches - match cards similar to in-game match history */
+function renderLastMatches(ms: PlayerMatch[], ds: Dataset): string {
+  const wins = ms.filter((m) => m.won === true).length;
+  const losses = ms.filter((m) => m.won === false).length;
+  const draws = ms.filter((m) => m.won === null).length;
+  const kd = ms.length ? ms.reduce((a, m) => a + m.kills, 0) / Math.max(ms.reduce((a, m) => a + m.deaths, 0), 1) : null;
+  const hsPct = ms.length ? (ms.reduce((a, m) => a + m.headshots, 0) / Math.max(ms.reduce((a, m) => a + m.bodyshots + m.headshots + m.legshots, 0), 1)) * 100 : null;
+  const totalDamage = ms.reduce((a, m) => a + m.damageMade, 0);
+  const totalRounds = ms.reduce((a, m) => a + m.roundsWon + m.roundsLost, 0);
+  const dmgPerRound = totalRounds > 0 ? totalDamage / totalRounds : null;
+
+  const modeLabels: Record<Mode, string> = {
+    competitive: "Ranked",
+    premier: "Premier",
+    custom: "Scrim/Torneo",
+  };
+
+  const statCards: Array<{ label: string; value: string; trend?: "up" | "down" | "neutral"; trendText?: string }> = [
+    { label: "Partidas", value: String(ms.length) },
+    { label: "Victorias", value: String(wins), trend: wins > losses ? "up" : wins < losses ? "down" : "neutral" },
+    { label: "Derrotas", value: String(losses) },
+    { label: "Empates", value: String(draws), trend: draws > 0 ? "neutral" : undefined },
+    { label: "K/D", value: fmtKd(kd) },
+    { label: "HS%", value: fmtPct(hsPct) },
+    { label: "Daño/R", value: fmtNum(dmgPerRound) },
+    { label: "KDA", value: fmtKd((ms.reduce((a, m) => a + m.kills + m.assists, 0)) / Math.max(ms.reduce((a, m) => a + m.deaths, 0), 1)) },
+  ];
+
+  const agents = [...new Set(ms.map((m) => m.agent))];
+  const maps = [...new Set(ms.map((m) => m.map))];
+  const modes = [...new Set(ms.map((m) => m.mode))];
+
+  const matchCards = ms
+    .slice(0, 35)
+    .map((m) => {
+      const agentIconHtml = agentIcon(m.agent, 24);
+      const totalHsBodyLegs = m.headshots + m.bodyshots + m.legshots;
+      const matchHsPct = totalHsBodyLegs > 0 ? (m.headshots / totalHsBodyLegs) * 100 : 0;
+      const matchKda = (m.kills + m.assists) / Math.max(m.deaths, 1);
+      const matchRounds = m.roundsWon + m.roundsLost;
+      const matchAcs = matchRounds > 0 ? Math.round(m.score / matchRounds) : 0;
+      const wonClass = m.won === true ? "won" : m.won === false ? "lost" : "neutral";
+      const resultText = m.won === true ? "Victoria" : m.won === false ? "Derrota" : "Empate";
+      const resultClass = m.won === true ? "won" : m.won === false ? "lost" : "";
+
+      return `
+        <article class="tac-match-card tac-match-card--${wonClass}" role="listitem" aria-label="${esc(m.map)} - ${resultText}" data-match-id="${esc(m.matchId)}" tabindex="0">
+          <div class="tac-match-card__header">
+            <span class="tac-match-card__map">${esc(m.map)}</span>
+            <span class="tac-match-card__result tac-match-card__result--${resultClass}">${esc(resultText)}</span>
+          </div>
+          <div class="tac-match-card__score">${m.roundsWon}:${m.roundsLost}</div>
+          <div class="tac-match-card__mode">${esc(modeLabels[m.mode])}</div>
+          <div class="tac-match-card__agent">${agentIconHtml} ${esc(m.agent)}</div>
+          <div class="tac-match-card__stats">
+            <div class="tac-match-card__stat">
+              <span class="tac-match-card__stat-label">K/D</span>
+              <span class="tac-match-card__stat-value">${fmtKd(m.kills / Math.max(m.deaths, 1))}</span>
+            </div>
+            <div class="tac-match-card__stat">
+              <span class="tac-match-card__stat-label">HS%</span>
+              <span class="tac-match-card__stat-value">${fmtPct(matchHsPct)}</span>
+            </div>
+            <div class="tac-match-card__stat">
+              <span class="tac-match-card__stat-label">ACS</span>
+              <span class="tac-match-card__stat-value">${matchAcs}</span>
+            </div>
+            <div class="tac-match-card__stat">
+              <span class="tac-match-card__stat-label">KDA</span>
+              <span class="tac-match-card__stat-value">${fmtKd(matchKda)}</span>
+            </div>
+          </div>
+        </article>
+      `;
+    })
+    .join("");
+
+  return `
+    <section class="tac-match-section">
+      <div class="tac-match-filters" role="group" aria-label="Filtros de historial de partidos">
+        <button type="button" class="tac-match-filter-btn tac-match-filter-btn--active" aria-pressed="true">
+          Todos los agentes <span class="tac-match-filter__count">${agents.length}</span>
+        </button>
+        <button type="button" class="tac-match-filter-btn" aria-pressed="false">
+          Todos los mapas <span class="tac-match-filter__count">${maps.length}</span>
+        </button>
+        <button type="button" class="tac-match-filter-btn" aria-pressed="false">
+          Todos los modos <span class="tac-match-filter__count">${modes.length}</span>
+        </button>
+        <button type="button" class="tac-match-filter-btn" aria-pressed="false">
+          +4 más
+        </button>
+      </div>
+
+      <div class="tac-kpi-strip" role="list" aria-label="Resumen de partidos">
+        ${statCards
+          .map(
+            (k) => `
+          <div class="tac-kpi tac-kpi--${k.trend ? `tac-kpi__trend--${k.trend}` : "radiant"}" role="listitem">
+            <div class="tac-kpi__label">${esc(k.label)}</div>
+            <div class="tac-kpi__value">${esc(k.value)}</div>
+            ${k.trend ? `<div class="tac-kpi__trend tac-kpi__trend--${k.trend}">${k.trendText || ""}</div>` : ""}
+          </div>
+        `
+          )
+          .join("")}
+      </div>
+
+      <div class="tac-match-cards" role="list" aria-label="Historial de partidos">
+        ${matchCards}
+      </div>
+    </section>
+  `;
+}
+
+/** Match Detail Modal - detailed view for a single match (base info + async team data) */
+function renderMatchDetail(m: PlayerMatch, ds: Dataset): string {
+  const modeLabels: Record<Mode, string> = {
+    competitive: "Ranked",
+    premier: "Premier",
+    custom: "Scrim/Torneo",
+  };
+  const totalHsBodyLegs = m.headshots + m.bodyshots + m.legshots;
+  const matchHsPct = totalHsBodyLegs > 0 ? (m.headshots / totalHsBodyLegs) * 100 : 0;
+  const matchKda = (m.kills + m.assists) / Math.max(m.deaths, 1);
+  const matchRounds = m.roundsWon + m.roundsLost;
+  const matchAcs = matchRounds > 0 ? Math.round(m.score / matchRounds) : 0;
+  const wonClass = m.won === true ? "won" : m.won === false ? "lost" : "neutral";
+  const resultText = m.won === true ? "Victoria" : m.won === false ? "Derrota" : "Empate";
+  const resultClass = m.won === true ? "won" : m.won === false ? "lost" : "";
+  const dateStr = new Date(m.startedAt).toLocaleString("es-CO", { dateStyle: "medium", timeStyle: "short" });
+
+  // Base rounds (fallback) - will be replaced with ATK/DEF roles when team data loads
+  const roundsWonHtml = Array.from({ length: m.roundsWon }, () => `<span class="tac-match-detail__round tac-match-detail__round--win" aria-hidden="true"></span>`).join("");
+  const roundsLostHtml = Array.from({ length: m.roundsLost }, () => `<span class="tac-match-detail__round tac-match-detail__round--loss" aria-hidden="true"></span>`).join("");
+  const baseRoundsHtml = roundsWonHtml + roundsLostHtml;
+
+  return `
+    <section class="tac-match-detail">
+      <div class="tac-match-detail__header">
+        <div>
+          <span class="tac-match-detail__map">${esc(m.map)}</span>
+          <span class="tac-match-detail__result tac-match-detail__result--${resultClass}">${esc(resultText)}</span>
+        </div>
+        <div class="tac-match-detail__score">${m.roundsWon}:${m.roundsLost}</div>
+        <div class="tac-match-detail__mode">${esc(modeLabels[m.mode])}</div>
+        <div class="tac-match-detail__agent">${agentIcon(m.agent, 32)} ${esc(m.agent)}</div>
+      </div>
+
+      <div class="tac-match-detail__meta">
+        <div class="tac-match-detail__stat">
+          <span class="tac-match-detail__stat-label">Rival</span>
+          <span class="tac-match-detail__stat-value" data-opponent>Cargando…</span>
+        </div>
+        <div class="tac-match-detail__stat">
+          <span class="tac-match-detail__stat-label">Fecha</span>
+          <span class="tac-match-detail__stat-value">${dateStr}</span>
+        </div>
+        <div class="tac-match-detail__stat">
+          <span class="tac-match-detail__stat-label">Lado inicial</span>
+          <span class="tac-match-detail__stat-value">${m.side === "Red" ? "ATK" : "DEF"}</span>
+        </div>
+      </div>
+
+      <div class="tac-match-detail__stats">
+        <div class="tac-match-detail__stat">
+          <span class="tac-match-detail__stat-label">K/D</span>
+          <span class="tac-match-detail__stat-value">${fmtKd(m.kills / Math.max(m.deaths, 1))}</span>
+        </div>
+        <div class="tac-match-detail__stat">
+          <span class="tac-match-detail__stat-label">HS%</span>
+          <span class="tac-match-detail__stat-value">${fmtPct(matchHsPct)}</span>
+        </div>
+        <div class="tac-match-detail__stat">
+          <span class="tac-match-detail__stat-label">ACS</span>
+          <span class="tac-match-detail__stat-value">${matchAcs}</span>
+        </div>
+        <div class="tac-match-detail__stat">
+          <span class="tac-match-detail__stat-label">KDA</span>
+          <span class="tac-match-detail__stat-value">${fmtKd(matchKda)}</span>
+        </div>
+      </div>
+      <div class="tac-match-detail__stats">
+        <div class="tac-match-detail__stat">
+          <span class="tac-match-detail__stat-label">Daño</span>
+          <span class="tac-match-detail__stat-value">${fmtNum(m.damageMade)}</span>
+        </div>
+        <div class="tac-match-detail__stat">
+          <span class="tac-match-detail__stat-label">Daño/R</span>
+          <span class="tac-match-detail__stat-value">${matchRounds > 0 ? Math.round(m.damageMade / matchRounds) : 0}</span>
+        </div>
+        <div class="tac-match-detail__stat">
+          <span class="tac-match-detail__stat-label">Daño recibido</span>
+          <span class="tac-match-detail__stat-value">${fmtNum(m.damageReceived)}</span>
+        </div>
+      </div>
+
+      <div class="tac-match-detail__section">
+        <div class="tac-match-detail__section-title">Rondas</div>
+        <div class="tac-match-detail__rounds">${baseRoundsHtml}</div>
+      </div>
+
+      <div class="tac-match-detail__section" id="tac-our-lineup" hidden>
+        <div class="tac-match-detail__section-title">Nuestro equipo</div>
+        <div class="tac-match-detail__lineup" id="tac-our-lineup-inner">Cargando equipo aliado…</div>
+      </div>
+
+      <div class="tac-match-detail__section" id="tac-opp-lineup" hidden>
+        <div class="tac-match-detail__section-title">Equipo rival</div>
+        <div class="tac-match-detail__lineup" id="tac-opp-lineup-inner">Cargando equipo enemigo…</div>
+      </div>
+
+    </section>
+  `;
+}
 
 function renderRanking(ds: Dataset, f: Filter, sort: { key: LeaderKey; dir: "asc" | "desc" }): string {
   const base = leaderboard(ds, f);
   const lead = leaders(base);
   const rows = sortLeaderboard(base, sort.key, sort.dir);
-  const cell = (r: (typeof rows)[number], key: LeaderKey, text: string) =>
-    lead[key].includes(r.puuid) ? `<span class="vlead">${text}</span>` : text;
-  const th = RANK_COLS.map((c) => {
-    const active = c.key === sort.key;
-    const aria = active ? (sort.dir === "asc" ? "ascending" : "descending") : "none";
-    const arrow = active ? (sort.dir === "asc" ? " ▲" : " ▼") : "";
-    return `<th class="num" aria-sort="${aria}"><button type="button" class="vsort" data-sort="${c.key}">${c.label}${arrow}</button></th>`;
-  }).join("");
-  const body = rows
-    .map((r) => {
-      const rank = r.tierName ? `${esc(r.tierName)} · ${esc(String(r.rr ?? 0))} RR` : dash;
-      const tds = [
-        cell(r, "rank", rank),
-        cell(r, "games", String(r.line.games)),
-        cell(r, "winRate", fmtPct(r.line.winRate)),
-        cell(r, "kd", fmtKd(r.line.kd)),
-        cell(r, "hsPct", fmtPct(r.line.hsPct)),
-        cell(r, "dmgPerRound", fmtNum(r.line.dmgPerRound)),
-        cell(r, "kda", fmtKd(r.kda)),
-      ];
-      return `<tr><td><a class="vplayer" href="#${esc(r.name.toLowerCase().replace(/[^a-z0-9]+/g, "-"))}">${esc(r.name)}</a></td>${tds.map((t) => `<td class="num">${t}</td>`).join("")}</tr>`;
-    })
-    .join("");
-  return `<p class="vsub">Toca un encabezado para ordenar. Resaltado: el mejor de cada columna.</p>
-    <div class="vtable-wrap"><table class="vtable vrank"><thead><tr><th>Jugador</th>${th}</tr></thead><tbody>${body}</tbody></table></div>`;
+
+  const rankHeaders = ["Jugador", "Rango", "PJ", "WR", "K/D", "HS%", "Daño/R", "KDA"];
+  const rankRows = rows.map((r) => {
+    const rankStr = r.tierName ? `${esc(r.tierName)} · ${esc(String(r.rr ?? 0))} RR` : dash;
+    const isLeader = (key: LeaderKey) => lead[key].includes(r.puuid);
+    return {
+      cells: [
+        `<a class="tac-player" href="#${slug({ name: r.name, tag: "", puuid: r.puuid })}">${esc(r.name)}</a>`,
+        isLeader("rank") ? `<span class="tac-leader">${esc(rankStr)}</span>` : rankStr,
+        isLeader("games") ? `<span class="tac-leader">${esc(String(r.line.games))}</span>` : String(r.line.games),
+        isLeader("winRate") ? `<span class="tac-leader ${wrClass(r.line.winRate)}">${esc(fmtPct(r.line.winRate))}</span>` : `<span class="${wrClass(r.line.winRate)}">${esc(fmtPct(r.line.winRate))}</span>`,
+        isLeader("kd") ? `<span class="tac-leader">${esc(fmtKd(r.line.kd))}</span>` : fmtKd(r.line.kd),
+        isLeader("hsPct") ? `<span class="tac-leader">${esc(fmtPct(r.line.hsPct))}</span>` : fmtPct(r.line.hsPct),
+        isLeader("dmgPerRound") ? `<span class="tac-leader">${esc(fmtNum(r.line.dmgPerRound))}</span>` : fmtNum(r.line.dmgPerRound),
+        isLeader("kda") ? `<span class="tac-leader">${esc(fmtKd(r.kda))}</span>` : fmtKd(r.kda),
+      ],
+    };
+  });
+
+  return `
+    <p class="tac-canvas__subtitle" style="margin-bottom:16px;">Click en encabezado para ordenar. <span class="tac-leader" style="background:var(--tac-radiant);color:#fff;padding:0 6px;border-radius:3px;font-size:0.625rem;">Líder</span> = mejor valor de la columna.</p>
+    ${renderScoreboard(rankHeaders, rankRows, { numCols: [2, 3, 4, 5, 6, 7], sortableCols: [1, 2, 3, 4, 5, 6, 7] })}
+  `;
 }
 
+/* ==========================================================================
+   LIVE PANEL CONTENT
+   ========================================================================== */
+
+function renderLiveTeam(ds: Dataset, f: Filter): string {
+  const tms = teamMatchesFor(ds, f);
+  const last = ds.snapshots[ds.snapshots.length - 1];
+  const pr = last?.premier;
+
+  if (!tms.length) {
+    return `
+      <div class="tac-live-card">
+        <div class="tac-live-card__header"><span class="tac-live-card__title">Próximo rival</span></div>
+        <div class="tac-live-next">
+          <div class="tac-empty" style="padding:16px 0;"><p class="tac-empty__desc">Sin partidas en filtro actual</p></div>
+        </div>
+      </div>
+    `;
+  }
+
+  const nextMatch = tms[0];
+  const side = nextMatch.side === "Red" ? "ATK" : "DEF";
+  const sideColor = nextMatch.side === "Red" ? "var(--tac-radiant)" : "var(--tac-dire)";
+
+  return `
+    <div class="tac-live-card">
+      <div class="tac-live-card__header"><span class="tac-live-card__title">Próximo rival</span></div>
+      <div class="tac-live-next">
+        <div class="tac-live-next__item">
+          <span class="tac-live-next__label">Mapa</span>
+          <span class="tac-live-next__value">${esc(nextMatch.map)}</span>
+        </div>
+        <div class="tac-live-next__item">
+          <span class="tac-live-next__label">Lado inicial</span>
+          <span class="tac-live-next__value" style="color:${sideColor};">${side}</span>
+        </div>
+        <div class="tac-live-next__item">
+          <span class="tac-live-next__label">Rival</span>
+          <span class="tac-live-next__value">${esc(nextMatch.opponentName || nextMatch.opponentPlayers[0] || "Desconocido")}</span>
+        </div>
+        <div class="tac-live-next__item">
+          <span class="tac-live-next__label">Tipo</span>
+          <span class="tac-live-next__value"><span class="tac-badge tac-badge--${nextMatch.kind === "premier" ? "premier" : "custom"}">${esc(nextMatch.kind === "premier" ? "Premier" : "Scrim/Torneo")}</span></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tac-live-card">
+      <div class="tac-live-card__header"><span class="tac-live-card__title">Economía del filtro</span></div>
+      <div class="tac-live-econ">
+        <div class="tac-live-econ__item tac-live-econ__item--won">
+          <div class="tac-live-econ__label">Ganadas</div>
+          <div class="tac-live-econ__value">${tms.filter((t) => t.won === true).length}</div>
+        </div>
+        <div class="tac-live-econ__item tac-live-econ__item--lost">
+          <div class="tac-live-econ__label">Perdidas</div>
+          <div class="tac-live-econ__value">${tms.filter((t) => t.won === false).length}</div>
+        </div>
+        <div class="tac-live-econ__item tac-live-econ__item--spike">
+          <div class="tac-live-econ__label">Empates</div>
+          <div class="tac-live-econ__value">${tms.filter((t) => t.won === null).length}</div>
+        </div>
+      </div>
+    </div>
+
+    ${pr ? `
+    <div class="tac-live-card">
+      <div class="tac-live-card__header"><span class="tac-live-card__title">Premier Status</span></div>
+      <div class="tac-live-econ">
+        <div class="tac-live-econ__item">
+          <div class="tac-live-econ__label">División</div>
+          <div class="tac-live-econ__value">${pr.division}</div>
+        </div>
+        <div class="tac-live-econ__item">
+          <div class="tac-live-econ__label">Puesto</div>
+          <div class="tac-live-econ__value">#${pr.place}</div>
+        </div>
+        <div class="tac-live-econ__item">
+          <div class="tac-live-econ__label">Puntos</div>
+          <div class="tac-live-econ__value">${pr.points}</div>
+        </div>
+      </div>
+    </div>
+    ` : ""}
+  `;
+}
+
+function renderLivePlayer(ds: Dataset, p: RosterPlayer, f: Filter): string {
+  const ms = playerMatchesFor(ds, p.puuid, f);
+  const l = line(ms);
+  const last = ds.snapshots[ds.snapshots.length - 1]?.players[p.puuid];
+  const tips = highlights(ms);
+
+  const recentForm = ms.slice(0, 5).map((m) => (m.won === true ? "W" : m.won === false ? "L" : "D")).join("");
+
+  return `
+    <div class="tac-live-card">
+      <div class="tac-live-card__header"><span class="tac-live-card__title">Forma reciente</span></div>
+      <div style="display:flex;gap:8px;justify-content:center;font-family:var(--tac-font-mono);font-size:1.25rem;font-weight:700;letter-spacing:4px;">
+        ${recentForm.split("").map((c) => `<span style="color:${c === "W" ? "var(--tac-clutch)" : c === "L" ? "var(--tac-threat)" : "var(--tac-spike)"}">${c}</span>`).join("")}
+      </div>
+      <p style="text-align:center;margin-top:8px;font-size:0.75rem;color:var(--tac-text-muted);">${ms.length} partidas en filtro</p>
+    </div>
+
+    ${last ? `
+    <div class="tac-live-card">
+      <div class="tac-live-card__header"><span class="tac-live-card__title">Rango actual</span></div>
+      <div style="text-align:center;">
+        <div style="font-family:var(--tac-font-display);font-weight:700;font-size:1.5rem;color:var(--tac-radiant);">${esc(last.tierName)}</div>
+        <div style="font-family:var(--tac-font-mono);font-size:1rem;color:var(--tac-text-dim);">${last.rr} RR · ${last.elo} ELO</div>
+      </div>
+    </div>
+    ` : ""}
+
+    ${tips.length ? `
+    <div class="tac-live-card">
+      <div class="tac-live-card__header"><span class="tac-live-card__title">Insights</span></div>
+      <ul style="display:flex;flex-direction:column;gap:8px;">
+        ${tips.map((t) => `<li style="font-size:0.8125rem;line-height:1.5;color:var(--tac-text);">${esc(t)}</li>`).join("")}
+      </ul>
+    </div>
+    ` : ""}
+  `;
+}
+
+function renderLiveRanking(ds: Dataset, f: Filter): string {
+  const base = leaderboard(ds, f);
+  const lead = leaders(base);
+
+  return `
+    <div class="tac-live-card">
+      <div class="tac-live-card__header"><span class="tac-live-card__title">Líderes del equipo</span></div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        ${Object.entries(lead)
+          .filter(([, v]) => v.length > 0)
+          .slice(0, 5)
+          .map(([key, puuids]) => {
+            const labels: Record<LeaderKey, string> = {
+              rank: "Rango",
+              games: "Partidas",
+              winRate: "Win%",
+              kd: "K/D",
+              hsPct: "HS%",
+              dmgPerRound: "Daño/R",
+              kda: "KDA",
+            };
+            const players = ds.roster.players.filter((p) => puuids.includes(p.puuid));
+            return `
+              <div style="padding:12px;background:var(--tac-bg-elevated);border-radius:var(--tac-r-sm);border:1px solid var(--tac-stroke);">
+                <div style="font-family:var(--tac-font-mono);font-size:0.5625rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--tac-radiant);margin-bottom:4px;">${labels[key as LeaderKey]}</div>
+                <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                  ${players.map((p) => `<span class="tac-badge tac-badge--premier" style="font-size:0.625rem;">${esc(p.name)}</span>`).join("")}
+                </div>
+              </div>
+            `;
+          })
+          .join("")}
+      </div>
+    </div>
+  `;
+}
+
+/* ==========================================================================
+   MAIN APPLICATION
+   ========================================================================== */
+
 async function main() {
-  const updated = document.getElementById("v-updated")!;
-  const tabsEl = document.getElementById("v-tabs")!;
-  const content = document.getElementById("v-content")!;
-  const filtersEl = document.getElementById("v-filters")!;
+  const updatedEl = document.getElementById("tac-updated")!;
+  const tabsEl = document.getElementById("tac-tabs")!;
+  const filtersEl = document.getElementById("tac-filters")!;
+  const canvasTitle = document.getElementById("tac-view-title")!;
+  const canvasSubtitle = document.getElementById("tac-view-subtitle")!;
+  const contentEl = document.getElementById("tac-content")!;
+  const liveEl = document.getElementById("tac-live")!;
+  const liveContentEl = document.getElementById("tac-live-content")!;
+  const intelEl = document.getElementById("tac-intel")!;
+  const mainEl = document.getElementById("tac-main")!;
+
+  // Mobile overlay for live panel
+  let overlay = document.querySelector(".tac-live-overlay") as HTMLElement;
+  if (!overlay) {
+    overlay = document.createElement("div");
+    overlay.className = "tac-live-overlay";
+    document.body.appendChild(overlay);
+  }
+
+  // Match detail modal
+  let modalEl = document.querySelector(".tac-modal-overlay") as HTMLElement;
+  if (!modalEl) {
+    modalEl = document.createElement("div");
+    modalEl.className = "tac-modal-overlay";
+    modalEl.innerHTML = `
+      <div class="tac-modal" role="dialog" aria-modal="true" aria-label="Detalles del partido">
+        <div class="tac-modal__header">
+          <div>
+            <span class="tac-modal__title">Detalles del partido</span>
+            <span class="tac-modal__subtitle" id="tac-modal-map"></span>
+          </div>
+          <button type="button" class="tac-modal__close" aria-label="Cerrar">&times;</button>
+        </div>
+        <div class="tac-modal__body" id="tac-modal-body"></div>
+      </div>
+    `;
+    document.body.appendChild(modalEl);
+  }
+
+  const modalCloseBtn = modalEl.querySelector(".tac-modal__close")!;
+  const modalBody = document.getElementById("tac-modal-body")!;
+
+  function openModal(match: PlayerMatch) {
+    // Render base match info immediately, team data loads async
+    modalBody.innerHTML = renderMatchDetail(match, ds);
+    modalEl.setAttribute("open", "");
+    document.body.style.overflow = "hidden";
+    // Los datos de equipo (alineaciones, rondas) ya vienen en el dataset; solo existen para partidas de equipo.
+    const teamMatch = ds.teamMatches.find((t) => t.matchId === match.matchId);
+    if (teamMatch) populateMatchTeamData(teamMatch);
+    else {
+      const opponentStat = document.querySelector('.tac-match-detail__stat-value[data-opponent]');
+      if (opponentStat) opponentStat.textContent = dash;
+    }
+  }
+
+  function populateMatchTeamData(teamMatch: TeamMatch) {
+    if (teamMatch.lineup.length === 0) return;
+
+    const ourLineup = teamMatch.lineup;
+    const opponentLineup = teamMatch.opponentPlayers;
+
+    // Update rounds with ATK/DEF roles
+    const roundsContainer = document.querySelector('.tac-match-detail__rounds');
+    if (roundsContainer && teamMatch.rounds.length > 0) {
+      // Remove any existing legend first
+      const existingLegend = roundsContainer.parentElement?.querySelector('.tac-match-detail__rounds-legend');
+      existingLegend?.remove();
+
+      // Build rounds with side-switch separator after round 12
+      const roundsHtml = teamMatch.rounds
+        .map((r: TeamRound, i: number) => {
+          const roleLabel = r.role === 'Attack' ? 'ATK' : 'DEF';
+          const roleClass = r.role === 'Attack' ? 'tac-round--atk' : 'tac-round--def';
+          const isSideSwitch = i === 12 ? ' tac-round--side-switch' : '';
+          return `<span class="tac-match-detail__round tac-match-detail__round--${r.won ? 'win' : 'loss'} ${roleClass}${isSideSwitch}" aria-label="Ronda ${i + 1}: ${roleLabel} ${r.won ? 'Ganada' : 'Perdida'}" title="Ronda ${i + 1}: ${roleLabel} ${r.won ? 'Ganada' : 'Perdida'}"></span>`;
+        })
+        .join('');
+      roundsContainer.innerHTML = roundsHtml;
+
+      // Dynamic legend based on starting side (first 12 rounds = starting side)
+      const startingSide = teamMatch.side === 'Red' ? 'Attack' : 'Defense';
+      const firstHalfRole = startingSide === 'Attack' ? 'ATK' : 'DEF';
+      const secondHalfRole = startingSide === 'Attack' ? 'DEF' : 'ATK';
+
+      const legend = document.createElement('div');
+      legend.className = 'tac-match-detail__rounds-legend';
+      legend.innerHTML = `
+        <div class="tac-match-detail__legend-half">
+          <span class="tac-match-detail__legend-half-title">Primer half (${firstHalfRole})</span>
+          <span class="tac-match-detail__legend-item"><span class="tac-match-detail__round tac-match-detail__round--win tac-round--${firstHalfRole.toLowerCase()}" aria-hidden="true"></span> ${firstHalfRole} Ganada</span>
+          <span class="tac-match-detail__legend-item"><span class="tac-match-detail__round tac-match-detail__round--loss tac-round--${firstHalfRole.toLowerCase()}" aria-hidden="true"></span> ${firstHalfRole} Perdida</span>
+        </div>
+        <div class="tac-match-detail__legend-half">
+          <span class="tac-match-detail__legend-half-title">Segundo half (${secondHalfRole})</span>
+          <span class="tac-match-detail__legend-item"><span class="tac-match-detail__round tac-match-detail__round--win tac-round--${secondHalfRole.toLowerCase()}" aria-hidden="true"></span> ${secondHalfRole} Ganada</span>
+          <span class="tac-match-detail__legend-item"><span class="tac-match-detail__round tac-match-detail__round--loss tac-round--${secondHalfRole.toLowerCase()}" aria-hidden="true"></span> ${secondHalfRole} Perdida</span>
+        </div>
+      `;
+      roundsContainer.parentElement?.appendChild(legend);
+    }
+
+    // Opponent name
+    const opponentStat = document.querySelector('.tac-match-detail__stat-value[data-opponent]');
+    if (opponentStat) {
+      opponentStat.textContent = teamMatch.opponentName ?? dash;
+    }
+
+    // Our team lineup
+    const ourLineupContainer = document.getElementById('tac-our-lineup-inner');
+    if (ourLineupContainer && ourLineup.length > 0) {
+      ourLineupContainer.innerHTML = ourLineup
+        .map(
+          (p: LineupEntry) => `
+            <div class="tac-match-detail__player">
+              <span class="tac-match-detail__player-agent">${agentIcon(p.agent, 24)}</span>
+              <span class="tac-match-detail__player-name">${esc(p.riotId)}</span>
+              ${p.inRoster ? '' : '<span class="tac-badge tac-badge--sub">Suplente</span>'}
+            </div>
+          `
+        )
+        .join('');
+      document.getElementById('tac-our-lineup')!.hidden = false;
+    }
+
+    // Opponent lineup
+    const oppLineupContainer = document.getElementById('tac-opp-lineup-inner');
+    if (oppLineupContainer && opponentLineup.length > 0) {
+      oppLineupContainer.innerHTML = opponentLineup
+        .map(
+          (riotId: string) => `
+            <div class="tac-match-detail__player">
+              <span class="tac-match-detail__player-name">${esc(riotId)}</span>
+            </div>
+          `
+        )
+        .join('');
+      document.getElementById('tac-opp-lineup')!.hidden = false;
+    }
+  }
+
+  function closeModal() {
+    modalEl.removeAttribute("open");
+    document.body.style.overflow = "";
+    modalBody.innerHTML = "";
+  }
+
+  modalCloseBtn.addEventListener("click", closeModal);
+  modalEl.addEventListener("click", (e) => {
+    if (e.target === modalEl) closeModal();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && modalEl.hasAttribute("open")) closeModal();
+  });
 
   let ds: Dataset;
   try {
     const res = await fetch("/valorant-data.json", { cache: "no-cache" });
     ds = (await res.json()) as Dataset;
   } catch {
-    updated.textContent = "No se pudieron cargar los datos.";
+    updatedEl.textContent = "No se pudieron cargar los datos.";
+    contentEl.innerHTML = `<div class="tac-empty"><svg class="tac-empty__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg><p class="tac-empty__title">Error de carga</p><p class="tac-empty__desc">No se pudo obtener el dataset. Intenta recargar la página.</p></div>`;
     return;
   }
-  updated.textContent = ds.meta.updatedAt
+
+  updatedEl.textContent = ds.meta.updatedAt
     ? `Actualizado: ${new Date(ds.meta.updatedAt).toLocaleString("es-CO", { dateStyle: "medium", timeStyle: "short" })}`
     : "Aún no hay datos";
 
@@ -212,90 +1197,229 @@ async function main() {
     player: { modes: ["competitive"], period: "act" },
   };
   const rankSort: { key: LeaderKey; dir: "asc" | "desc" } = { key: "rank", dir: "desc" };
+
+  const TEAM = "equipo";
+  const RANKING = "ranking";
   const kindOf = (tab: string): Kind => (tab === TEAM ? "team" : tab === RANKING ? "ranking" : "player");
-  const tabs = [{ id: TEAM, label: "Equipo" }, { id: RANKING, label: "Ranking" }, ...ds.roster.players.map((p) => ({ id: slug(p), label: p.name }))];
-  const current = () => {
+
+  const tabs: Array<{ id: string; label: string; icon?: string; avatar?: string }> = [
+    { id: TEAM, label: "Equipo", icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>` },
+    { id: RANKING, label: "Ranking", icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M19 9l-7 7-7-7"/></svg>` },
+    ...ds.roster.players.map((p) => ({
+      id: slug(p),
+      label: p.name,
+      avatar: initials(p.name, p.tag),
+    })),
+  ];
+
+  function currentTab(): string {
     const h = decodeURIComponent(location.hash.slice(1));
     return tabs.some((t) => t.id === h) ? h : TEAM;
-  };
-
-  tabsEl.innerHTML = tabs
-    .map((t) => `<button type="button" class="vtab" role="tab" data-tab="${esc(t.id)}">${esc(t.label)}</button>`)
-    .join("");
-
-  function render() {
-    const tab = current();
-    const kind = kindOf(tab);
-    const f = filters[kind];
-    tabsEl.querySelectorAll<HTMLButtonElement>(".vtab").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.tab === tab)));
-    filtersEl.querySelectorAll<HTMLButtonElement>("[data-mode]").forEach((b) => {
-      const m = b.dataset.mode as Mode;
-      b.disabled = kind === "team" && m === "competitive";
-      b.setAttribute("aria-pressed", String(f.modes.includes(m) && !b.disabled));
-    });
-    filtersEl.querySelectorAll<HTMLButtonElement>("[data-period]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.period === f.period)));
-    const player = ds.roster.players.find((p) => slug(p) === tab);
-    content.innerHTML = player
-      ? renderPlayer(ds, player, f)
-      : kind === "ranking"
-        ? renderRanking(ds, f, rankSort)
-        : renderTeam(ds, f);
   }
 
+  function renderTabs() {
+    tabsEl.innerHTML = tabs
+      .map(
+        (t) => `
+      <button type="button" class="tac-tab" role="tab" data-tab="${esc(t.id)}" aria-selected="false">
+        ${t.icon ? `<span class="tac-tab__icon">${t.icon}</span>` : ""}
+        ${t.avatar ? `<span class="tac-tab__avatar">${esc(t.avatar)}</span>` : ""}
+        <span>${esc(t.label)}</span>
+      </button>
+    `
+      )
+      .join("");
+  }
+
+  function updateFilterBadges() {
+    const f = filters[kindOf(currentTab())];
+    document.querySelectorAll<HTMLInputElement>('.tac-segment input[name="mode"]').forEach((input) => {
+      const badge = input.parentElement?.querySelector(".tac-segment__badge");
+      if (badge) {
+        const count = ds.playerMatches.filter((m) => m.mode === input.value && f.modes.includes(m.mode as Mode)).length;
+        badge.textContent = count > 0 ? String(count) : "";
+      }
+    });
+  }
+
+  function render() {
+    const tab = currentTab();
+    const kind = kindOf(tab);
+    const f = filters[kind];
+
+    // Update tabs
+    tabsEl.querySelectorAll<HTMLButtonElement>(".tac-tab").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.tab === tab)));
+
+    // Update filter controls
+    filtersEl.querySelectorAll<HTMLInputElement>('.tac-segment input[name="mode"]').forEach((input) => {
+      input.checked = f.modes.includes(input.value as Mode);
+      input.disabled = kind === "team" && input.value === "competitive";
+      input.parentElement!.classList.toggle("disabled", input.disabled);
+    });
+    filtersEl.querySelectorAll<HTMLInputElement>('.tac-toggle input[name="period"]').forEach((input) => {
+      input.checked = input.value === f.period;
+    });
+
+    updateFilterBadges();
+
+    // Update live panel visibility
+    const showLive = kind !== "ranking" || ds.roster.players.length > 0;
+    liveEl.hidden = !showLive;
+    overlay.hidden = true;
+
+    // Find player if player tab
+    const player = ds.roster.players.find((p) => slug(p) === tab);
+
+    // Render canvas
+    if (player) {
+      canvasTitle.textContent = player.name;
+      canvasSubtitle.textContent = `${ds.roster.players.indexOf(player) + 1} de ${ds.roster.players.length} · ${fmtTimeAgo(ds.meta.updatedAt || new Date().toISOString())}`;
+      contentEl.innerHTML = renderPlayer(ds, player, f);
+      liveContentEl.innerHTML = renderLivePlayer(ds, player, f);
+    } else if (kind === "ranking") {
+      canvasTitle.textContent = "Ranking del equipo";
+      canvasSubtitle.textContent = "Ordenado por ELO · Filtro: Ranked / Este acto";
+      contentEl.innerHTML = renderRanking(ds, f, rankSort);
+      liveContentEl.innerHTML = renderLiveRanking(ds, f);
+    } else {
+      canvasTitle.textContent = "Visión de equipo";
+      canvasSubtitle.textContent = "Premier + Scrims · Este acto";
+      contentEl.innerHTML = renderTeam(ds, f);
+      liveContentEl.innerHTML = renderLiveTeam(ds, f);
+    }
+
+    // Attach detail row listeners
+    attachDetailListeners();
+    attachSortListeners();
+    attachEloTooltipListeners();
+    attachMatchModalListeners();
+  }
+
+  function attachDetailListeners() {
+    contentEl.querySelectorAll<HTMLTableRowElement>("tr.tac-row--expandable").forEach((row) => {
+      row.addEventListener("click", () => toggleDetail(row));
+      row.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          toggleDetail(row);
+        }
+      });
+    });
+  }
+
+  function toggleDetail(row: HTMLTableRowElement) {
+    const detailRow = row.nextElementSibling as HTMLElement;
+    const expanded = row.getAttribute("aria-expanded") === "true";
+    row.setAttribute("aria-expanded", String(!expanded));
+    if (detailRow && detailRow.classList.contains("tac-detail-row")) {
+      detailRow.style.display = expanded ? "none" : "table-row";
+      // Re-attach listeners for nested content
+      attachSortListeners();
+    }
+  }
+
+  function attachSortListeners() {
+    contentEl.querySelectorAll<HTMLButtonElement>("th.sortable").forEach((th) => {
+      th.onclick = () => {
+        if (kindOf(currentTab()) !== "ranking") return;
+        const key = th.dataset.sort as LeaderKey;
+        if (rankSort.key === key) rankSort.dir = rankSort.dir === "desc" ? "asc" : "desc";
+        else Object.assign(rankSort, { key, dir: "desc" });
+        // Update aria-sort
+        contentEl.querySelectorAll("th.sortable").forEach((t) => t.setAttribute("aria-sort", "none"));
+        th.setAttribute("aria-sort", rankSort.dir === "asc" ? "ascending" : "descending");
+        render();
+      };
+    });
+  }
+
+  function attachEloTooltipListeners() {
+    const tooltip = document.getElementById("tac-elo-tooltip") as HTMLElement;
+    const timeline = document.querySelector(".tac-elo-timeline") as HTMLElement;
+    if (!tooltip || !timeline) return;
+
+    contentEl.querySelectorAll<SVGCircleElement>(".elo-point").forEach((point) => {
+      point.addEventListener("mouseenter", () => {
+        const date = point.dataset.date ?? "";
+        const tier = point.dataset.tier ?? "";
+        const rr = point.dataset.rr ?? "";
+        tooltip.querySelector(".tac-elo-tooltip__date")!.textContent = date ? fmtTooltipDate(date) : "";
+        tooltip.querySelector(".tac-elo-tooltip__rank")!.textContent = tier;
+        tooltip.querySelector(".tac-elo-tooltip__rr")!.textContent = `${rr} RR`;
+        tooltip.hidden = false;
+      });
+      point.addEventListener("mousemove", (e) => {
+        const rect = timeline.getBoundingClientRect();
+        tooltip.style.left = `${e.clientX - rect.left + 12}px`;
+        tooltip.style.top = `${e.clientY - rect.top - 12}px`;
+      });
+      point.addEventListener("mouseleave", () => {
+        tooltip.hidden = true;
+      });
+      // Keyboard support
+      point.addEventListener("focus", () => {
+        const date = point.dataset.date ?? "";
+        const tier = point.dataset.tier ?? "";
+        const rr = point.dataset.rr ?? "";
+        tooltip.querySelector(".tac-elo-tooltip__date")!.textContent = date ? fmtTooltipDate(date) : "";
+        tooltip.querySelector(".tac-elo-tooltip__rank")!.textContent = tier;
+        tooltip.querySelector(".tac-elo-tooltip__rr")!.textContent = `${rr} RR`;
+        const pointRect = point.getBoundingClientRect();
+        const timelineRect = timeline.getBoundingClientRect();
+        tooltip.style.left = `${pointRect.left - timelineRect.left + 12}px`;
+        tooltip.style.top = `${pointRect.top - timelineRect.top - 12}px`;
+        tooltip.hidden = false;
+      });
+      point.addEventListener("blur", () => {
+        tooltip.hidden = true;
+      });
+    });
+  }
+
+  function attachMatchModalListeners() {
+    contentEl.querySelectorAll<HTMLElement>(".tac-match-card").forEach((card) => {
+      const matchId = card.dataset.matchId;
+      if (!matchId) return;
+      const match = ds.playerMatches.find((m) => m.matchId === matchId);
+      if (!match) return;
+      card.addEventListener("click", () => openModal(match));
+      card.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          openModal(match);
+        }
+      });
+    });
+  }
+
+  // Tab click
   tabsEl.addEventListener("click", (e) => {
-    const b = (e.target as HTMLElement).closest<HTMLButtonElement>(".vtab");
-    if (b) location.hash = b.dataset.tab!;
+    const btn = (e.target as HTMLElement).closest<HTMLButtonElement>(".tac-tab");
+    if (btn) location.hash = btn.dataset.tab!;
   });
   window.addEventListener("hashchange", render);
 
-  filtersEl.addEventListener("click", (e) => {
-    const b = (e.target as HTMLElement).closest<HTMLButtonElement>("button");
-    if (!b || b.disabled) return;
-    const f = filters[kindOf(current())];
-    if (b.dataset.mode) {
-      const m = b.dataset.mode as Mode;
-      const next = f.modes.includes(m) ? f.modes.filter((x) => x !== m) : [...f.modes, m];
-      if (next.length === 0) return; // siempre al menos un modo
+  // Filter changes
+  filtersEl.addEventListener("change", (e) => {
+    const target = e.target as HTMLInputElement;
+    if (!target || target.disabled) return;
+    const f = filters[kindOf(currentTab())];
+    if (target.name === "mode") {
+      const mode = target.value as Mode;
+      const next = f.modes.includes(mode) ? f.modes.filter((x) => x !== mode) : [...f.modes, mode];
+      if (next.length === 0) { target.checked = true; return; }
       f.modes = next;
-    } else if (b.dataset.period) {
-      f.period = b.dataset.period as Period;
+    } else if (target.name === "period") {
+      f.period = target.value as Period;
     }
     render();
   });
 
-  function toggleMap(row: HTMLTableRowElement) {
-    const next = row.nextElementSibling;
-    if (next?.classList.contains("vdetail")) {
-      next.remove();
-      row.setAttribute("aria-expanded", "false");
-      return;
-    }
-    const tr = document.createElement("tr");
-    tr.className = "vdetail";
-    tr.innerHTML = `<td colspan="5">${renderMapDetail(ds, filters.team, row.dataset.map!)}</td>`;
-    row.after(tr);
-    row.setAttribute("aria-expanded", "true");
-  }
-  content.addEventListener("click", (e) => {
-    const sortBtn = (e.target as HTMLElement).closest<HTMLButtonElement>("button.vsort");
-    if (sortBtn) {
-      const key = sortBtn.dataset.sort as LeaderKey;
-      if (rankSort.key === key) rankSort.dir = rankSort.dir === "desc" ? "asc" : "desc";
-      else Object.assign(rankSort, { key, dir: "desc" });
-      render();
-      return;
-    }
-    const row = (e.target as HTMLElement).closest<HTMLTableRowElement>("tr.vrow-btn");
-    if (row) toggleMap(row);
-  });
-  content.addEventListener("keydown", (e) => {
-    const row = (e.target as HTMLElement).closest<HTMLTableRowElement>("tr.vrow-btn");
-    if (row && (e.key === "Enter" || e.key === " ")) {
-      e.preventDefault();
-      toggleMap(row);
-    }
-  });
+  // Mobile panel toggles (could add hamburger buttons in header if needed)
+  // For now, panels are always visible on desktop, hidden on mobile until needed
 
+  // Initial render
+  renderTabs();
   render();
 }
 
