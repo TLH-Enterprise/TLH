@@ -89,6 +89,78 @@
     "score": 6656
    }
   ],
+  "opponentLineup": [
+   {
+    "puuid": "5db60ed6-5267-575e-9d7c-0d2fe22ba4b8",
+    "riotId": "Twicth XANDER#Jett",
+    "agent": "Fade",
+    "inRoster": false,
+    "kills": 21,
+    "deaths": 14,
+    "assists": 10,
+    "headshots": 20,
+    "bodyshots": 23,
+    "legshots": 4,
+    "damage": 3911,
+    "score": 5849
+   },
+   {
+    "puuid": "039fab4a-3267-5607-b91a-21a001e21873",
+    "riotId": "saint#nikes",
+    "agent": "Neon",
+    "inRoster": false,
+    "kills": 29,
+    "deaths": 17,
+    "assists": 5,
+    "headshots": 32,
+    "bodyshots": 35,
+    "legshots": 3,
+    "damage": 5444,
+    "score": 8310
+   },
+   {
+    "puuid": "5df3a0fb-6762-524b-a415-b18f1bfc64dd",
+    "riotId": "creatine addict#zyco",
+    "agent": "Chamber",
+    "inRoster": false,
+    "kills": 20,
+    "deaths": 16,
+    "assists": 3,
+    "headshots": 3,
+    "bodyshots": 33,
+    "legshots": 1,
+    "damage": 3445,
+    "score": 5394
+   },
+   {
+    "puuid": "d0fa8e5c-a092-5f28-b99d-dce03deffe3e",
+    "riotId": "Andrew#SAPO",
+    "agent": "Omen",
+    "inRoster": false,
+    "kills": 11,
+    "deaths": 18,
+    "assists": 10,
+    "headshots": 9,
+    "bodyshots": 22,
+    "legshots": 1,
+    "damage": 2124,
+    "score": 3492
+   },
+   {
+    "puuid": "47a04701-f49a-5132-8236-a9c4af1048b7",
+    "riotId": "markeloff#Oli",
+    "agent": "Hush",
+    "inRoster": false,
+    "kills": 15,
+    "deaths": 19,
+    "assists": 6,
+    "headshots": 10,
+    "bodyshots": 30,
+    "legshots": 2,
+    "damage": 2459,
+    "score": 3961
+   }
+  ],
   "rounds": [
    {
     "won": true,
@@ -278,6 +350,78 @@
     "score": 2514
    }
   ],
+  "opponentLineup": [
+   {
+    "puuid": "b59ec3dc-5519-58ad-a108-57aec16b4e5a",
+    "riotId": "Dazzart#SCOTT",
+    "agent": "Omen",
+    "inRoster": false,
+    "kills": 13,
+    "deaths": 16,
+    "assists": 4,
+    "headshots": 13,
+    "bodyshots": 11,
+    "legshots": 0,
+    "damage": 2376,
+    "score": 3984
+   },
+   {
+    "puuid": "56afacb8-e73d-54d8-92f7-d2b1e59ce4af",
+    "riotId": "ddesireme#4gz1",
+    "agent": "Sage",
+    "inRoster": false,
+    "kills": 7,
+    "deaths": 18,
+    "assists": 1,
+    "headshots": 8,
+    "bodyshots": 8,
+    "legshots": 1,
+    "damage": 1434,
+    "score": 2190
+   },
+   {
+    "puuid": "73d835a4-a7c6-5f62-a2b9-85462b1ceb19",
+    "riotId": "Noxyfps1#ttk",
+    "agent": "Jett",
+    "inRoster": false,
+    "kills": 18,
+    "deaths": 14,
+    "assists": 0,
+    "headshots": 18,
+    "bodyshots": 29,
+    "legshots": 4,
+    "damage": 3934,
+    "score": 5676
+   },
+   {
+    "puuid": "afadc87a-e2eb-524b-a6b5-a7cec31f2aba",
+    "riotId": "Unknow14#hola",
+    "agent": "Sova",
+    "inRoster": false,
+    "kills": 8,
+    "deaths": 16,
+    "assists": 2,
+    "headshots": 8,
+    "bodyshots": 17,
+    "legshots": 0,
+    "damage": 1969,
+    "score": 2438
+   },
+   {
+    "puuid": "3c89076a-1769-5244-b78a-e9f1b95d1ad3",
+    "riotId": "Kire#frogo",
+    "agent": "Cypher",
+    "inRoster": false,
+    "kills": 7,
+    "deaths": 16,
+    "assists": 1,
+    "headshots": 6,
+    "bodyshots": 15,
+    "legshots": 2,
+    "damage": 1193,
+    "score": 1991
+   }
+  ],
   "rounds": [
    {
     "won": true,
@@ -367,7 +511,7 @@
   "opponentPlayers": [
    "VainaLoka#xxx",
    "Thanos2003#50hs",
-   "DEMENCIA#1902",
+   "Out of Time#1909",
    "Leo#Kron",
    "nesqui#play"
   ],
@@ -441,6 +585,78 @@
     "legshots": 1,
     "damage": 3873,
     "score": 5186
+   }
+  ],
+  "opponentLineup": [
+   {
+    "puuid": "89dcc86c-6c14-5b7f-bdcd-f70c2a88934d",
+    "riotId": "VainaLoka#xxx",
+    "agent": "Phoenix",
+    "inRoster": false,
+    "kills": 12,
+    "deaths": 17,
+    "assists": 12,
+    "headshots": 7,
+    "bodyshots": 43,
+    "legshots": 1,
+    "damage": 2784,
+    "score": 3836
+   },
+   {
+    "puuid": "c13f80ac-5baa-5b3e-9ab5-f80de350832f",
+    "riotId": "Thanos2003#50hs",
+    "agent": "Omen",
+    "inRoster": false,
+    "kills": 19,
+    "deaths": 16,
+    "assists": 1,
+    "headshots": 14,
+    "bodyshots": 29,
+    "legshots": 0,
+    "damage": 3255,
+    "score": 5373
+   },
+   {
+    "puuid": "7cc73fb5-b5c0-59c5-8d64-a4c919e4b541",
+    "riotId": "Out of Time#1909",
+    "agent": "Cypher",
+    "inRoster": false,
+    "kills": 16,
+    "deaths": 17,
+    "assists": 8,
+    "headshots": 11,
+    "bodyshots": 44,
+    "legshots": 0,
+    "damage": 3059,
+    "score": 4820
+   },
+   {
+    "puuid": "2f0942bc-bf0b-5891-865e-50f90500d4aa",
+    "riotId": "Leo#Kron",
+    "agent": "Sova",
+    "inRoster": false,
+    "kills": 11,
+    "deaths": 15,
+    "assists": 2,
+    "headshots": 7,
+    "bodyshots": 29,
+    "legshots": 2,
+    "damage": 2049,
+    "score": 2800
+   },
+   {
+    "puuid": "734e7d97-030c-57a9-8a25-f33c18c19e0f",
+    "riotId": "nesqui#play",
+    "agent": "Raze",
+    "inRoster": false,
+    "kills": 13,
+    "deaths": 18,
+    "assists": 3,
+    "headshots": 9,
+    "bodyshots": 21,
+    "legshots": 1,
+    "damage": 2172,
+    "score": 3364
    }
   ],
   "rounds": [
