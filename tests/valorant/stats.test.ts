@@ -15,6 +15,7 @@ import {
   recent,
   rrSeries,
   teamByMap,
+  filterHistory,
   teamMatchesFor,
 } from "../../src/lib/valorant/stats.ts";
 import type { Dataset, LineupEntry, PlayerMatch, Roster, TeamMatch } from "../../src/lib/valorant/types.ts";
@@ -129,6 +130,23 @@ describe("equipo", () => {
   test("teamByMap calcula % de ataque y defensa", () => {
     const r = teamByMap([tm({ rounds: [{ won: true, role: "Attack" }, { won: false, role: "Attack" }, { won: true, role: "Defense" }] })]);
     expect(r[0]).toMatchObject({ map: "Sunset", games: 1, wins: 1, winRate: null, atkPct: 50, defPct: 100 });
+  });
+
+  test("teamByMap suma las rondas y da el resultado de cada partida en orden", () => {
+    const r = teamByMap([tm({ roundsWon: 13, roundsLost: 5 }), tm({ roundsWon: 9, roundsLost: 13, won: false })]);
+    expect(r[0]).toMatchObject({ roundsWon: 22, roundsLost: 18 });
+    expect(r[0].results).toEqual([
+      { won: true, roundsWon: 13, roundsLost: 5 },
+      { won: false, roundsWon: 9, roundsLost: 13 },
+    ]);
+  });
+
+  test("filterHistory: los campos vacíos no filtran y los llenos se combinan", () => {
+    const ms = [pm({ agent: "Sova", map: "Lotus" }), pm({ agent: "Omen", map: "Lotus", mode: "custom" }), pm({ agent: "Sova", map: "Bind" })];
+    expect(filterHistory(ms, { agent: "", map: "", mode: "" })).toHaveLength(3);
+    expect(filterHistory(ms, { agent: "Sova", map: "", mode: "" })).toEqual([ms[0], ms[2]]);
+    expect(filterHistory(ms, { agent: "Sova", map: "Lotus", mode: "" })).toEqual([ms[0]]);
+    expect(filterHistory(ms, { agent: "", map: "Lotus", mode: "custom" })).toEqual([ms[1]]);
   });
 
   test("teamByMap sin rondas → atk/def null", () => {
