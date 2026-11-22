@@ -1,0 +1,27 @@
+# Vive en la rama valorant-data: los eventos push usan el workflow de la rama que recibe el push.
+# La rutina de Claude que busca torneos sube data/tournaments.json aquí; esto reconstruye el sitio.
+# (Los pushes de la Action "Valorant collect" usan GITHUB_TOKEN y no disparan workflows, así que no hay deploy doble.)
+name: Deploy al cambiar torneos
+
+on:
+  push:
+    branches: [valorant-data]
+    paths: [data/tournaments.json]
+
+permissions: {}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Reconstruir el sitio en Vercel
+        env:
+          HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$HOOK" ]; then
+            echo "::warning::Falta el secreto VERCEL_DEPLOY_HOOK_URL; no se reconstruye el sitio."
+            exit 0
+          fi
+          curl -fsS -X POST "$HOOK" > /dev/null
+          echo "Deploy solicitado."
