@@ -9,6 +9,7 @@ const files: Record<string, unknown> = {
   "snapshots.json": [{ date: "2026-11-13" }],
   "labels.json": { T: { rival: "ABC" } },
   "meta.json": { updatedAt: "2026-11-13T10:00:00Z", nonTeamMatchIds: [] },
+  "tournaments.json": { actualizado: "2026-11-22", torneos: [], riot_proximo_qualifier: null, notas: null },
 };
 
 function fakeFetch(override: (url: string) => Response | undefined = () => undefined) {
@@ -26,13 +27,14 @@ function fakeFetch(override: (url: string) => Response | undefined = () => undef
 }
 
 describe("buildDataset", () => {
-  test("usa el SHA de la rama en las 5 URLs raw", async () => {
+  test("usa el SHA de la rama en las 6 URLs raw", async () => {
     const f = fakeFetch();
     const ds = await buildDataset({ fetch: f.fn, roster: rosterJson });
     for (const name of Object.keys(files))
       expect(f.urls).toContain(`https://raw.githubusercontent.com/TLH-Enterprise/TLH/${SHA}/data/${name}`);
     expect(ds.playerMatches).toEqual([{ matchId: "1" }]);
     expect(ds.labels).toEqual({ T: { rival: "ABC" } });
+    expect(ds.tournaments).toEqual(files["tournaments.json"]);
     expect(ds.meta.updatedAt).toBe("2026-11-13T10:00:00Z");
     expect(ds.roster).toEqual(rosterJson);
   });
@@ -42,7 +44,7 @@ describe("buildDataset", () => {
     const f = fakeFetch((u) => (u.includes("api.github.com") ? new Response("{}", { status: 403 }) : new Response("x", { status: 500 })));
     const ds = await buildDataset({ fetch: f.fn, roster: rosterJson });
     expect(ds).toEqual({
-      meta: { updatedAt: null, nonTeamMatchIds: [] }, roster: rosterJson, playerMatches: [], teamMatches: [], snapshots: [], labels: {},
+      meta: { updatedAt: null, nonTeamMatchIds: [] }, roster: rosterJson, playerMatches: [], teamMatches: [], snapshots: [], labels: {}, tournaments: null,
     });
     expect(warn).toHaveBeenCalled();
     warn.mockRestore();
@@ -92,6 +94,21 @@ describe("buildDataset", () => {
     const f = fakeFetch((u) => (u.endsWith("labels.json") ? new Response("404: Not Found", { status: 404 }) : undefined));
     const remote = await buildDataset({ fetch: f.fn, roster: rosterJson });
     expect(remote.labels).toEqual({});
+    expect(remote.teamMatches).toEqual([{ matchId: "T" }]);
+  });
+
+  test("tournaments.json ausente (local o 404) → tournaments null", async () => {
+    const { mkdtemp, writeFile } = await import("node:fs/promises");
+    const { tmpdir } = await import("node:os");
+    const { join } = await import("node:path");
+    const dir = await mkdtemp(join(tmpdir(), "vd-"));
+    for (const [n, v] of Object.entries(files)) if (n !== "tournaments.json") await writeFile(join(dir, n), JSON.stringify(v));
+    const local = await buildDataset({ fetch: async () => { throw new Error("x"); }, roster: rosterJson, dataDir: dir });
+    expect(local.tournaments).toBeNull();
+    expect(local.playerMatches).toEqual([{ matchId: "1" }]);
+    const f = fakeFetch((u) => (u.endsWith("tournaments.json") ? new Response("404: Not Found", { status: 404 }) : undefined));
+    const remote = await buildDataset({ fetch: f.fn, roster: rosterJson });
+    expect(remote.tournaments).toBeNull();
     expect(remote.teamMatches).toEqual([{ matchId: "T" }]);
   });
 

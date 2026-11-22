@@ -16,10 +16,20 @@
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
       </button>
       <time id="tac-updated" class="tac-timestamp" datetime="">Cargando datos…</time>
-      <button type="button" class="tac-theme-toggle" aria-label="Alternar tema" aria-pressed="false" title="Tema oscuro forzado (contexto táctico)">
-        <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-        <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-      </button>
+      <div class="tac-notify">
+        <button type="button" class="tac-notify__btn" id="tac-notify-btn" aria-label="Próximos torneos" aria-controls="tac-notify-panel" aria-expanded="false" title="Próximos torneos">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="tac-notify__badge" id="tac-notify-badge" hidden></span>
+        </button>
+        <div class="tac-notify__panel" id="tac-notify-panel" role="dialog" aria-labelledby="tac-notify-title" hidden>
+          <div class="tac-notify__head">
+            <span class="tac-notify__title" id="tac-notify-title">Próximos torneos</span>
+            <span class="tac-notify__meta" id="tac-notify-meta"></span>
+          </div>
+          <div class="tac-notify__list" id="tac-notify-list"></div>
+          <div class="tac-notify__foot" id="tac-notify-foot"></div>
+        </div>
+      </div>
     </div>
   </div>
 </header>
@@ -233,7 +243,10 @@
     white-space: nowrap;
   }
 
-  .tac-theme-toggle {
+  /* Campana de torneos */
+  .tac-notify { position: relative; }
+  .tac-notify__btn {
+    position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -245,11 +258,127 @@
     cursor: pointer;
     transition: all var(--tac-fast);
   }
-  .tac-theme-toggle:hover {
+  .tac-notify__btn:hover, .tac-notify__btn[aria-expanded="true"] {
     background: var(--tac-bg-hover);
     border-color: var(--tac-radiant);
     color: var(--tac-radiant);
   }
+  .tac-notify__btn.has-new svg { animation: tac-bell 1.6s ease-in-out 2; transform-origin: 50% 10%; }
+  @keyframes tac-bell {
+    0%, 60%, 100% { transform: rotate(0); }
+    10%, 30% { transform: rotate(14deg); }
+    20%, 40% { transform: rotate(-12deg); }
+  }
+  .tac-notify__badge {
+    position: absolute;
+    top: -6px; right: -6px;
+    min-width: 18px; height: 18px;
+    padding: 0 5px;
+    border-radius: 9px;
+    background: var(--tac-threat);
+    color: #fff;
+    font-family: var(--tac-font-mono);
+    font-size: 0.625rem;
+    font-weight: 700;
+    line-height: 18px;
+    text-align: center;
+    box-shadow: 0 0 0 2px var(--tac-bg);
+  }
+  .tac-notify__badge[hidden] { display: none; }
+  .tac-notify__panel {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 380px;
+    max-height: min(560px, calc(100vh - var(--tac-header-h) - 24px));
+    display: flex;
+    flex-direction: column;
+    background: var(--tac-bg-elevated);
+    border: 1px solid var(--tac-stroke-strong);
+    border-radius: var(--tac-r-lg);
+    box-shadow: 0 24px 64px rgba(0,0,0,0.55);
+    z-index: 300;
+    overflow: hidden;
+  }
+  .tac-notify__panel[hidden] { display: none; }
+  .tac-notify__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--tac-space-3);
+    padding: 14px 16px 12px;
+    border-bottom: 1px solid var(--tac-stroke);
+  }
+  .tac-notify__title {
+    font-family: var(--tac-font-display);
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--tac-text);
+  }
+  .tac-notify__meta { font-family: var(--tac-font-mono); font-size: 0.6875rem; color: var(--tac-text-muted); }
+  .tac-notify__list { overflow-y: auto; padding: 8px; display: flex; flex-direction: column; gap: 8px; }
+  .tac-notify__empty { padding: 24px 12px; text-align: center; color: var(--tac-text-dim); font-size: 0.8125rem; line-height: 1.5; }
+  .tac-tourney {
+    padding: 12px;
+    border-radius: var(--tac-r-md);
+    background: var(--tac-surface);
+    border: 1px solid var(--tac-stroke);
+  }
+  .tac-tourney.is-new { border-color: var(--tac-radiant); background: linear-gradient(180deg, var(--tac-radiant-dim), var(--tac-surface) 60%); }
+  .tac-tourney__tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+  .tac-tourney__tag {
+    font-family: var(--tac-font-mono);
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: var(--tac-r-xs);
+    background: var(--tac-surface-strong);
+    color: var(--tac-text-dim);
+  }
+  .tac-tourney__tag--main { background: var(--tac-radiant-dim); color: var(--tac-radiant); }
+  .tac-tourney__tag--new { background: var(--tac-radiant); color: #fff; }
+  .tac-tourney__tag--soon { background: var(--tac-spike-dim); color: var(--tac-spike); }
+  .tac-tourney__name { font-weight: 600; font-size: 0.9375rem; color: var(--tac-text); line-height: 1.3; overflow-wrap: anywhere; }
+  .tac-tourney__org { font-size: 0.75rem; color: var(--tac-text-muted); margin-top: 2px; }
+  .tac-tourney__facts { display: grid; grid-template-columns: auto 1fr; gap: 3px 10px; margin: 10px 0; font-size: 0.75rem; }
+  .tac-tourney__facts dt { color: var(--tac-text-muted); font-family: var(--tac-font-mono); font-size: 0.625rem; text-transform: uppercase; letter-spacing: 0.06em; padding-top: 2px; }
+  .tac-tourney__facts dd { margin: 0; color: var(--tac-text); overflow-wrap: anywhere; }
+  .tac-tourney__alert {
+    display: flex; gap: 6px;
+    margin: 0 0 10px;
+    padding: 6px 8px;
+    border-radius: var(--tac-r-sm);
+    background: var(--tac-spike-dim);
+    color: var(--tac-spike);
+    font-size: 0.75rem;
+    line-height: 1.4;
+  }
+  .tac-tourney__cta {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 12px;
+    border-radius: var(--tac-r-sm);
+    background: var(--tac-radiant);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: filter var(--tac-fast);
+  }
+  .tac-tourney__cta:hover { filter: brightness(1.15); }
+  .tac-notify__foot {
+    padding: 10px 16px 12px;
+    border-top: 1px solid var(--tac-stroke);
+    font-size: 0.6875rem;
+    color: var(--tac-text-muted);
+    line-height: 1.5;
+  }
+  .tac-notify__foot strong { color: var(--tac-text-dim); font-weight: 600; }
+  .tac-notify__foot details { margin-top: 4px; }
+  .tac-notify__foot summary { cursor: pointer; color: var(--tac-text-dim); }
   .tac-header-btn {
     display: none;
     align-items: center;
@@ -263,8 +392,6 @@
     transition: all var(--tac-fast);
   }
   .tac-header-btn:hover, .tac-header-btn[aria-expanded="true"] { border-color: var(--tac-radiant); color: var(--tac-radiant); }
-  .tac-theme-toggle .icon-sun { display: none; }
-  .tac-theme-toggle .icon-moon { display: block; }
 
   .tac-main {
     margin-top: var(--tac-header-h);
@@ -1051,6 +1178,8 @@
     .tac-scoreboard th, .tac-scoreboard td { padding: var(--tac-space-2) var(--tac-space-3); }
     .tac-compositions { grid-template-columns: 1fr; }
     .tac-timestamp { display: none; }
+    .tac-notify { position: static; }
+    .tac-notify__panel { position: fixed; top: calc(var(--tac-header-h) + 8px); left: 16px; right: 16px; width: auto; }
   }
 
   /* ==========================================================================

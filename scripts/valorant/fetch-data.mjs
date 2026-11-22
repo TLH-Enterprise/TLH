@@ -7,18 +7,23 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 const REPO = "TLH-Enterprise/TLH";
 const TIMEOUT_MS = 15_000;
 const BRANCH = "valorant-data";
-// labels.json lo crea el equipo a mano; si no existe, se usa {}.
-const OPTIONAL = new Set(["labels.json"]);
+// Archivos opcionales y su valor si no existen: labels.json lo crea el equipo a mano;
+// tournaments.json lo escribe la Action de torneos (scripts/valorant/tournaments.ts).
+const OPTIONAL = new Map([
+  ["labels.json", {}],
+  ["tournaments.json", null],
+]);
 const FILES = {
   playerMatches: "player-matches.json",
   teamMatches: "team-matches.json",
   snapshots: "snapshots.json",
   labels: "labels.json",
   meta: "meta.json",
+  tournaments: "tournaments.json",
 };
 
 function empty(roster) {
-  return { meta: { updatedAt: null, nonTeamMatchIds: [] }, roster, playerMatches: [], teamMatches: [], snapshots: [], labels: {} };
+  return { meta: { updatedAt: null, nonTeamMatchIds: [] }, roster, playerMatches: [], teamMatches: [], snapshots: [], labels: {}, tournaments: null };
 }
 
 /**
@@ -33,7 +38,7 @@ export async function buildDataset({ fetch, roster, dataDir }) {
         try {
           return JSON.parse(await readFile(join(dataDir, name), "utf8"));
         } catch (e) {
-          if (OPTIONAL.has(name) && e && e.code === "ENOENT") return {};
+          if (OPTIONAL.has(name) && e && e.code === "ENOENT") return OPTIONAL.get(name);
           throw e;
         }
       };
@@ -55,7 +60,7 @@ export async function buildDataset({ fetch, roster, dataDir }) {
         const r = await fetch(`https://raw.githubusercontent.com/${REPO}/${ref}/data/${name}`, {
           signal: AbortSignal.timeout(TIMEOUT_MS),
         });
-        if (r.status === 404 && OPTIONAL.has(name)) return {};
+        if (r.status === 404 && OPTIONAL.has(name)) return OPTIONAL.get(name);
         if (!r.ok) throw new Error(`${name}: ${r.status}`);
         return JSON.parse(await r.text());
       };
