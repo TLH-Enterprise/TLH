@@ -1,3 +1,4 @@
+import type { TournamentReport } from "./tournaments.ts";
 export type Mode = "competitive" | "premier" | "custom";
 export type Side = "Red" | "Blue";
 
@@ -121,4 +122,6 @@ export interface Dataset {
   teamMatches: TeamMatch[];
   snapshots: Snapshot[];
   labels: Labels;
+  /** null si la Action de torneos aún no ha corrido. */
+  tournaments: TournamentReport | null;
 }

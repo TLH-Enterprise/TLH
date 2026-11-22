@@ -56,7 +56,7 @@ function tm(p: Partial<TeamMatch> = {}): TeamMatch {
 function ds(p: Partial<Dataset> = {}): Dataset {
   return {
     meta: { updatedAt: "2026-11-13T10:00:00Z", nonTeamMatchIds: [] }, roster, playerMatches: [], teamMatches: [],
-    snapshots: [], labels: {}, ...p,
+    snapshots: [], labels: {}, tournaments: null, ...p,
   };
 }
 

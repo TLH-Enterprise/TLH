@@ -21,6 +21,7 @@ import {
   type LeaderKey,
   type Period,
 } from "../lib/valorant/stats.ts";
+import { colombiaToDate, parseReport, tournamentKey, upcoming, type Tournament, type TournamentReport } from "../lib/valorant/tournaments.ts";
 import type { Dataset, Mode, RosterPlayer, TeamMatch, PlayerMatch, LineupEntry, TeamRound } from "../lib/valorant/types.ts";
 
 /* ==========================================================================
@@ -1066,6 +1067,145 @@ function renderLiveRanking(ds: Dataset, f: Filter): string {
    MAIN APPLICATION
    ========================================================================== */
 
+/* ==========================================================================
+   TORNEOS (campana del header)
+   ========================================================================== */
+const SEEN_KEY = "tlh-valorant-torneos-vistos";
+const SOON_HOURS = 72;
+
+function loadSeen(): Set<string> {
+  try {
+    const v = JSON.parse(localStorage.getItem(SEEN_KEY) ?? "[]");
+    return new Set(Array.isArray(v) ? v.filter((x) => typeof x === "string") : []);
+  } catch {
+    return new Set();
+  }
+}
+function saveSeen(keys: Iterable<string>) {
+  try {
+    localStorage.setItem(SEEN_KEY, JSON.stringify([...keys]));
+  } catch {
+    /* sin almacenamiento: la campana sigue funcionando, solo no recuerda lo visto */
+  }
+}
+
+const fmtColombia = (s: string) => {
+  const d = colombiaToDate(s);
+  const date = d.toLocaleDateString("es-CO", { timeZone: "America/Bogota", weekday: "short", day: "numeric", month: "short" });
+  // Las fechas sin hora se guardan como 00:00: en ese caso no se muestra hora.
+  if (s.endsWith(" 00:00")) return date;
+  return `${date} · ${d.toLocaleTimeString("es-CO", { timeZone: "America/Bogota", hour: "numeric", minute: "2-digit" })}`;
+};
+
+function renderTourney(t: Tournament, isNew: boolean, now: Date): string {
+  const closeIso = t.cierre_inscripcion ?? t.fecha_hora_colombia;
+  const hoursLeft = closeIso ? (colombiaToDate(closeIso).getTime() - now.getTime()) / 3_600_000 : Infinity;
+  const tags = [
+    isNew ? `<span class="tac-tourney__tag tac-tourney__tag--new">Nuevo</span>` : "",
+    t.formato ? `<span class="tac-tourney__tag${t.formato === "5v5" ? " tac-tourney__tag--main" : ""}">${esc(t.formato)}</span>` : "",
+    t.region ? `<span class="tac-tourney__tag">${esc(t.region)}</span>` : "",
+    hoursLeft < SOON_HOURS
+      ? `<span class="tac-tourney__tag tac-tourney__tag--soon">${hoursLeft < 24 ? "Cierra hoy" : `Cierra en ${Math.ceil(hoursLeft / 24)} días`}</span>`
+      : "",
+  ].join("");
+  const facts: Array<[string, string | null]> = [
+    ["Inicio", t.fecha_hora_colombia && fmtColombia(t.fecha_hora_colombia)],
+    ["Cierre", t.cierre_inscripcion && fmtColombia(t.cierre_inscripcion)],
+    ["Costo", t.costo],
+    ["Premio", t.premio],
+    ["Cupos", t.cupos],
+    ["Requisitos", t.requisitos],
+  ];
+  const org = [t.organizador, t.fuente && t.fuente !== t.organizador ? `vía ${t.fuente}` : null].filter(Boolean).join(" · ");
+  return `
+    <article class="tac-tourney${isNew ? " is-new" : ""}">
+      <div class="tac-tourney__tags">${tags}</div>
+      <div class="tac-tourney__name">${esc(t.nombre)}</div>
+      ${org ? `<div class="tac-tourney__org">${esc(org)}</div>` : ""}
+      <dl class="tac-tourney__facts">
+        ${facts.filter(([, v]) => v).map(([k, v]) => `<dt>${k}</dt><dd>${esc(v!)}</dd>`).join("")}
+      </dl>
+      ${t.alerta ? `<p class="tac-tourney__alert"><span aria-hidden="true">⚠</span><span>${esc(t.alerta)}</span></p>` : ""}
+      <a class="tac-tourney__cta" href="${esc(t.link_inscripcion)}" target="_blank" rel="noopener noreferrer">
+        Inscribirse
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M7 17L17 7M8 7h9v9"/></svg>
+      </a>
+    </article>`;
+}
+
+function setupTournaments(raw: unknown) {
+  const btn = document.getElementById("tac-notify-btn");
+  const panel = document.getElementById("tac-notify-panel");
+  const badge = document.getElementById("tac-notify-badge");
+  const list = document.getElementById("tac-notify-list");
+  const meta = document.getElementById("tac-notify-meta");
+  const foot = document.getElementById("tac-notify-foot");
+  if (!btn || !panel || !badge || !list || !meta || !foot) return;
+
+  // Se re-valida en el cliente: descarta enlaces que no sean http(s) aunque el archivo venga alterado.
+  let report: TournamentReport | null = null;
+  try {
+    report = raw ? parseReport(raw) : null;
+  } catch {
+    report = null;
+  }
+  const now = new Date();
+  const items = upcoming(report, now);
+  // 5v5 primero; dentro de cada grupo se respeta el orden por fecha.
+  items.sort((a, b) => Number(b.formato === "5v5") - Number(a.formato === "5v5"));
+  const seen = loadSeen();
+  let newKeys = new Set(items.map(tournamentKey).filter((k) => !seen.has(k)));
+
+  const updateBadge = () => {
+    badge.hidden = newKeys.size === 0;
+    badge.textContent = newKeys.size > 9 ? "9+" : String(newKeys.size);
+    btn.classList.toggle("has-new", newKeys.size > 0);
+    btn.setAttribute("aria-label", newKeys.size ? `Próximos torneos (${newKeys.size} nuevos)` : "Próximos torneos");
+  };
+
+  const render = () => {
+    meta.textContent = items.length ? `${items.length} abiertos` : "";
+    list.innerHTML = !report
+      ? `<p class="tac-notify__empty">Todavía no hay búsqueda de torneos.<br>La búsqueda automática corre los lunes y jueves.</p>`
+      : items.length
+        ? items.map((t) => renderTourney(t, newKeys.has(tournamentKey(t)), now)).join("")
+        : `<p class="tac-notify__empty">No hay torneos con inscripción abierta por ahora.</p>`;
+    foot.innerHTML = report
+      ? `<div><strong>Próximo qualifier de Riot:</strong> ${esc(report.riot_proximo_qualifier ?? "sin anunciar")}</div>
+         <div>Búsqueda del ${esc(report.generadoEn ? fmtDateTime(report.generadoEn) : report.actualizado)}. Verifica los datos antes de inscribirte.</div>
+         ${report.notas ? `<details><summary>Notas de la búsqueda</summary>${esc(report.notas)}</details>` : ""}`
+      : "";
+  };
+
+  const setOpen = (open: boolean) => {
+    panel.hidden = !open;
+    btn.setAttribute("aria-expanded", String(open));
+    if (open) {
+      render(); // muestra "Nuevo" en lo que no se había visto…
+      saveSeen([...seen, ...newKeys]); // …y desde ya cuenta como visto.
+      for (const k of newKeys) seen.add(k);
+      newKeys = new Set();
+      updateBadge();
+    }
+  };
+
+  btn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    setOpen(panel.hidden);
+  });
+  document.addEventListener("click", (e) => {
+    if (!panel.hidden && !panel.contains(e.target as Node)) setOpen(false);
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !panel.hidden) {
+      setOpen(false);
+      btn.focus();
+    }
+  });
+
+  updateBadge();
+}
+
 async function main() {
   const updatedEl = document.getElementById("tac-updated")!;
   const tabsEl = document.getElementById("tac-tabs")!;
@@ -1232,6 +1372,8 @@ async function main() {
   updatedEl.textContent = ds.meta.updatedAt
     ? `Actualizado: ${new Date(ds.meta.updatedAt).toLocaleString("es-CO", { dateStyle: "medium", timeStyle: "short" })}`
     : "Aún no hay datos";
+
+  setupTournaments(ds.tournaments);
 
   type Kind = "team" | "ranking" | "player";
   const filters: Record<Kind, Filter> = {
