@@ -613,32 +613,47 @@ function goalBar(r: GoalRow): string {
     </div>`;
 }
 
-/** Las metas siempre se miden en partidas de equipo (Premier + scrims/torneos), con el periodo del filtro. */
-const GOAL_MODES: Mode[] = ["premier", "custom"];
+/** Partidas con las que se miden las metas. Por defecto, las de equipo; el filtro de modo de arriba no influye. */
+type GoalSource = "team" | "ranked";
+/** Se recuerda al cambiar de jugador o de filtro; por defecto, partidas de equipo. */
+let goalSource: GoalSource = "team";
+const GOAL_SOURCES: Record<GoalSource, { modes: Mode[]; label: string }> = {
+  team: { modes: ["premier", "custom"], label: "Premier + Scrims/Torneos" },
+  ranked: { modes: ["competitive"], label: "Ranked" },
+};
 
-function renderGoals(ds: Dataset, p: RosterPlayer, f: Filter): string {
-  const ms = playerMatchesFor(ds, p.puuid, { modes: GOAL_MODES, period: f.period });
-  const scope = `Premier + Scrims/Torneos · ${f.period === "act" ? "este acto" : "todo el historial"}`;
+function renderGoals(ds: Dataset, p: RosterPlayer, f: Filter, source: GoalSource = "team"): string {
+  const ms = playerMatchesFor(ds, p.puuid, { modes: GOAL_SOURCES[source].modes, period: f.period });
+  const periodLabel = f.period === "act" ? "este acto" : "todo el historial";
+  const sourceSwitch = `<div class="tac-goals__source" role="group" aria-label="Partidas para medir las metas">${(Object.keys(GOAL_SOURCES) as GoalSource[])
+    .map((k) => `<button type="button" data-goal-source="${k}" aria-pressed="${k === source}">${GOAL_SOURCES[k].label}</button>`)
+    .join("")}</div>`;
   const auto = mainRole(ms);
   const assigned = isRole(p.role) ? p.role : null;
   const roles = [...new Set([assigned, auto].filter((r): r is Role => r !== null))];
   if (roles.length === 0)
-    return `${sectionHeader("Metas nivel pro")}<p class="tac-goals__note">Sin partidas de Premier ni scrims/torneos (${f.period === "act" ? "este acto" : "todo el historial"}) para calcular las metas.</p>`;
+    return `<section class="tac-goals" data-goals>
+      <div class="tac-section__header"><h2 class="tac-section__title">Metas nivel pro</h2>${sourceSwitch}</div>
+      <p class="tac-goals__note">Sin partidas de ${GOAL_SOURCES[source].label} (${periodLabel}) para calcular las metas.</p>
+    </section>`;
   const stats = proStats(ms);
   // Agente más jugado DENTRO del rol detectado (el más jugado en general puede ser de otro rol).
   const autoAgent = auto ? byKey(ms, "agent").find((a) => roleOfAgent(a.key) === auto)?.key ?? null : null;
   const tabLabel = (r: Role) =>
     [r === assigned ? "Rol asignado" : null, r === auto ? `Rol por agente${autoAgent ? ` (${esc(autoAgent)})` : ""}` : null].filter(Boolean).join(" · ");
   const warnings = [
-    "Los pros sacan estos números jugando contra pros; en Premier y scrims los rivales suelen ser más débiles.",
+    source === "ranked"
+      ? "Ranked: los rivales son mucho más débiles que en VCT, así que alcanzar la meta aquí no equivale a nivel pro. La referencia principal es Premier + Scrims/Torneos."
+      : "Los pros sacan estos números jugando contra pros; en Premier y scrims los rivales suelen ser más débiles.",
     stats.rounds < MIN_GOAL_ROUNDS ? `Solo ${stats.rounds} rondas: los números todavía pueden variar mucho.` : null,
   ].filter(Boolean);
   return `
     <section class="tac-goals" data-goals>
       <div class="tac-section__header">
         <h2 class="tac-section__title">Metas nivel pro</h2>
-        <span class="tac-section__count">${esc(scope)}</span>
+        ${sourceSwitch}
       </div>
+      <p class="tac-goals__scope">Medido en ${GOAL_SOURCES[source].label} · ${periodLabel}</p>
       ${
         roles.length > 1
           ? `<div class="tac-goals__roles" role="tablist" aria-label="Rol para comparar">${roles
@@ -649,7 +664,7 @@ function renderGoals(ds: Dataset, p: RosterPlayer, f: Filter): string {
       ${roles
         .map(
           (r, i) => `<div class="tac-goals__grid" data-goal-panel="${r}"${i === 0 ? "" : " hidden"}>${goalsFor(r, stats).map(goalBar).join("")}</div>
-          <p class="tac-goals__note" data-goal-panel="${r}"${i === 0 ? "" : " hidden"}>Pro = mediana y Pro top = 25% mejor de los ${benchmarkInfo.playersFor(r)} ${ROLE_LABELS[r].toLowerCase()}s de VCT Americas 2026 (vlr.gg, datos del ${benchmarkInfo.collectedAt}). Se mide solo en Premier y scrims/torneos, sin importar el filtro de modo.</p>`,
+          <p class="tac-goals__note" data-goal-panel="${r}"${i === 0 ? "" : " hidden"}>Pro = mediana y Pro top = 25% mejor de los ${benchmarkInfo.playersFor(r)} ${ROLE_LABELS[r].toLowerCase()}s de VCT Americas 2026 (vlr.gg, datos del ${benchmarkInfo.collectedAt}).</p>`,
         )
         .join("")}
       ${warnings.map((w) => `<p class="tac-goals__warn">⚠ ${esc(w!)}</p>`).join("")}
@@ -697,7 +712,7 @@ function renderPlayer(ds: Dataset, p: RosterPlayer, f: Filter): string {
   return `
     ${renderKpiStrip(kpis)}
     ${renderCallouts(tips)}
-    ${renderGoals(ds, p, f)}
+    ${renderGoals(ds, p, f, goalSource)}
     ${sectionHeader("Agentes", agents.length, "agentes")}
     ${renderScoreboard(agentHeaders, agentRows, { numCols: [1, 2, 3, 4], sortableCols: [0, 1, 2, 3, 4] })}
     ${sectionHeader("Mapas", maps.length, "mapas")}
@@ -1667,6 +1682,16 @@ async function main() {
     return ds.playerMatches.find((m) => m.matchId === matchId && m.puuid === puuid);
   }
   contentEl.addEventListener("click", (e) => {
+    const srcBtn = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-goal-source]");
+    if (srcBtn) {
+      const player = ds.roster.players.find((pl) => slug(pl) === currentTab());
+      const box = srcBtn.closest("[data-goals]");
+      if (player && box) {
+        goalSource = srcBtn.dataset.goalSource as GoalSource;
+        box.outerHTML = renderGoals(ds, player, filters.player, goalSource);
+      }
+      return;
+    }
     const roleBtn = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-goal-role]");
     if (roleBtn) {
       const box = roleBtn.closest("[data-goals]")!;
