@@ -613,28 +613,31 @@ function goalBar(r: GoalRow): string {
     </div>`;
 }
 
-function renderGoals(p: RosterPlayer, ms: PlayerMatch[], f: Filter): string {
+/** Las metas siempre se miden en partidas de equipo (Premier + scrims/torneos), con el periodo del filtro. */
+const GOAL_MODES: Mode[] = ["premier", "custom"];
+
+function renderGoals(ds: Dataset, p: RosterPlayer, f: Filter): string {
+  const ms = playerMatchesFor(ds, p.puuid, { modes: GOAL_MODES, period: f.period });
+  const scope = `Premier + Scrims/Torneos · ${f.period === "act" ? "este acto" : "todo el historial"}`;
   const auto = mainRole(ms);
   const assigned = isRole(p.role) ? p.role : null;
   const roles = [...new Set([assigned, auto].filter((r): r is Role => r !== null))];
   if (roles.length === 0)
-    return `${sectionHeader("Metas nivel pro")}<p class="tac-goals__note">Sin partidas en este filtro para calcular las metas.</p>`;
+    return `${sectionHeader("Metas nivel pro")}<p class="tac-goals__note">Sin partidas de Premier ni scrims/torneos (${f.period === "act" ? "este acto" : "todo el historial"}) para calcular las metas.</p>`;
   const stats = proStats(ms);
   // Agente más jugado DENTRO del rol detectado (el más jugado en general puede ser de otro rol).
   const autoAgent = auto ? byKey(ms, "agent").find((a) => roleOfAgent(a.key) === auto)?.key ?? null : null;
   const tabLabel = (r: Role) =>
     [r === assigned ? "Rol asignado" : null, r === auto ? `Rol por agente${autoAgent ? ` (${esc(autoAgent)})` : ""}` : null].filter(Boolean).join(" · ");
   const warnings = [
-    f.modes.includes("competitive")
-      ? "Incluye ranked: los rivales son más débiles que en VCT, así que alcanzar la meta aquí no equivale a nivel pro."
-      : "Los pros sacan estos números jugando contra pros; en Premier y scrims los rivales suelen ser más débiles.",
-    stats.rounds < MIN_GOAL_ROUNDS ? `Solo ${stats.rounds} rondas en este filtro: los números todavía pueden variar mucho.` : null,
+    "Los pros sacan estos números jugando contra pros; en Premier y scrims los rivales suelen ser más débiles.",
+    stats.rounds < MIN_GOAL_ROUNDS ? `Solo ${stats.rounds} rondas: los números todavía pueden variar mucho.` : null,
   ].filter(Boolean);
   return `
     <section class="tac-goals" data-goals>
       <div class="tac-section__header">
         <h2 class="tac-section__title">Metas nivel pro</h2>
-        <span class="tac-section__count">VCT Americas 2026 · vlr.gg</span>
+        <span class="tac-section__count">${esc(scope)}</span>
       </div>
       ${
         roles.length > 1
@@ -646,7 +649,7 @@ function renderGoals(p: RosterPlayer, ms: PlayerMatch[], f: Filter): string {
       ${roles
         .map(
           (r, i) => `<div class="tac-goals__grid" data-goal-panel="${r}"${i === 0 ? "" : " hidden"}>${goalsFor(r, stats).map(goalBar).join("")}</div>
-          <p class="tac-goals__note" data-goal-panel="${r}"${i === 0 ? "" : " hidden"}>Pro = mediana y Pro top = 25% mejor de los ${benchmarkInfo.playersFor(r)} ${ROLE_LABELS[r].toLowerCase()}s de VCT Americas 2026 (datos del ${benchmarkInfo.collectedAt}).</p>`,
+          <p class="tac-goals__note" data-goal-panel="${r}"${i === 0 ? "" : " hidden"}>Pro = mediana y Pro top = 25% mejor de los ${benchmarkInfo.playersFor(r)} ${ROLE_LABELS[r].toLowerCase()}s de VCT Americas 2026 (vlr.gg, datos del ${benchmarkInfo.collectedAt}). Se mide solo en Premier y scrims/torneos, sin importar el filtro de modo.</p>`,
         )
         .join("")}
       ${warnings.map((w) => `<p class="tac-goals__warn">⚠ ${esc(w!)}</p>`).join("")}
@@ -694,7 +697,7 @@ function renderPlayer(ds: Dataset, p: RosterPlayer, f: Filter): string {
   return `
     ${renderKpiStrip(kpis)}
     ${renderCallouts(tips)}
-    ${renderGoals(p, ms, f)}
+    ${renderGoals(ds, p, f)}
     ${sectionHeader("Agentes", agents.length, "agentes")}
     ${renderScoreboard(agentHeaders, agentRows, { numCols: [1, 2, 3, 4], sortableCols: [0, 1, 2, 3, 4] })}
     ${sectionHeader("Mapas", maps.length, "mapas")}
