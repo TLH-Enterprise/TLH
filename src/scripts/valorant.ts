@@ -22,6 +22,7 @@ import {
   type Period,
 } from "../lib/valorant/stats.ts";
 import { benchmarkInfo, GOAL_DECIMALS, GOAL_LABELS, goalsFor, isRole, mainRole, proStats, ROLE_LABELS, roleOfAgent, type GoalRow, type Role } from "../lib/valorant/goals.ts";
+import { evaluateTeamGoals, goalsMetBy, teamGoals, type GoalProgress, type TeamGoalResult } from "../lib/valorant/team-goals.ts";
 import { colombiaToDate, parseReport, tournamentKey, upcoming, type Tournament, type TournamentReport } from "../lib/valorant/tournaments.ts";
 import type { Dataset, Mode, RosterPlayer, TeamMatch, PlayerMatch, LineupEntry, TeamRound } from "../lib/valorant/types.ts";
 
@@ -518,6 +519,7 @@ function renderTeam(ds: Dataset, f: Filter): string {
   const maps = teamByMap(tms);
   const comps = compositions(tms);
   const rec = recent(ds, tms, 10);
+  const board = leaderboard(ds, f);
 
   // KPI Strip
   const kpis = [
@@ -569,6 +571,7 @@ function renderTeam(ds: Dataset, f: Filter): string {
   return `
     ${renderKpiStrip(kpis)}
     ${renderCallouts(teamHighlights(ds, tms))}
+    ${renderTeamGoals(evaluateTeamGoals(board), board, "Premier + Scrims/Torneos")}
     ${sectionHeader("Mapas", maps.length, "mapas")}
     ${renderScoreboard(mapHeaders, mapRows, { numCols: [1, 2, 3, 4], centerCols: [5], sortableCols: [0, 1, 2, 3, 4] })}
     ${renderCompositions(comps)}
@@ -964,12 +967,77 @@ function renderLastPlayed(iso: string | null, now: Date): string {
     </span>`;
 }
 
+const TIER_NAMES: Record<number, string> = { 24: "Immortal 1", 25: "Immortal 2", 26: "Immortal 3", 27: "Radiant" };
+
+/** "Immortal 2" → "Imm 2", para que quepa en las tarjetas de objetivos. */
+const shortTier = (name: string) =>
+  name.replace(/^(Ascendant|Immortal|Diamond|Platinum|Silver|Bronze)/, (t) => ({ Ascendant: "Asc", Immortal: "Imm", Diamond: "Dia", Platinum: "Plat", Silver: "Plata", Bronze: "Bronce" })[t] ?? t);
+
+function fmtGoalValue(res: TeamGoalResult, p: GoalProgress, tierName: string | null, rr: number | null): string {
+  if (p.value === null) return dash;
+  switch (res.goal.metric) {
+    case "rank": return tierName ? `${shortTier(tierName)} · ${rr ?? 0} RR` : dash;
+    case "winRate": case "hsPct": return fmtPct(p.value);
+    case "kd": case "kda": return fmtKd(p.value);
+    case "activeDays": return p.value < 1 ? "hoy" : `hace ${Math.floor(p.value)} d`;
+    default: return fmtNum(p.value);
+  }
+}
+
+function fmtGoalTarget(res: TeamGoalResult): string {
+  const t = res.goal.target;
+  switch (res.goal.metric) {
+    case "rank": return TIER_NAMES[t] ?? `tier ${t}`;
+    case "winRate": case "hsPct": return `≥ ${t}%`;
+    case "kd": case "kda": return `≥ ${t.toFixed(2)}`;
+    case "activeDays": return `≤ ${t} días sin ranked`;
+    case "games": return `≥ ${t} partidas`;
+    default: return `≥ ${t}`;
+  }
+}
+
+/** Objetivos generales del equipo: quién los cumple y cuánto le falta a cada uno. */
+function renderTeamGoals(results: TeamGoalResult[], rows: ReturnType<typeof leaderboard>, measuredWith = "el filtro de arriba"): string {
+  if (!results.length || !rows.length) return "";
+  const byPuuid = new Map(rows.map((r) => [r.puuid, r]));
+  const cards = results.map((res) => {
+    const total = res.players.length;
+    const state = res.metCount === total ? "done" : res.metCount > 0 ? "some" : "none";
+    const players = res.players.map((p) => {
+      const r = byPuuid.get(p.puuid);
+      const val = fmtGoalValue(res, p, r?.tierName ?? null, r?.rr ?? null);
+      return `<li class="tac-tgoal__player${p.met ? " is-met" : ""}"${res.goal.metric === "rank" && r?.tierName ? ` title="${esc(r.tierName)} · ${r.rr ?? 0} RR"` : ""}>
+          <span class="tac-tgoal__name">${p.met ? "✓ " : ""}${esc(p.name)}</span>
+          <span class="tac-tgoal__bar" aria-hidden="true"><span style="width:${Math.round(p.progress * 100)}%"></span></span>
+          <span class="tac-tgoal__val">${esc(val)}</span>
+        </li>`;
+    }).join("");
+    return `<details class="tac-tgoal tac-tgoal--${state}">
+        <summary class="tac-tgoal__summary">
+          <span class="tac-tgoal__head">
+            <span class="tac-tgoal__label">${esc(res.goal.label)}</span>
+            <span class="tac-tgoal__count" title="Jugadores que lo cumplen">${res.metCount}/${total}</span>
+          </span>
+          <span class="tac-tgoal__target">Meta: ${esc(fmtGoalTarget(res))}</span>
+        </summary>
+        <ul class="tac-tgoal__players">${players}</ul>
+      </details>`;
+  }).join("");
+  return `<section class="tac-tgoals" aria-label="Objetivos del equipo">
+      <h3 class="tac-tgoals__title">Objetivos del equipo</h3>
+      <div class="tac-tgoals__grid">${cards}</div>
+      <p class="tac-canvas__subtitle" style="margin-top:8px;">El rango es el actual y "Jugar ranked" mira la última partida competitiva; las demás metas se miden con ${esc(measuredWith)}.</p>
+    </section>`;
+}
+
 function renderRanking(ds: Dataset, f: Filter, sort: { key: LeaderKey; dir: "asc" | "desc" }): string {
   const base = leaderboard(ds, f);
   const lead = leaders(base);
   const rows = sortLeaderboard(base, sort.key, sort.dir);
+  const goalResults = evaluateTeamGoals(base);
+  const metBy = goalsMetBy(goalResults);
 
-  const rankHeaders = ["Jugador", "Rango", "PJ", "WR", "K/D", "HS%", "Daño/R", "KDA", "Última ranked"];
+  const rankHeaders = ["Jugador", "Rango", "PJ", "WR", "K/D", "HS%", "Daño/R", "KDA", "Última ranked", "Objetivos"];
   const rankSortKeys: Record<number, LeaderKey> = { 1: "rank", 2: "games", 3: "winRate", 4: "kd", 5: "hsPct", 6: "dmgPerRound", 7: "kda", 8: "lastPlayed" };
   const now = new Date();
   const rankRows = rows.map((r) => {
@@ -986,13 +1054,15 @@ function renderRanking(ds: Dataset, f: Filter, sort: { key: LeaderKey; dir: "asc
         isLeader("dmgPerRound") ? `<span class="tac-leader">${esc(fmtNum(r.line.dmgPerRound))}</span>` : fmtNum(r.line.dmgPerRound),
         isLeader("kda") ? `<span class="tac-leader">${esc(fmtKd(r.kda))}</span>` : fmtKd(r.kda),
         renderLastPlayed(r.lastPlayedAt, now),
+        `<span class="tac-nowrap" title="Objetivos del equipo que cumple">${metBy[r.puuid] ?? 0}/${teamGoals.length}</span>`,
       ],
     };
   });
 
   return `
+    ${renderTeamGoals(goalResults, base)}
     <p class="tac-canvas__subtitle" style="margin-bottom:16px;">Click en encabezado para ordenar. <span class="tac-leader" style="background:var(--tac-radiant);color:#fff;padding:0 6px;border-radius:3px;font-size:0.625rem;">Líder</span> = mejor valor de la columna.</p>
-    ${renderScoreboard(rankHeaders, rankRows, { numCols: [2, 3, 4, 5, 6, 7], sortableCols: [1, 2, 3, 4, 5, 6, 7, 8], sortKeys: rankSortKeys, sorted: sort })}
+    ${renderScoreboard(rankHeaders, rankRows, { numCols: [2, 3, 4, 5, 6, 7, 9], sortableCols: [1, 2, 3, 4, 5, 6, 7, 8], sortKeys: rankSortKeys, sorted: sort })}
     <p class="tac-canvas__subtitle" style="margin-top:12px;">"Última ranked" es la partida competitiva más reciente de cada jugador, sin importar el filtro. Se actualiza con cada recolección de datos.</p>
   `;
 }
@@ -1562,7 +1632,10 @@ async function main() {
       liveContentEl.innerHTML = renderLivePlayer(ds, player, f);
     } else if (kind === "ranking") {
       canvasTitle.textContent = "Ranking del equipo";
-      canvasSubtitle.textContent = "Ordenado por ELO · Filtro: Ranked / Este acto";
+      const sync = ds.meta.updatedAt
+        ? `Última sincronización: ${new Date(ds.meta.updatedAt).toLocaleString("es-CO", { dateStyle: "medium", timeStyle: "short" })} (${timeSince(ds.meta.updatedAt).label})`
+        : "Aún sin sincronizar";
+      canvasSubtitle.textContent = `Ordenado por ELO · Filtro: Ranked / Este acto · ${sync}`;
       contentEl.innerHTML = renderRanking(ds, f, rankSort);
       liveContentEl.innerHTML = renderLiveRanking(ds, f);
     } else {
@@ -1595,7 +1668,7 @@ async function main() {
     const expanded = row.getAttribute("aria-expanded") === "true";
     row.setAttribute("aria-expanded", String(!expanded));
     if (detailRow && detailRow.classList.contains("tac-detail-row")) {
-      detailRow.style.display = expanded ? "none" : "table-row";
+      detailRow.classList.toggle("is-open", !expanded);
       // Re-attach listeners for nested content
       attachSortListeners();
     }

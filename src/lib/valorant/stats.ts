@@ -214,6 +214,7 @@ export interface LeaderRow {
   puuid: string;
   riotId: string;
   name: string;
+  tier: number | null;
   tierName: string | null;
   rr: number | null;
   elo: number | null;
@@ -238,6 +239,7 @@ export function leaderboard(ds: Dataset, f: Filter): LeaderRow[] {
       puuid: p.puuid,
       riotId: `${p.name}#${p.tag}`,
       name: p.name,
+      tier: rank?.tier ?? null,
       tierName: rank?.tierName ?? null,
       rr: rank?.rr ?? null,
       elo: rank?.elo ?? null,
