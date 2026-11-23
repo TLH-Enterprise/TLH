@@ -12,8 +12,12 @@ Las páginas de listado de Challengermode, Battlefy y Toornament se arman con Ja
    - curl -s "https://www.challengermode.com/xml/feed/tournaments" → <entry> con <title>, <link href>, <summary>
      (ej. "VALORANT, 5 vs 5, 16 Slots, Prize $500, Free to enter, Single Elimination, Start time …").
      Trae los ~100 torneos más recientes de todos los juegos: quédate con los que digan VALORANT en el summary y cuya fecha no haya pasado.
-   - Detalle: curl -sL "<link>" (redirige) y lee el bloque <script type="application/ld+json">: name, startDate, doorTime,
-     isAccessibleForFree, maximumAttendeeCapacity, remainingAttendeeCapacity, description. El organizador es la parte
+   - Detalle: curl -sL "<link>" (redirige). La página trae VARIOS bloques <script type="application/ld+json">: el primero
+     es la empresa ("@type": "Organization"). Usa el que tiene "sport": "Valorant" (empieza con "@id" = URL del torneo):
+     name, startDate, doorTime,
+     isAccessibleForFree, maximumAttendeeCapacity, remainingAttendeeCapacity, description. Comando probado:
+       curl -sL "<link>" | python3 -c "import sys,re,json; [print(json.dumps(d,ensure_ascii=False)) for b in re.findall(r'<script[^>]*application/ld\+json[^>]*>(.*?)</script>',sys.stdin.read(),re.S) for d in [json.loads(b)] if isinstance(d,dict) and d.get('sport')]"
+     remainingAttendeeCapacity = cupos libres (cupos = (max-libres)/max). El organizador es la parte
      /s/<organizador>/ de la URL. La región no viene: inclúyelo solo si el nombre, el organizador o la descripción
      indican LATAM/LAN/México/Colombia/NA abierto; si no se puede saber, descártalo.
    - Revisa también https://www.challengermode.com/s/LEVIATAN/tournaments con web search ("challengermode LEVIATAN valorant").
