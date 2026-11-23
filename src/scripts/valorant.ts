@@ -21,6 +21,7 @@ import {
   type LeaderKey,
   type Period,
 } from "../lib/valorant/stats.ts";
+import { benchmarkInfo, GOAL_DECIMALS, GOAL_LABELS, goalsFor, isRole, mainRole, proStats, ROLE_LABELS, roleOfAgent, type GoalRow, type Role } from "../lib/valorant/goals.ts";
 import { colombiaToDate, parseReport, tournamentKey, upcoming, type Tournament, type TournamentReport } from "../lib/valorant/tournaments.ts";
 import type { Dataset, Mode, RosterPlayer, TeamMatch, PlayerMatch, LineupEntry, TeamRound } from "../lib/valorant/types.ts";
 
@@ -576,6 +577,82 @@ function renderTeam(ds: Dataset, f: Filter): string {
   `;
 }
 
+/* ==========================================================================
+   METAS NIVEL PRO
+   ========================================================================== */
+const MIN_GOAL_ROUNDS = 200;
+
+function goalBar(r: GoalRow): string {
+  const d = GOAL_DECIMALS[r.key];
+  const max = r.top * 1.2;
+  const pos = (v: number) => `${Math.max(0, Math.min(100, (v / max) * 100)).toFixed(1)}%`;
+  const fmt = (v: number) => v.toFixed(d) + (r.key === "hs" ? "%" : "");
+  const status =
+    r.level === null
+      ? "Sin datos"
+      : r.level === "top"
+        ? "Nivel Pro top ✓"
+        : r.level === "pro"
+          ? `Nivel Pro ✓ · faltan ${fmt(r.gap!)} para Pro top`
+          : `Faltan ${fmt(r.gap!)} para nivel Pro`;
+  return `
+    <div class="tac-goal tac-goal--${r.level ?? "none"}">
+      <div class="tac-goal__head">
+        <span class="tac-goal__label">${GOAL_LABELS[r.key]}</span>
+        <span class="tac-goal__value">${r.value === null ? dash : fmt(r.value)}</span>
+      </div>
+      <div class="tac-goal__track" role="img" aria-label="${GOAL_LABELS[r.key]}: ${r.value === null ? "sin datos" : fmt(r.value)}; Pro ${fmt(r.pro)}; Pro top ${fmt(r.top)}">
+        <div class="tac-goal__fill" style="width:${r.value === null ? "0%" : pos(r.value)}"></div>
+        <span class="tac-goal__mark" style="left:${pos(r.pro)}" title="Pro ${fmt(r.pro)}"></span>
+        <span class="tac-goal__mark tac-goal__mark--top" style="left:${pos(r.top)}" title="Pro top ${fmt(r.top)}"></span>
+      </div>
+      <div class="tac-goal__foot">
+        <span>Pro ${fmt(r.pro)} · Pro top ${fmt(r.top)}</span>
+        <span class="tac-goal__status">${status}</span>
+      </div>
+    </div>`;
+}
+
+function renderGoals(p: RosterPlayer, ms: PlayerMatch[], f: Filter): string {
+  const auto = mainRole(ms);
+  const assigned = isRole(p.role) ? p.role : null;
+  const roles = [...new Set([assigned, auto].filter((r): r is Role => r !== null))];
+  if (roles.length === 0)
+    return `${sectionHeader("Metas nivel pro")}<p class="tac-goals__note">Sin partidas en este filtro para calcular las metas.</p>`;
+  const stats = proStats(ms);
+  // Agente más jugado DENTRO del rol detectado (el más jugado en general puede ser de otro rol).
+  const autoAgent = auto ? byKey(ms, "agent").find((a) => roleOfAgent(a.key) === auto)?.key ?? null : null;
+  const tabLabel = (r: Role) =>
+    [r === assigned ? "Rol asignado" : null, r === auto ? `Rol por agente${autoAgent ? ` (${esc(autoAgent)})` : ""}` : null].filter(Boolean).join(" · ");
+  const warnings = [
+    f.modes.includes("competitive")
+      ? "Incluye ranked: los rivales son más débiles que en VCT, así que alcanzar la meta aquí no equivale a nivel pro."
+      : "Los pros sacan estos números jugando contra pros; en Premier y scrims los rivales suelen ser más débiles.",
+    stats.rounds < MIN_GOAL_ROUNDS ? `Solo ${stats.rounds} rondas en este filtro: los números todavía pueden variar mucho.` : null,
+  ].filter(Boolean);
+  return `
+    <section class="tac-goals" data-goals>
+      <div class="tac-section__header">
+        <h2 class="tac-section__title">Metas nivel pro</h2>
+        <span class="tac-section__count">VCT Americas 2026 · vlr.gg</span>
+      </div>
+      ${
+        roles.length > 1
+          ? `<div class="tac-goals__roles" role="tablist" aria-label="Rol para comparar">${roles
+              .map((r, i) => `<button type="button" role="tab" class="tac-goals__role" data-goal-role="${r}" aria-selected="${i === 0}">${ROLE_LABELS[r]}<small>${tabLabel(r)}</small></button>`)
+              .join("")}</div>`
+          : `<p class="tac-goals__role-one"><strong>${ROLE_LABELS[roles[0]]}</strong> · ${tabLabel(roles[0])}</p>`
+      }
+      ${roles
+        .map(
+          (r, i) => `<div class="tac-goals__grid" data-goal-panel="${r}"${i === 0 ? "" : " hidden"}>${goalsFor(r, stats).map(goalBar).join("")}</div>
+          <p class="tac-goals__note" data-goal-panel="${r}"${i === 0 ? "" : " hidden"}>Pro = mediana y Pro top = 25% mejor de los ${benchmarkInfo.playersFor(r)} ${ROLE_LABELS[r].toLowerCase()}s de VCT Americas 2026 (datos del ${benchmarkInfo.collectedAt}).</p>`,
+        )
+        .join("")}
+      ${warnings.map((w) => `<p class="tac-goals__warn">⚠ ${esc(w!)}</p>`).join("")}
+    </section>`;
+}
+
 function renderPlayer(ds: Dataset, p: RosterPlayer, f: Filter): string {
   const ms = playerMatchesFor(ds, p.puuid, f);
   const l = line(ms);
@@ -617,6 +694,7 @@ function renderPlayer(ds: Dataset, p: RosterPlayer, f: Filter): string {
   return `
     ${renderKpiStrip(kpis)}
     ${renderCallouts(tips)}
+    ${renderGoals(p, ms, f)}
     ${sectionHeader("Agentes", agents.length, "agentes")}
     ${renderScoreboard(agentHeaders, agentRows, { numCols: [1, 2, 3, 4], sortableCols: [0, 1, 2, 3, 4] })}
     ${sectionHeader("Mapas", maps.length, "mapas")}
@@ -1586,6 +1664,13 @@ async function main() {
     return ds.playerMatches.find((m) => m.matchId === matchId && m.puuid === puuid);
   }
   contentEl.addEventListener("click", (e) => {
+    const roleBtn = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-goal-role]");
+    if (roleBtn) {
+      const box = roleBtn.closest("[data-goals]")!;
+      box.querySelectorAll("[data-goal-role]").forEach((b) => b.setAttribute("aria-selected", String(b === roleBtn)));
+      box.querySelectorAll<HTMLElement>("[data-goal-panel]").forEach((el) => (el.hidden = el.dataset.goalPanel !== roleBtn.dataset.goalRole));
+      return;
+    }
     if ((e.target as HTMLElement).closest("[data-history-more]")) {
       historyShown += MATCH_PAGE;
       renderHistory();
