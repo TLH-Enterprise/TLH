@@ -6,10 +6,21 @@ OBJETIVO
 Encontrar torneos online con inscripción ABIERTA hoy, y devolverlos en JSON.
 
 DÓNDE BUSCAR (todas, en este orden)
-1. Challengermode: https://www.challengermode.com/valorant/tournaments?state=upcoming (filtro 5v5 y luego 2v2). Revisa también https://www.challengermode.com/s/LEVIATAN/tournaments
-2. Toornament: https://play.toornament.com/en_US/games/valorant
-3. Battlefy: https://battlefy.com/browse/valorant
-4. start.gg: torneos de VALORANT online próximos
+Las páginas de listado de Challengermode, Battlefy y Toornament se arman con JavaScript: WebFetch las ve vacías.
+
+1. Challengermode (feed Atom público que publican en su robots.txt, sin login). Usa `curl` desde Bash y procesa con node o python:
+   - curl -s "https://www.challengermode.com/xml/feed/tournaments" → <entry> con <title>, <link href>, <summary>
+     (ej. "VALORANT, 5 vs 5, 16 Slots, Prize $500, Free to enter, Single Elimination, Start time …").
+     Trae los ~100 torneos más recientes de todos los juegos: quédate con los que digan VALORANT en el summary y cuya fecha no haya pasado.
+   - Detalle: curl -sL "<link>" (redirige) y lee el bloque <script type="application/ld+json">: name, startDate, doorTime,
+     isAccessibleForFree, maximumAttendeeCapacity, remainingAttendeeCapacity, description. El organizador es la parte
+     /s/<organizador>/ de la URL. La región no viene: inclúyelo solo si el nombre, el organizador o la descripción
+     indican LATAM/LAN/México/Colombia/NA abierto; si no se puede saber, descártalo.
+   - Revisa también https://www.challengermode.com/s/LEVIATAN/tournaments con web search ("challengermode LEVIATAN valorant").
+2. Battlefy: su API responde "Direct API access is not permitted". NO la llames ni intentes saltar el bloqueo;
+   búscalo con web search ("battlefy valorant latin america tournament") y abre con WebFetch solo enlaces concretos de torneos.
+3. Toornament: está detrás de un CAPTCHA de Cloudflare. NO intentes abrirlo ni saltarlo; búscalo solo con web search.
+4. start.gg: no hay datos sin token; búscalo con web search ("start.gg valorant LATAM").
 5. X (Twitter), búsqueda "Latest" de los últimos 10 días:
    - torneo valorant LAN
    - torneo valorant (colombia OR mexico OR latam)
@@ -17,6 +28,7 @@ DÓNDE BUSCAR (todas, en este orden)
    - valorant tournament NA registration
    Revisa también los perfiles @valesportsla, @LeviatanGG y @SuraGG_LATAM.
 6. Riot oficial: valorantesports.com/es-MX/news (busca "Open Qualifier", "Clasificatoria", "Cup 1").
+   Para fechas de qualifiers sirven también thespike.gg, vlr.gg y liquipedia.net/valorant.
 
 Si una página no carga (por ejemplo, porque necesita JavaScript o inicio de sesión), búscala con web search y anótalo en "notas".
 
