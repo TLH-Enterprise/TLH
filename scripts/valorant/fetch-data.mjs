@@ -22,8 +22,40 @@ const FILES = {
   tournaments: "tournaments.json",
 };
 
+const SEASONS_URL = "https://valorant-api.com/v1/seasons";
+
 function empty(roster) {
-  return { meta: { updatedAt: null, nonTeamMatchIds: [] }, roster, playerMatches: [], teamMatches: [], snapshots: [], labels: {}, tournaments: null };
+  return { meta: { updatedAt: null, nonTeamMatchIds: [] }, roster, playerMatches: [], teamMatches: [], snapshots: [], labels: {}, tournaments: null, act: null };
+}
+
+/**
+ * Acto en curso según la lista de valorant-api.com/v1/seasons; null si no hay ninguno.
+ * @param {Array<{ uuid: string, displayName: string, type: string | null, startTime: string, endTime: string, parentUuid: string | null }>} seasons
+ * @param {Date} now
+ * @returns {import("../../src/lib/valorant/types.ts").ActInfo | null}
+ */
+export function currentAct(seasons, now) {
+  const t = now.getTime();
+  const act = seasons.find(
+    (s) => s.type === "EAresSeasonType::Act" && Date.parse(s.startTime) <= t && t < Date.parse(s.endTime),
+  );
+  if (!act) return null;
+  const episode = seasons.find((s) => s.uuid === act.parentUuid)?.displayName;
+  const actName = act.displayName.replace(/^ACT\b/i, "Acto");
+  return { name: episode ? `${episode} · ${actName}` : actName, startsAt: act.startTime, endsAt: act.endTime };
+}
+
+/** Pide el acto en curso; nunca lanza (sin red o con formato raro devuelve null). */
+export async function fetchAct(fetch, now = new Date()) {
+  try {
+    const r = await fetch(SEASONS_URL, { signal: AbortSignal.timeout(TIMEOUT_MS) });
+    if (!r.ok) throw new Error(`valorant-api respondió ${r.status}`);
+    const { data } = await r.json();
+    return Array.isArray(data) ? currentAct(data, now) : null;
+  } catch (e) {
+    console.warn(`[valorant] No se pudo leer el fin del acto (${e instanceof Error ? e.message : e}).`);
+    return null;
+  }
 }
 
 /**
@@ -68,6 +100,7 @@ export async function buildDataset({ fetch, roster, dataDir }) {
     /** @type {Record<string, unknown>} */
     const out = { roster };
     for (const [key, name] of Object.entries(FILES)) out[key] = await read(name);
+    out.act = await fetchAct(fetch);
     return /** @type {any} */ (out);
   } catch (e) {
     console.warn(`[valorant] No se pudieron cargar los datos (${e instanceof Error ? e.message : e}). La página saldrá vacía.`);

@@ -5,6 +5,7 @@ import {
   highlights,
   filterHistory,
   timeSince,
+  actCountdown,
   type HistoryFilter,
   includedTeamMatches,
   leaderboard,
@@ -571,7 +572,7 @@ function renderTeam(ds: Dataset, f: Filter): string {
   return `
     ${renderKpiStrip(kpis)}
     ${renderCallouts(teamHighlights(ds, tms))}
-    ${renderTeamGoals(evaluateTeamGoals(board), board, "Premier + Scrims/Torneos")}
+    ${renderTeamGoals(evaluateTeamGoals(board), board, "Premier + Scrims/Torneos", renderActEnd(ds))}
     ${sectionHeader("Mapas", maps.length, "mapas")}
     ${renderScoreboard(mapHeaders, mapRows, { numCols: [1, 2, 3, 4], centerCols: [5], sortableCols: [0, 1, 2, 3, 4] })}
     ${renderCompositions(comps)}
@@ -997,7 +998,18 @@ function fmtGoalTarget(res: TeamGoalResult): string {
 }
 
 /** Objetivos generales del equipo: quién los cumple y cuánto le falta a cada uno. */
-function renderTeamGoals(results: TeamGoalResult[], rows: ReturnType<typeof leaderboard>, measuredWith = "el filtro de arriba"): string {
+/** "V26 · Acto VI · quedan 44 días (termina el 6 ene)"; vacío si no se sabe o ya terminó. */
+function renderActEnd(ds: Dataset): string {
+  const act = ds.act;
+  if (!act) return "";
+  const left = actCountdown(act.endsAt);
+  if (!left) return "";
+  const end = new Date(act.endsAt).toLocaleDateString("es-CO", { day: "numeric", month: "short" });
+  const level = left.days <= 7 ? "alert" : left.days <= 21 ? "warn" : "ok";
+  return `<span class="tac-actend tac-actend--${level}" title="Fin del acto: ${esc(new Date(act.endsAt).toLocaleString("es-CO", { dateStyle: "long", timeStyle: "short" }))}">${esc(act.name)} · <strong>${esc(left.label)}</strong> (termina el ${esc(end)})</span>`;
+}
+
+function renderTeamGoals(results: TeamGoalResult[], rows: ReturnType<typeof leaderboard>, measuredWith = "el filtro de arriba", actEnd = ""): string {
   if (!results.length || !rows.length) return "";
   const byPuuid = new Map(rows.map((r) => [r.puuid, r]));
   const cards = results.map((res) => {
@@ -1024,7 +1036,7 @@ function renderTeamGoals(results: TeamGoalResult[], rows: ReturnType<typeof lead
       </details>`;
   }).join("");
   return `<section class="tac-tgoals" aria-label="Objetivos del equipo">
-      <h3 class="tac-tgoals__title">Objetivos del equipo</h3>
+      <div class="tac-tgoals__top"><h3 class="tac-tgoals__title">Objetivos del equipo</h3>${actEnd}</div>
       <div class="tac-tgoals__grid">${cards}</div>
       <p class="tac-canvas__subtitle" style="margin-top:8px;">El rango es el actual y "Jugar ranked" mira la última partida competitiva; las demás metas se miden con ${esc(measuredWith)}.</p>
     </section>`;
@@ -1060,7 +1072,7 @@ function renderRanking(ds: Dataset, f: Filter, sort: { key: LeaderKey; dir: "asc
   });
 
   return `
-    ${renderTeamGoals(goalResults, base)}
+    ${renderTeamGoals(goalResults, base, undefined, renderActEnd(ds))}
     <p class="tac-canvas__subtitle" style="margin-bottom:16px;">Click en encabezado para ordenar. <span class="tac-leader" style="background:var(--tac-radiant);color:#fff;padding:0 6px;border-radius:3px;font-size:0.625rem;">Líder</span> = mejor valor de la columna.</p>
     ${renderScoreboard(rankHeaders, rankRows, { numCols: [2, 3, 4, 5, 6, 7, 9], sortableCols: [1, 2, 3, 4, 5, 6, 7, 8], sortKeys: rankSortKeys, sorted: sort })}
     <p class="tac-canvas__subtitle" style="margin-top:12px;">"Última ranked" es la partida competitiva más reciente de cada jugador, sin importar el filtro. Se actualiza con cada recolección de datos.</p>

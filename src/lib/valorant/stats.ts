@@ -310,3 +310,13 @@ export function timeSince(iso: string, now: Date = new Date()): { label: string;
   else label = `hace ${Math.floor(days / 30)} meses`;
   return { label, days };
 }
+
+/** Cuánto falta para que termine el acto. null si ya terminó (el dato quedó viejo). */
+export function actCountdown(endsAt: string, now: Date = new Date()): { days: number; label: string } | null {
+  const ms = Date.parse(endsAt) - now.getTime();
+  if (!(ms > 0)) return null;
+  const hours = Math.floor(ms / 3_600_000);
+  const days = Math.ceil(ms / 86_400_000);
+  const label = hours < 24 ? `quedan ${Math.max(hours, 1)} h` : `quedan ${days} ${days === 1 ? "día" : "días"}`;
+  return { days, label };
+}

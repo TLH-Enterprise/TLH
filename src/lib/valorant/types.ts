@@ -118,6 +118,13 @@ export interface Meta {
   nonTeamMatchIds: string[];
 }
 
+export interface ActInfo {
+  /** "V26 · Acto VI" */
+  name: string;
+  startsAt: string;
+  endsAt: string;
+}
+
 export interface Dataset {
   meta: Meta;
   roster: Roster;
@@ -127,4 +134,6 @@ export interface Dataset {
   labels: Labels;
   /** null si la Action de torneos aún no ha corrido. */
   tournaments: TournamentReport | null;
+  /** Acto en curso (valorant-api.com, se lee en cada build). Falta o null si no se pudo leer. */
+  act?: ActInfo | null;
 }
