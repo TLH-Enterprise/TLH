@@ -1,0 +1,11 @@
+{
+  "_comment": "Objetivos del equipo que se muestran en la pestaña Ranking. Para cambiarlos, edita esta lista. metric: rank (target = número de tier: 24 Immortal 1, 25 Immortal 2, 26 Immortal 3, 27 Radiant), winRate (%), kd, hsPct (%), dmgPerRound, kda, games (partidas en el filtro), activeDays (jugó ranked en los últimos N días).",
+  "goals": [
+    { "id": "radiant", "label": "Ser Radiant", "metric": "rank", "target": 27 },
+    { "id": "winrate", "label": "Win rate de 55%", "metric": "winRate", "target": 55 },
+    { "id": "kd", "label": "K/D de 1.10", "metric": "kd", "target": 1.1 },
+    { "id": "hs", "label": "25% de headshots", "metric": "hsPct", "target": 25 },
+    { "id": "adr", "label": "150 de daño por ronda", "metric": "dmgPerRound", "target": 150 },
+    { "id": "activo", "label": "Jugar ranked cada semana", "metric": "activeDays", "target": 7 }
+  ]
+}

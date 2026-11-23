@@ -825,6 +825,10 @@
   .tac-leader { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 24px; padding: 0 6px; border-radius: var(--tac-r-xs); background: var(--tac-radiant); color: #fff; font-family: var(--tac-font-mono); font-size: 0.625rem; font-weight: 700; }
 
   /* Detail row */
+  .tac-detail-row { display: none; }
+  .tac-detail-row.is-open { display: table-row; }
+  .tac-row--expandable > td:first-child::before { content: ""; display: inline-block; width: 6px; height: 6px; margin: 0 10px 2px 0; border-right: 2px solid var(--tac-text-muted); border-bottom: 2px solid var(--tac-text-muted); transform: rotate(-45deg); transition: transform var(--tac-fast, 150ms); }
+  .tac-row--expandable[aria-expanded="true"] > td:first-child::before { transform: rotate(45deg); }
   .tac-detail-row td { padding: 0 !important; border: 0 !important; background: var(--tac-bg-elevated) !important; }
   .tac-detail-panel { padding: var(--tac-space-4); border-top: 1px solid var(--tac-stroke); animation: tac-slide-down var(--tac-base); }
   @keyframes tac-slide-down { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
@@ -931,6 +935,30 @@
      ========================================================================== */
 
   /* Metas nivel pro */
+  .tac-tgoals { margin: 0 0 var(--tac-space-6); }
+  .tac-tgoals__title { margin: 0 0 var(--tac-space-3); font-family: var(--tac-font-display); font-size: 1rem; font-weight: 700; color: var(--tac-text); }
+  .tac-tgoals__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; align-items: start; }
+  .tac-tgoal { padding: 12px 14px; border-radius: var(--tac-r-md); background: var(--tac-surface); border: 1px solid var(--tac-stroke); border-top: 3px solid var(--tac-threat); }
+  .tac-tgoal--some { border-top-color: var(--tac-spike); }
+  .tac-tgoal--done { border-top-color: var(--tac-clutch); }
+  .tac-tgoal__summary { display: block; cursor: pointer; list-style: none; position: relative; padding-right: 18px; }
+  .tac-tgoal__summary::-webkit-details-marker { display: none; }
+  .tac-tgoal__summary::after { content: ""; position: absolute; right: 2px; top: 6px; width: 7px; height: 7px; border-right: 2px solid var(--tac-text-muted); border-bottom: 2px solid var(--tac-text-muted); transform: rotate(45deg); transition: transform var(--tac-fast, 150ms); }
+  .tac-tgoal[open] .tac-tgoal__summary::after { transform: rotate(-135deg); top: 9px; }
+  .tac-tgoal__summary:focus-visible { outline: 2px solid var(--tac-radiant); outline-offset: 4px; border-radius: 2px; }
+  .tac-tgoal__head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .tac-tgoal__label { font-weight: 700; font-size: 0.875rem; color: var(--tac-text); }
+  .tac-tgoal__count { font-family: var(--tac-font-mono); font-weight: 700; font-size: 0.875rem; color: var(--tac-text-dim); }
+  .tac-tgoal--done .tac-tgoal__count { color: var(--tac-clutch); }
+  .tac-tgoal__target { display: block; margin: 2px 0 0; font-family: var(--tac-font-mono); font-size: 0.6875rem; color: var(--tac-text-muted); }
+  .tac-tgoal__players { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+  .tac-tgoal__player { display: grid; grid-template-columns: minmax(0, 7.5em) minmax(40px, 1fr) auto; align-items: center; gap: 8px; font-size: 0.75rem; color: var(--tac-text-dim); }
+  .tac-tgoal__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tac-tgoal__player.is-met .tac-tgoal__name { color: var(--tac-clutch); font-weight: 600; }
+  .tac-tgoal__bar { height: 6px; border-radius: 3px; background: var(--tac-surface-strong); overflow: hidden; }
+  .tac-tgoal__bar span { display: block; height: 100%; background: var(--tac-spike); border-radius: 3px; }
+  .tac-tgoal__player.is-met .tac-tgoal__bar span { background: var(--tac-clutch); }
+  .tac-tgoal__val { font-family: var(--tac-font-mono); font-size: 0.6875rem; white-space: nowrap; text-align: right; }
   .tac-goals { margin: var(--tac-space-6) 0; }
   .tac-goals__source { display: inline-flex; border: 1px solid var(--tac-stroke); border-radius: var(--tac-r-sm); overflow: hidden; }
   .tac-goals__source button {
