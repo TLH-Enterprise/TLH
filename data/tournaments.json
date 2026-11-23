@@ -1,7 +1,7 @@
 {
   "actualizado": "2026-11-22",
   "torneos": [],
-  "riot_proximo_qualifier": "sin anunciar (VCT 2027 LATAM Norte Qualifier 1 y 2 ya pasaron: registro cerro el 8-nov; Swiss/playoffs 20-24 nov; LCQ Americas 17-18 dic)",
-  "notas": "Challengermode (general y LEVIATAN), Toornament y Battlefy cargan por JavaScript y WebFetch no devolvio listados. start.gg, X/Twitter y perfiles (@valesportsla, @LeviatanGG, @SuraGG_LATAM) no se pudieron revisar directamente; solo web search, sin resultados de torneos LATAM abiertos. thespike.gg e insider-gaming.com no resuelven desde esta sesion (dominios no permitidos). Hallazgos descartados: First Strike Latinoamerica (articulo de 2020, no vigente); VCT 2027 Americas Kickoff LATAM Norte Q1 (5-8 nov) y Q2 (12-15 nov), registro cerrado; NA Q1/Q2 registro cerrado; Game Changers (solo femenino/generos subrepresentados) excluido. Riot indica que las fechas de nuevas clasificatorias se anunciaran por canales regionales VCT LATAM (vctkolatam2027.com).",
-  "generadoEn": "2026-11-22T23:58:02.413Z"
+  "riot_proximo_qualifier": "sin anunciar",
+  "notas": "Challengermode (feed Atom): 6 torneos VALORANT 5v5 vigentes (RIVALS VALORANT, CAT Invitational, Rage Baiters Christmas, AcadArena Brasil, Test) pero ninguno indica region LATAM/LAN/NA; descartados (AcadArena Brasil = Brasil). No se pudo leer el JSON-LD de detalle. First Strike LATAM (Riot/GGTech, Open 23-26 nov): inscripcion cerro el 21 nov, excluido. VCT 2027 Americas Kickoff LATAM Norte Qualifier 1 se jugo 5-8 nov (ya paso); proximo qualifier sin fecha confirmada. Battlefy, Toornament, start.gg, X: solo web search, sin torneos abiertos encontrados. lafm.com.co no resolvio por red del entorno. Busqueda web limitada; sin acceso a X ni perfiles.",
+  "generadoEn": "2026-11-23T00:05:18.122Z"
 }
