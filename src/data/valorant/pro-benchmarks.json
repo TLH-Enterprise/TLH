@@ -1,0 +1,48 @@
+{
+  "source": "vlr.gg — estadísticas por evento (/event/stats/<id>)",
+  "collectedAt": "2026-11-22",
+  "events": [
+    "VCT 2026: Americas Kickoff (2682)",
+    "VCT 2026: Americas Stage 1 (2860)",
+    "VCT 2026: Americas Stage 2 (2977)"
+  ],
+  "method": "Jugadores con 100+ rondas en cada evento (194 filas). Rol según el agente más jugado en ese evento. pro = mediana (P50), top = percentil 75 de cada rol. K/D, KPR y APR calculados con los totales K, D, A y rondas.",
+  "roles": {
+    "duelist": {
+      "players": 58,
+      "acs": { "pro": 208, "top": 221 },
+      "kd": { "pro": 1.01, "top": 1.09 },
+      "adr": { "pro": 135, "top": 142 },
+      "kpr": { "pro": 0.73, "top": 0.78 },
+      "apr": { "pro": 0.22, "top": 0.25 },
+      "hs": { "pro": 25, "top": 28 }
+    },
+    "initiator": {
+      "players": 45,
+      "acs": { "pro": 178, "top": 193 },
+      "kd": { "pro": 0.93, "top": 1.07 },
+      "adr": { "pro": 117, "top": 128 },
+      "kpr": { "pro": 0.62, "top": 0.67 },
+      "apr": { "pro": 0.31, "top": 0.34 },
+      "hs": { "pro": 24, "top": 28 }
+    },
+    "controller": {
+      "players": 65,
+      "acs": { "pro": 187, "top": 202 },
+      "kd": { "pro": 1.0, "top": 1.09 },
+      "adr": { "pro": 122, "top": 135 },
+      "kpr": { "pro": 0.67, "top": 0.72 },
+      "apr": { "pro": 0.31, "top": 0.34 },
+      "hs": { "pro": 28, "top": 31 }
+    },
+    "sentinel": {
+      "players": 26,
+      "acs": { "pro": 198, "top": 216 },
+      "kd": { "pro": 1.09, "top": 1.2 },
+      "adr": { "pro": 132, "top": 141 },
+      "kpr": { "pro": 0.72, "top": 0.78 },
+      "apr": { "pro": 0.2, "top": 0.23 },
+      "hs": { "pro": 28, "top": 33 }
+    }
+  }
+}

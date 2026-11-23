@@ -1,3 +1,4 @@
+import type { Role } from "./goals.ts";
 import type { TournamentReport } from "./tournaments.ts";
 export type Mode = "competitive" | "premier" | "custom";
 export type Side = "Red" | "Blue";
@@ -6,6 +7,8 @@ export interface RosterPlayer {
   name: string;
   tag: string;
   puuid: string;
+  /** Rol asignado por el equipo (metas nivel pro). Si falta, solo se usa el rol del agente más jugado. */
+  role?: Role;
 }
 
 export interface Roster {
