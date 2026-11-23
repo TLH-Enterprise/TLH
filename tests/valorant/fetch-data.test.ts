@@ -44,7 +44,7 @@ describe("buildDataset", () => {
     const f = fakeFetch((u) => (u.includes("api.github.com") ? new Response("{}", { status: 403 }) : new Response("x", { status: 500 })));
     const ds = await buildDataset({ fetch: f.fn, roster: rosterJson });
     expect(ds).toEqual({
-      meta: { updatedAt: null, nonTeamMatchIds: [] }, roster: rosterJson, playerMatches: [], teamMatches: [], snapshots: [], labels: {}, tournaments: null,
+      meta: { updatedAt: null, nonTeamMatchIds: [] }, roster: rosterJson, playerMatches: [], teamMatches: [], snapshots: [], labels: {}, tournaments: null, act: null,
     });
     expect(warn).toHaveBeenCalled();
     warn.mockRestore();
@@ -120,5 +120,29 @@ describe("buildDataset", () => {
     for (const [n, v] of Object.entries(files)) await writeFile(join(dir, n), JSON.stringify(v));
     const ds = await buildDataset({ fetch: async () => { throw new Error("no debería llamar"); }, roster: rosterJson, dataDir: dir });
     expect(ds.teamMatches).toEqual([{ matchId: "T" }]);
+  });
+});
+
+describe("currentAct / fetchAct", () => {
+  const seasons = [
+    { uuid: "ep", displayName: "V26", type: null, startTime: "2026-06-24T00:00:00Z", endTime: "2027-01-06T00:00:00Z", parentUuid: null },
+    { uuid: "a5", displayName: "ACT V", type: "EAresSeasonType::Act", startTime: "2026-08-20T00:00:00Z", endTime: "2026-10-14T00:00:00Z", parentUuid: "ep" },
+    { uuid: "a6", displayName: "ACT VI", type: "EAresSeasonType::Act", startTime: "2026-10-14T00:00:00Z", endTime: "2027-01-06T00:00:00Z", parentUuid: "ep" },
+  ];
+
+  test("elige el acto en curso con su episodio", async () => {
+    const { currentAct } = await import("../../scripts/valorant/fetch-data.mjs");
+    expect(currentAct(seasons, new Date("2026-11-23T12:00:00Z"))).toEqual({
+      name: "V26 · Acto VI", startsAt: "2026-10-14T00:00:00Z", endsAt: "2027-01-06T00:00:00Z",
+    });
+    expect(currentAct(seasons, new Date("2027-02-01T00:00:00Z"))).toBeNull();
+  });
+
+  test("fetchAct no lanza si la API falla", async () => {
+    const { fetchAct } = await import("../../scripts/valorant/fetch-data.mjs");
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    expect(await fetchAct(async () => new Response("x", { status: 500 }))).toBeNull();
+    expect(await fetchAct(async () => new Response(JSON.stringify({ data: seasons })), new Date("2026-11-23T00:00:00Z"))).toMatchObject({ name: "V26 · Acto VI" });
+    warn.mockRestore();
   });
 });

@@ -315,3 +315,12 @@ describe("timeSince", () => {
     expect(timeSince("2026-11-12T13:00:00Z", now).days).toBe(7);
   });
 });
+
+describe("actCountdown", () => {
+  test("días que faltan, horas en el último día y null si ya terminó", async () => {
+    const { actCountdown } = await import("../../src/lib/valorant/stats.ts");
+    expect(actCountdown("2027-01-06T00:00:00Z", new Date("2026-11-23T12:00:00Z"))).toEqual({ days: 44, label: "quedan 44 días" });
+    expect(actCountdown("2027-01-06T00:00:00Z", new Date("2027-01-05T19:00:00Z"))?.label).toBe("quedan 5 h");
+    expect(actCountdown("2027-01-06T00:00:00Z", new Date("2027-01-06T01:00:00Z"))).toBeNull();
+  });
+});

@@ -936,6 +936,12 @@
 
   /* Metas nivel pro */
   .tac-tgoals { margin: 0 0 var(--tac-space-6); }
+  .tac-tgoals__top { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 12px; margin-bottom: var(--tac-space-3); }
+  .tac-tgoals__top .tac-tgoals__title { margin: 0; }
+  .tac-actend { font-family: var(--tac-font-mono); font-size: 0.6875rem; color: var(--tac-text-muted); }
+  .tac-actend strong { color: var(--tac-clutch); }
+  .tac-actend--warn strong { color: var(--tac-spike); }
+  .tac-actend--alert strong { color: var(--tac-threat); }
   .tac-tgoals__title { margin: 0 0 var(--tac-space-3); font-family: var(--tac-font-display); font-size: 1rem; font-weight: 700; color: var(--tac-text); }
   .tac-tgoals__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; align-items: start; }
   .tac-tgoal { padding: 12px 14px; border-radius: var(--tac-r-md); background: var(--tac-surface); border: 1px solid var(--tac-stroke); border-top: 3px solid var(--tac-threat); }
