@@ -1,16 +1,16 @@
 {
-  "actualizado": "2026-11-23",
+  "actualizado": "2026-11-26",
   "torneos": [
     {
       "nombre": "CIRCUITO TAKIS - LAS - VALORANT 2VS2",
       "organizador": "LEVIATÁN",
       "formato": "2v2",
-      "region": "Latin America",
+      "region": "Latin America (LAS)",
       "fecha_hora_colombia": "2026-11-29 14:00",
       "cierre_inscripcion": null,
       "costo": "Gratis",
       "premio": "1°: 50 USD, 2°: 35 USD, 3°: 15 USD",
-      "cupos": "24/256",
+      "cupos": "26/256",
       "requisitos": null,
       "link_inscripcion": "https://www.challengermode.com/s/LEVIATAN/tournaments/994ef618-8e3d-45b6-e91b-08df3e4c1535",
       "fuente": "Challengermode",
@@ -20,19 +20,19 @@
       "nombre": "CIRCUITO TAKIS - LAN - VALORANT 2VS2",
       "organizador": "LEVIATÁN",
       "formato": "2v2",
-      "region": "Latin America",
+      "region": "Latin America (LAN)",
       "fecha_hora_colombia": "2026-11-29 16:00",
       "cierre_inscripcion": null,
       "costo": "Gratis",
       "premio": "1°: 50 USD, 2°: 35 USD, 3°: 15 USD",
-      "cupos": "16/256",
+      "cupos": "20/256",
       "requisitos": null,
       "link_inscripcion": "https://www.challengermode.com/s/LEVIATAN/tournaments/e84ed17e-fe08-4b2a-e922-08df3e4c1535",
       "fuente": "Challengermode",
       "alerta": null
     }
   ],
-  "riot_proximo_qualifier": "sin anunciar (VCT Americas Kickoff 2027 NA: Open Qualifiers 1 y 2 ya pasaron, Swiss 20-22 nov, playoffs 1-6 dic)",
-  "notas": "Challengermode OK (script). Battlefy/Toornament/start.gg/X: solo web search, sin torneos concretos encontrados. dotesports.com no resolvible desde el entorno. No se encontraron torneos 5v5 LATAM abiertos; Wolvesden (Europa) y Wolfoxy (Brasil) excluidos.",
-  "generadoEn": "2026-11-23T13:15:25.329Z"
+  "riot_proximo_qualifier": "sin anunciar (LAN/LAS); VCT 2027 Open Qualifiers empiezan en noviembre, sin fechas regionales confirmadas",
+  "notas": "Challengermode revisado con script (8 torneos, solo 2 Valorant LATAM; el resto Europa/Brasil/otros juegos). Battlefy, Toornament, start.gg, X y Riot: solo web search, sin torneos abiertos verificables LATAM/NA 5v5; X no es accesible. thespike.gg no trae fechas LAN/LAS.",
+  "generadoEn": "2026-11-26T13:16:26.837Z"
 }
