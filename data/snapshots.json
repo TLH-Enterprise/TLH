@@ -635,5 +635,54 @@
    "wins": 2,
    "losses": 0
   }
+ },
+ {
+  "date": "2026-11-26",
+  "players": {
+   "33061b1f-7843-528a-a83c-cdd909de674d": {
+    "tier": 22,
+    "tierName": "Ascendant 2",
+    "rr": 80,
+    "elo": 1980
+   },
+   "ab7191eb-25fd-5639-b895-e5cf2257621e": {
+    "tier": 24,
+    "tierName": "Immortal 1",
+    "rr": 36,
+    "elo": 2136
+   },
+   "65ec15a9-d6b8-5ff2-8159-115b4b10564b": {
+    "tier": 23,
+    "tierName": "Ascendant 3",
+    "rr": 41,
+    "elo": 2041
+   },
+   "25997071-9a45-52bb-95e0-652245a96ac6": {
+    "tier": 22,
+    "tierName": "Ascendant 2",
+    "rr": 1,
+    "elo": 1901
+   },
+   "1693c1eb-22d0-5aa8-a972-7d01b5e45d43": {
+    "tier": 24,
+    "tierName": "Immortal 1",
+    "rr": 71,
+    "elo": 2171
+   },
+   "e1f792dc-f201-58fc-8bed-17fc55e01080": {
+    "tier": 23,
+    "tierName": "Ascendant 3",
+    "rr": 36,
+    "elo": 2036
+   }
+  },
+  "premier": {
+   "points": 200,
+   "division": 21,
+   "place": 63,
+   "conference": "LATAM_NORTH",
+   "wins": 2,
+   "losses": 0
+  }
  }
 ]
