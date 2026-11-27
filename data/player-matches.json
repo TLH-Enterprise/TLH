@@ -1,5 +1,28 @@
 [
  {
+  "matchId": "7738887a-5d48-4ed0-8a90-12fd9e16fb38",
+  "puuid": "65ec15a9-d6b8-5ff2-8159-115b4b10564b",
+  "mode": "competitive",
+  "startedAt": "2026-11-27T01:31:14.665Z",
+  "map": "Abyss",
+  "season": "e11a6",
+  "agent": "Neon",
+  "side": "Red",
+  "roundsWon": 13,
+  "roundsLost": 9,
+  "won": true,
+  "kills": 25,
+  "deaths": 14,
+  "assists": 3,
+  "headshots": 15,
+  "bodyshots": 57,
+  "legshots": 1,
+  "damageMade": 4075,
+  "damageReceived": 2724,
+  "score": 6472,
+  "tier": 23
+ },
+ {
   "matchId": "244215ee-5101-4907-ac58-824d197e9e43",
   "puuid": "65ec15a9-d6b8-5ff2-8159-115b4b10564b",
   "mode": "competitive",
